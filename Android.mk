@@ -17,7 +17,7 @@
 
 ifeq ($(BOARD_HAVE_FM_RADIO_TI),true)
   include vendor/ti/fmradio/fm_stack/Android.mk
-  include vendor/ti/fmradio/fm_app/Android.mk
+#  include vendor/ti/fmradio/fm_app/Android.mk
   include vendor/ti/fmradio/Fmapplication/Android.mk
   include vendor/ti/fmradio/service/Android.mk
   include vendor/ti/fmradio/service/src/jni/Android.mk

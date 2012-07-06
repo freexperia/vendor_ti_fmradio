@@ -1,26 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="480dip" android:id="@+id/widget28"
-	android:layout_height="854dip" android:orientation="vertical"
-	android:background="@drawable/wallpaper33">
+	android:layout_height="584dip" android:orientation="vertical">
 
 	<LinearLayout android:id="@+id/widget224"
 		android:layout_width="fill_parent" android:orientation="vertical"
-		android:layout_height="320dip">
-		<LinearLayout android:id="@+id/widget224"
-			android:layout_alignParentTop="true" android:layout_alignParentLeft="true"
-			android:layout_width="fill_parent" android:layout_height="120dip">
-			<ImageView android:id="@+id/imgFTP" android:src="@drawable/robot"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:layout_marginLeft="30dip">
-			</ImageView>
-			<TextView android:id="@+id/lblFmRx" android:layout_width="fill_parent"
-				android:layout_height="30dip" android:layout_marginTop="15dip"
-				android:text="@string/app_rx" android:textSize="24sp"
-				android:textStyle="bold" android:layout_marginLeft="20dip"
-				android:layout_gravity="center">
-			</TextView>
-		</LinearLayout>
+		android:layout_height="480dip">
 		<LinearLayout android:id="@+id/widget233"
 			android:layout_below="@+id/widget224" android:layout_width="fill_parent"
 			android:layout_alignParentLeft="false" android:layout_height="100dip">

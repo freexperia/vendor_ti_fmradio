@@ -3,12 +3,13 @@
 <ScrollView
 android:id="@+id/scrollview1"
 xmlns:android="http://schemas.android.com/apk/res/android"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content">
+android:layout_width="match_parent"
+android:layout_height="match_parent">
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="480dip" android:id="@+id/widget28"
-	android:orientation="vertical" android:layout_height="854dip"
-	android:background="@drawable/wallpaper33">
+	android:layout_width="match_parent" android:id="@+id/widget28"
+	android:layout_width="match_parent" android:id="@+id/widget28"
+	android:orientation="vertical" android:layout_height="match_parent"
+	android:background="@drawable/wallpaper">
 	<LinearLayout android:id="@+id/widget29"
 		android:layout_below="@+id/widget28" android:layout_alignParentLeft="true"
 		android:layout_width="fill_parent" android:layout_height="55dip">
@@ -112,7 +113,7 @@ android:layout_height="wrap_content">
 	</LinearLayout>
 
 
-	<RelativeLayout android:id="@+id/widget173"
+	<RelativeLayout android:id="@+id/widget175"
 		android:layout_below="@+id/widget171" android:layout_alignParentLeft="true"
 		android:layout_width="fill_parent" android:paddingBottom="10dip"
 		android:layout_gravity="bottom" android:layout_height="90dip">
@@ -121,7 +122,7 @@ android:layout_height="wrap_content">
 			android:layout_alignParentBottom="true" android:layout_width="150dip">
 		</Button>
 		<Button android:id="@+id/btnCancel" android:layout_height="60dip"
-			android:text="@string/btnCancel" android:layout_alignTop="@+id/ok_button"
+			android:text="@string/btnCancel" 
 			android:layout_alignParentBottom="true"
 			android:layout_alignParentRight="true" android:layout_width="150dip">
 		</Button>

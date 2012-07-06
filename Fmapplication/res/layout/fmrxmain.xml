@@ -7,7 +7,7 @@ android:layout_height="match_parent">
 <LinearLayout android:id="@+id/widget28"
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent" android:orientation="vertical"
-	android:layout_height="match_parent" android:background="@drawable/wallpaper">
+	android:layout_height="match_parent">
 	<LinearLayout android:id="@+id/widget30"
 		android:layout_alignParentTop="true" android:layout_alignParentLeft="true"
 		android:layout_width="fill_parent" android:layout_height="80dip">

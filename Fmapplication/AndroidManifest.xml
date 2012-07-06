@@ -11,7 +11,8 @@
     <application android:icon="@drawable/radio" android:label="@string/app_name">
         <uses-library android:name="fmreceiverif" />
         <activity android:name=".FmRxApp"
-                  android:label="@string/app_name">
+                  android:label="@string/app_name"
+				  android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

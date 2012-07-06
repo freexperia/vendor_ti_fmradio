@@ -5,8 +5,8 @@ xmlns:android="http://schemas.android.com/apk/res/android"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content">
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical" android:layout_width="320dip"
-	android:layout_height="480dip" android:background="@drawable/wallpaper33">
+	android:orientation="vertical" android:layout_width="480dip"
+	android:layout_height="854dip" android:background="@drawable/wallpaper33">
 
 
 	<ListView android:id="@+id/android:list" android:layout_width="fill_parent"

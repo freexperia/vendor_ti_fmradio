@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout android:id="@+id/widget28"
-	android:layout_width="320dip" android:layout_height="140dip"
+	android:layout_width="480dip" android:layout_height="140dip"
 	android:background="@drawable/wallpaper33" xmlns:android="http://schemas.android.com/apk/res/android">
 	<TextView android:id="@+id/freqRange" android:text="@string/freqRangeEurope"
 		android:layout_alignParentTop="true" android:layout_alignParentLeft="true"

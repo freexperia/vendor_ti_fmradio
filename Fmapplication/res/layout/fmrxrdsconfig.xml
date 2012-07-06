@@ -6,8 +6,8 @@ xmlns:android="http://schemas.android.com/apk/res/android"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content">
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="320dip" android:id="@+id/widget28"
-	android:orientation="vertical" android:layout_height="480dip"
+	android:layout_width="480dip" android:id="@+id/widget28"
+	android:orientation="vertical" android:layout_height="854dip"
 	android:background="@drawable/wallpaper33">
 	<LinearLayout android:id="@+id/widget29"
 		android:layout_below="@+id/widget28" android:layout_alignParentLeft="true"

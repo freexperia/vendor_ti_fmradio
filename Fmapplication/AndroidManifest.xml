@@ -19,7 +19,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".FmRxApp"
-                  android:label="@string/app_rx">
+                  android:label="@string/app_rx"
+				  android:screenOrientation="portrait">
              <intent-filter>
                 <action android:name="android.intent.action.START_FMRX" />
                  <category android:name="android.intent.category.DEFAULT" />
@@ -28,7 +29,8 @@
          
        
               <activity android:name=".FmRxHelp"
-                  android:label="@string/app_rxhelp">
+                  android:label="@string/app_rxhelp"
+				  android:screenOrientation="portrait">
              <intent-filter>
                 <action android:name="android.intent.action.START_RXHELP" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -36,7 +38,8 @@
         </activity>
         
 		<activity android:name=".FmRxFreqInput" android:theme="@android:style/Theme.Dialog" 
-		    	  android:label="@string/enterFreq_Dialog">
+		    	  android:label="@string/enterFreq_Dialog"
+				  android:screenOrientation="portrait">
     		<intent-filter>
              <action android:name="android.intent.action.START_RXFREQ" />
              <category android:name="android.intent.category.DEFAULT" />
@@ -44,14 +47,16 @@
 		</activity>
 		
 		<activity android:name=".FmRxRdsConfig"  
-		    	  android:label="@string/app_rds">
+		    	  android:label="@string/app_rds"
+				  android:screenOrientation="portrait">
     		<intent-filter>
              <action android:name="android.intent.action.RDS_CONFIG" />
              <category android:name="android.intent.category.DEFAULT" />
     		</intent-filter>
 		</activity>
     <activity android:name=".FmPresetList"  
-		    	  android:label="@string/stations">
+		    	  android:label="@string/stations"
+				  android:screenOrientation="portrait">
     		<intent-filter>
              <action android:name="android.intent.action.PRESET" />
              <category android:name="android.intent.category.DEFAULT" />

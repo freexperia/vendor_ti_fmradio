@@ -398,35 +398,35 @@ static void MCP_HAL_LOG_LogToAndroid(const char*        fileName,
     switch (severity)
     {
         case MCP_HAL_LOG_SEVERITY_FUNCTION:
-            LOGV("%s(%s):%s (%ld@%s)",MCP_HAL_LOG_Modules[moduleId].name,
+            ALOGV("%s(%s):%s (%ld@%s)",MCP_HAL_LOG_Modules[moduleId].name,
                 MCP_HAL_LOG_GetThreadName(),
                 copy_of_msg,
                 line,
                 fileName);
             break;
         case MCP_HAL_LOG_SEVERITY_DEBUG:   
-            LOGV("%s(%s):%s (%ld@%s)",MCP_HAL_LOG_Modules[moduleId].name,
+            ALOGV("%s(%s):%s (%ld@%s)",MCP_HAL_LOG_Modules[moduleId].name,
                 MCP_HAL_LOG_GetThreadName(),
                 copy_of_msg,
                 line,
                 fileName);
             break;
         case MCP_HAL_LOG_SEVERITY_INFO:   
-            LOGV("%s(%s):%s (%ld@%s)",MCP_HAL_LOG_Modules[moduleId].name,
+            ALOGV("%s(%s):%s (%ld@%s)",MCP_HAL_LOG_Modules[moduleId].name,
                 MCP_HAL_LOG_GetThreadName(),
                 copy_of_msg,
                 line,
                 fileName);
             break;
         case MCP_HAL_LOG_SEVERITY_ERROR:  
-            LOGV("%s(%s):%s (%ld@%s)",MCP_HAL_LOG_Modules[moduleId].name,
+            ALOGV("%s(%s):%s (%ld@%s)",MCP_HAL_LOG_Modules[moduleId].name,
                 MCP_HAL_LOG_GetThreadName(),
                 copy_of_msg,
                 line,
                 fileName);
             break;
         case MCP_HAL_LOG_SEVERITY_FATAL:
-            LOGV("%s(%s):%s (%ld@%s)",MCP_HAL_LOG_Modules[moduleId].name,
+            ALOGV("%s(%s):%s (%ld@%s)",MCP_HAL_LOG_Modules[moduleId].name,
                 MCP_HAL_LOG_GetThreadName(),
                 copy_of_msg,
                 line,

@@ -75,6 +75,8 @@ public interface FmRxAppConstants {
     public static final int EVENT_GET_FREQUENCY = 37;
     public static final int EVENT_COMPLETE_SCAN_PROGRESS = 38;
 
+    public static final int EVENT_FM_ERROR = 1000;
+
     /* Volume range */
 
     public static final int MIN_VOLUME = 0;

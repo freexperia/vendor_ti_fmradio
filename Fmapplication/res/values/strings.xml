@@ -8,7 +8,6 @@
     <string name="stations">FM Radio Stations</string>
     <string name="txtplatform">for Android</string>
     <string name="lblversion">Version:</string>
-    <string name="txtversion">0.1</string>
     <string name="app_rxtune">Enter Frequency</string>
     <string name="app_rxhelp">About</string>
     <string name="radioTxt">Radio Text Display</string>

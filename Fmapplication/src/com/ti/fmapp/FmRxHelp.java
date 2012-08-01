@@ -1,7 +1,7 @@
 /*
  * TI's FM
  *
- * Copyright 2001-2010 Texas Instruments, Inc. - http://www.ti.com/
+ * Copyright 2001-2011 Texas Instruments, Inc. - http://www.ti.com/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@
  *
  *   FILE NAME:      FmRxHelp.java
  *
- *   BRIEF:          This file defines the API of the FM Rx stack.
+ *   BRIEF:          This file shows the version of the application and relevant
+ *                   information.
  *
  *   DESCRIPTION:    General
  *
@@ -31,40 +32,35 @@
 package com.ti.fmapp;
 
 import android.app.Activity;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.View;
-import android.widget.Button;
+import android.util.Log;
+import android.widget.TextView;
 
-public class FmRxHelp extends Activity implements View.OnKeyListener,
-		View.OnClickListener {
-	public static final String TAG = "FmTxHelp";
+public class FmRxHelp extends Activity {
+    public static final String TAG = "FmTxHelp";
 
-	/** Called when the activity is first created. */
+    /**
+     * Called when the activity is first created.
+     */
 
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.fmrxhelp);
-		initControls();
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.fmrxhelp);
 
-	}
+        //present the current app version
+        TextView tv1 = (TextView) findViewById(R.id.txtversion);
+        PackageManager manager = this.getPackageManager();
+        PackageInfo info;
+        String result = "";
+        try {
+            info = manager.getPackageInfo(this.getPackageName(), 0);
+            result = info.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Failed to get app version!");
+        }
+        tv1.setText(result);
+    }
 
-	private void initControls() {
-		Button btnBack = (Button) findViewById(R.id.btnBack);
-		btnBack.setOnClickListener(this);
-
-	}
-
-	public boolean onKey(View arg0, int arg1, KeyEvent arg2) {
-		return false;
-	}
-
-	public void onClick(View v) {
-		int id = v.getId();
-		switch (id) {
-		case R.id.btnBack:
-			finish();
-			break;
-		}
-	}
 }

@@ -230,7 +230,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 		case FmReceiver.STATE_DISABLED:
 
 			mStatus = sFmReceiver.enable();
-			if (mStatus == false) {
+			if (!mStatus) {
 				showAlert(this, "FmRadio", "Cannot enable Radio!!!!");
 
 			}
@@ -248,14 +248,14 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 			 * Make sure not to start the FM_Enable() again, if it has been
 			 * already called before orientation change
 			 */
-			if (mFmInterrupted == false) {
+			if (!mFmInterrupted) {
 				mStatus = sFmReceiver.create();
-				if (mStatus == false) {
+				if (!mStatus) {
 					showAlert(this, "FmRadio", "Cannot create Radio!!!!");
 
 				}
 				mStatus = sFmReceiver.enable();
-				if (mStatus == false) {
+				if (!mStatus) {
 					showAlert(this, "FmRadio", "Cannot enable Radio!!!!");
 
 				}
@@ -314,7 +314,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 	 * main screen
 	 */
 	public static void UpdateRenameStation(int index, String name) {
-		txtStationName.setText(name.toString());
+		txtStationName.setText(name);
 		// Store the name in the selected index in Arraylist
 		SetStation(index, "", name);
 
@@ -424,7 +424,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 	/* Set particular station name or frequency in the stations arraylist */
 	public static void SetStation(Integer index, String freq, String name) {
-		Integer pos = new Integer(index.intValue() + 1);
+		Integer pos = index + 1;
 		try {
 			HashMap<String, String> item = stations.get(index.intValue());
 			item.put(ITEM_KEY, pos.toString());
@@ -442,7 +442,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 				item.put(ITEM_VALUE, freq);
 
 			}
-			stations.set(index.intValue(), item);
+			stations.set(index, item);
 		} catch (NullPointerException e) {
 			Log.e(TAG, "Tried to add null value");
 		}
@@ -451,13 +451,13 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 	/* UnSet particular station name and frequency in the stations arraylist */
 	public static void UnSetStation(Integer index, String freq, String name) {
-		Integer pos = new Integer(index.intValue() + 1);
+		Integer pos = index + 1;
 		try {
 			HashMap<String, String> item = stations.get(index.intValue());
 			item.put(ITEM_KEY, pos.toString());
 			item.put(ITEM_VALUE, freq);
 			item.put(ITEM_NAME, name);
-			stations.set(index.intValue(), item);
+			stations.set(index, item);
 		} catch (NullPointerException e) {
 			Log.e(TAG, "Tried to add null value");
 		}
@@ -466,7 +466,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 	/* Get particular station from the stations arraylist */
 
 	public static String GetStation(Integer index) {
-		Integer pos = new Integer(index.intValue() + 1);
+		Integer pos = index + 1;
 		try {
 			HashMap<String, String> item = stations.get(index.intValue());
 			Object freq = item.get(ITEM_VALUE);
@@ -518,18 +518,18 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 				 * Setting the default band when FM app is started for
 				 * the first time or after reentering the Fm app
 				 */
-				if (sdefaultSettingOn == false) {
+				if (!sdefaultSettingOn) {
 					/* Set the default band */
 					mStatus = sFmReceiver.setBand(sBand);
-					if (mStatus == false) {
+					if (!mStatus) {
 						showAlert(getParent(), "FmRadio",
 								"Not able to setband!!!!");
 					} else {
 
-						lastTunedFrequency = (float) lastTunedFrequency * 1000;
+						lastTunedFrequency = lastTunedFrequency * 1000;
 						mStatus = sFmReceiver.tune(lastTunedFrequency
 								.intValue());
-						if (mStatus == false) {
+						if (!mStatus) {
 							showAlert(getParent(), "FmRadio",
 									"Not able to tune!!!!");
 						}
@@ -546,8 +546,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 				Integer mode = (Integer) msg.obj;
 				if (DBG)
-					Log.d(TAG, "enter handleMessage ---mode" + mode.intValue());
-				if (mode.intValue() == 0) {
+					Log.d(TAG, "enter handleMessage ---mode" + mode);
+				if (mode == 0) {
 					imgFmMode.setImageResource(R.drawable.fm_stereo);
 				} else {
 					imgFmMode.setImageResource(R.drawable.fm_mono);
@@ -564,7 +564,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 				saveDefaultConfiguration();
 
 				mStatus = sFmReceiver.destroy();
-				if (mStatus == false) {
+				if (!mStatus) {
 					showAlert(getParent(), "FmRadio", "Not able to destroy!!!!");
 				}
 
@@ -1385,10 +1385,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 	/* Gets the stored frequency and tunes to it. */
 	void updateStationDisplay(int index) {
-		String tunedFreq = null;
-		tunedFreq = GetStation(index);
+		String tunedFreq = GetStation(index);
 		tuneStationFrequency(tunedFreq);
-		txtFmRxTunedFreq.setText(tunedFreq.toString());
+		txtFmRxTunedFreq.setText(tunedFreq);
 
 	}
 
@@ -1492,7 +1491,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 		Log.i(TAG, "onDestroy");
 		super.onDestroy();
 		/*
-		 * Unregistering the receiver , so that we dont handle any FM events
+		 * Unregistering the receiver , so that we don't handle any FM events
 		 * when out of the FM application screen
 		 */
 		unregisterReceiver(mReceiver);
@@ -1527,7 +1526,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 			}
 
 			if (fmAction.equals(FmReceiverIntent.RDS_TEXT_CHANGED_ACTION)) {
-				if (FM_SEND_RDS_IN_BYTEARRAY == true) {
+				if (FM_SEND_RDS_IN_BYTEARRAY) {
 					Bundle extras = intent.getExtras();
 
 					byte[] rdsText = extras.getByteArray(FmReceiverIntent.RDS);
@@ -1570,7 +1569,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 			if (fmAction.equals(FmReceiverIntent.PS_CHANGED_ACTION)) {
 	
-				if (FM_SEND_RDS_IN_BYTEARRAY == true) {
+				if (FM_SEND_RDS_IN_BYTEARRAY) {
 					Bundle extras = intent.getExtras();
 					byte[] psName = extras.getByteArray(FmReceiverIntent.PS);
 					int status = extras.getInt(FmReceiverIntent.STATUS, 0);

@@ -121,9 +121,9 @@ public class FmPresetList extends ListActivity implements FmRxAppConstants,
                                     ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.setHeaderTitle("ContextMenu");
-        menu.add(0, MENU_SET_STATION, 0, "Set Station");
-        menu.add(0, MENU_UNSET_STATION, 0, "Unset Station");
-        menu.add(0, MENU_RENAME_STATION, 0, "Rename Station");
+        menu.add(0, MENU_SET_STATION, 0, R.string.setStation);
+        menu.add(0, MENU_UNSET_STATION, 0, R.string.unsetStation);
+        menu.add(0, MENU_RENAME_STATION, 0, R.string.renameStation);
 
     }
 
@@ -144,14 +144,14 @@ public class FmPresetList extends ListActivity implements FmRxAppConstants,
 
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-                alert.setTitle("Rename");
-                alert.setMessage("Rename Station?");
+                alert.setTitle(R.string.rename);
+                alert.setMessage(R.string.renameStationQuestion);
 
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
                 alert.setView(input);
 
-                alert.setPositiveButton("Ok",
+                alert.setPositiveButton(android.R.string.ok,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,
                                                 int whichButton) {
@@ -161,7 +161,7 @@ public class FmPresetList extends ListActivity implements FmRxAppConstants,
                             }
                         });
 
-                alert.setNegativeButton("Cancel",
+                alert.setNegativeButton(android.R.string.cancel,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,
                                                 int whichButton) {
@@ -184,9 +184,9 @@ public class FmPresetList extends ListActivity implements FmRxAppConstants,
                     }
                 };
 
-                new AlertDialog.Builder(this).setTitle("Set Station").setIcon(
+                new AlertDialog.Builder(this).setTitle(R.string.setStation).setIcon(
                         android.R.drawable.ic_dialog_alert).setMessage(
-                        "Set Station?").setNegativeButton(android.R.string.cancel,
+                        R.string.setStationQuestion).setNegativeButton(android.R.string.cancel,
                         null).setPositiveButton(android.R.string.ok,
                         okButtonListener).show();
                 return true; /* true means: "we handled the event". */
@@ -202,9 +202,9 @@ public class FmPresetList extends ListActivity implements FmRxAppConstants,
                     }
                 };
 
-                new AlertDialog.Builder(this).setTitle("Unseet Station").setIcon(
+                new AlertDialog.Builder(this).setTitle(R.string.unsetStation).setIcon(
                         android.R.drawable.ic_dialog_alert).setMessage(
-                        "Unset Station?").setNegativeButton(
+                        R.string.unsetStationQuestion).setNegativeButton(
                         android.R.string.cancel, null).setPositiveButton(
                         android.R.string.ok, okUnsetButtonListener).show();
                 return true;

@@ -100,7 +100,7 @@
     <string name="renameStationQuestion">Rename Station?</string>
     <string name="setStation">Set Station</string>
     <string name="setStationQuestion">Set Station?</string>
-    <string name="unsetStation">Unseet Station</string>
-    <string name="unsetStationQuestion">Unseet Station?</string>
+    <string name="unsetStation">Unset Station</string>
+    <string name="unsetStationQuestion">Unset Station?</string>
 
 </resources>

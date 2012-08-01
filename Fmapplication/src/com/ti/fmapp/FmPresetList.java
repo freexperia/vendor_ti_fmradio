@@ -136,7 +136,6 @@ public class FmPresetList extends ListActivity implements FmRxAppConstants,
                 .getMenuInfo();
         /* Get the selected item out of the Adapter by its position. */
         final Integer index = menuInfo.position;
-        final Integer i = new Integer(index.intValue() + 1);
 
         /* Switch on the ID of the item, to get what the user selected. */
         switch (aItem.getItemId()) {

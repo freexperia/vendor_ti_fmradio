@@ -1,13 +1,13 @@
 /*
  * TI's FM
  *
- * Copyright 2001-2010 Texas Instruments, Inc. - http://www.ti.com/
+ * Copyright 2001-2011 Texas Instruments, Inc. - http://www.ti.com/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,177 +30,187 @@
  \*******************************************************************************/
 package com.ti.fmapp;
 
-import java.util.HashMap;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
-import android.text.Editable;
-import android.util.Log;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SimpleAdapter;
-import android.widget.AdapterView.AdapterContextMenuInfo;
-import java.util.HashMap;
-import android.widget.Button;
 
 public class FmPresetList extends ListActivity implements FmRxAppConstants,
-		View.OnClickListener {
+        View.OnClickListener {
 
-	public static SimpleAdapter adapter;
+    public static SimpleAdapter adapter;
 
-	// ===========================================================
-	// Final Fields
-	// ===========================================================
-	protected static final int MENU_SET_STATION = 0;
-	protected static final int MENU_UNSET_STATION = 1;
-	protected static final int MENU_RENAME_STATION = 2;
-	public static final String TAG = "FmPresetList";
+    // ===========================================================
+    // Final Fields
+    // ===========================================================
+    protected static final int MENU_SET_STATION = 0;
+    protected static final int MENU_UNSET_STATION = 1;
+    protected static final int MENU_RENAME_STATION = 2;
+    public static final String TAG = "FmPresetList";
 
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.preset);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.preset);
 
-		// Now build the list adapter
-		this.adapter = new SimpleAdapter(
-		// the Context
-				this,
-				// the data to display
-				FmRxApp.stations,
-				// The layout to use for each item
-				R.layout.row,
-				// The list item attributes to display
-				new String[] { ITEM_KEY, ITEM_VALUE, ITEM_NAME },
-				// And the ids of the views where they should be displayed (same
-				// order)
-				new int[] { R.id.list_key, R.id.list_value, R.id.list_name });
+        // Now build the list adapter
+        this.adapter = new SimpleAdapter(
+                // the Context
+                this,
+                // the data to display
+                FmRxApp.stations,
+                // The layout to use for each item
+                R.layout.row,
+                // The list item attributes to display
+                new String[]{ITEM_KEY, ITEM_VALUE, ITEM_NAME},
+                // And the ids of the views where they should be displayed (same
+                // order)
+                new int[]{R.id.list_key, R.id.list_value, R.id.list_name});
 
-		setListAdapter(this.adapter);
-		adapter.notifyDataSetChanged();
-		/* Add Context-Menu listener to the ListView. */
-		registerForContextMenu(getListView());
-		initControls();
+        setListAdapter(this.adapter);
+        adapter.notifyDataSetChanged();
+        /* Add Context-Menu listener to the ListView. */
+        registerForContextMenu(getListView());
+        initControls();
+    }
 
-	}
 
-	private void initControls() {
-		Button btnBack = (Button) findViewById(R.id.btnBack);
-		btnBack.setOnClickListener(this);
+    private void initControls() {
+        Button btnBack = (Button) findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(this);
+    }
 
-	}
+    public void onClick(View v) {
+        int id = v.getId();
+        switch (id) {
+            case R.id.btnBack:
+                setResult(RESULT_OK);
+                finish();
+                break;
+        }
+    }
 
-	public void onClick(View v) {
-		int id = v.getId();
-		switch (id) {
-		case R.id.btnBack:
-			finish();
-			break;
-		}
-	}
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
 
-	private void refreshFavListItems() {
-		this.setListAdapter(this.adapter);
+        switch (keyCode) {
 
-	}
+            case KeyEvent.KEYCODE_BACK: {
+                setResult(RESULT_OK);
+                return true;
+            }
+        }
+        return true;
+    }
 
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-		menu.setHeaderTitle("ContextMenu");
-		menu.add(0, MENU_SET_STATION, 0, "Set Station");
-		menu.add(0, MENU_UNSET_STATION, 0, "Unset Station");
-		menu.add(0, MENU_RENAME_STATION, 0, "Rename Station");
 
-	}
+    private void refreshFavListItems() {
+        this.setListAdapter(this.adapter);
 
-	// ===========================================================
-	// Methods from SuperClass/Interfaces
-	// ===========================================================
+    }
 
-	public boolean onContextItemSelected(MenuItem aItem) {
-		AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) aItem
-				.getMenuInfo();
-		/* Get the selected item out of the Adapter by its position. */
-		final Integer index = menuInfo.position;
-		final Integer i = new Integer(index.intValue() + 1);
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.setHeaderTitle("ContextMenu");
+        menu.add(0, MENU_SET_STATION, 0, "Set Station");
+        menu.add(0, MENU_UNSET_STATION, 0, "Unset Station");
+        menu.add(0, MENU_RENAME_STATION, 0, "Rename Station");
 
-		/* Switch on the ID of the item, to get what the user selected. */
-		switch (aItem.getItemId()) {
+    }
 
-		case MENU_RENAME_STATION:
+    // ===========================================================
+    // Methods from SuperClass/Interfaces
+    // ===========================================================
 
-			AlertDialog.Builder alert = new AlertDialog.Builder(this);
+    public boolean onContextItemSelected(MenuItem aItem) {
+        AdapterContextMenuInfo menuInfo = (AdapterContextMenuInfo) aItem
+                .getMenuInfo();
+        /* Get the selected item out of the Adapter by its position. */
+        final Integer index = menuInfo.position;
+        final Integer i = new Integer(index.intValue() + 1);
 
-			alert.setTitle("Rename");
-			alert.setMessage("Rename Station?");
+        /* Switch on the ID of the item, to get what the user selected. */
+        switch (aItem.getItemId()) {
 
-			// Set an EditText view to get user input
-			final EditText input = new EditText(this);
-			alert.setView(input);
+            case MENU_RENAME_STATION:
 
-			alert.setPositiveButton("Ok",
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog,
-								int whichButton) {
-							String value = input.getText().toString();
-							FmRxApp.UpdateRenameStation(index, value);
-							refreshFavListItems();
-						}
-					});
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-			alert.setNegativeButton("Cancel",
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog,
-								int whichButton) {
-							// Canceled.
-						}
-					});
+                alert.setTitle("Rename");
+                alert.setMessage("Rename Station?");
 
-			alert.show();
+                // Set an EditText view to get user input
+                final EditText input = new EditText(this);
+                alert.setView(input);
 
-			return true; /* true means: "we handled the event". */
+                alert.setPositiveButton("Ok",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                                int whichButton) {
+                                String value = input.getText().toString();
+                                FmRxApp.UpdateRenameStation(index, value);
+                                refreshFavListItems();
+                            }
+                        });
 
-		case MENU_SET_STATION:
-			OnClickListener okButtonListener = new OnClickListener() {
+                alert.setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                                int whichButton) {
+                                // Canceled.
+                            }
+                        });
 
-				public void onClick(DialogInterface arg0, int arg1) {
-					FmRxApp.updateSetStation(index, FmRxApp.txtFmRxTunedFreq
-							.getText().toString(), "");
-					refreshFavListItems();
+                alert.show();
 
-				}
-			};
+                return true; /* true means: "we handled the event". */
 
-			new AlertDialog.Builder(this).setTitle("Set Station").setIcon(
-					android.R.drawable.ic_dialog_alert).setMessage(
-					"Set Station?").setNegativeButton(android.R.string.cancel,
-					null).setPositiveButton(android.R.string.ok,
-					okButtonListener).show();
-			return true; /* true means: "we handled the event". */
+            case MENU_SET_STATION:
+                OnClickListener okButtonListener = new OnClickListener() {
 
-		case MENU_UNSET_STATION:
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        FmRxApp.updateSetStation(index, FmRxApp.txtFmRxTunedFreq
+                                .getText().toString(), "");
+                        refreshFavListItems();
 
-			OnClickListener okUnsetButtonListener = new OnClickListener() {
+                    }
+                };
 
-				public void onClick(DialogInterface arg0, int arg1) {
-					FmRxApp.updateUnSetStation(index);
-					refreshFavListItems();
+                new AlertDialog.Builder(this).setTitle("Set Station").setIcon(
+                        android.R.drawable.ic_dialog_alert).setMessage(
+                        "Set Station?").setNegativeButton(android.R.string.cancel,
+                        null).setPositiveButton(android.R.string.ok,
+                        okButtonListener).show();
+                return true; /* true means: "we handled the event". */
 
-				}
-			};
+            case MENU_UNSET_STATION:
 
-			new AlertDialog.Builder(this).setTitle("Unseet Station").setIcon(
-					android.R.drawable.ic_dialog_alert).setMessage(
-					"Unset Station?").setNegativeButton(
-					android.R.string.cancel, null).setPositiveButton(
-					android.R.string.ok, okUnsetButtonListener).show();
-			return true;
-		}
-		return false;
+                OnClickListener okUnsetButtonListener = new OnClickListener() {
 
-	}
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        FmRxApp.updateUnSetStation(index);
+                        refreshFavListItems();
+
+                    }
+                };
+
+                new AlertDialog.Builder(this).setTitle("Unseet Station").setIcon(
+                        android.R.drawable.ic_dialog_alert).setMessage(
+                        "Unset Station?").setNegativeButton(
+                        android.R.string.cancel, null).setPositiveButton(
+                        android.R.string.ok, okUnsetButtonListener).show();
+                return true;
+        }
+        return false;
+
+    }
 }

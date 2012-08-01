@@ -40,6 +40,7 @@ interface IFmReceiver {
     boolean enable();
     boolean disable();
     boolean isEnabled() ;
+    boolean isFMPaused() ;
     int getFMState();
     boolean setBand(int band);
     int getBand();

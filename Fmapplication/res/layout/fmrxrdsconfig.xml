@@ -34,6 +34,7 @@
                           android:layout_height="fill_parent" android:layout_marginLeft="15dip"
                           android:layout_width="fill_parent" android:layout_weight="1"/>
                 <Spinner android:id="@+id/spnRdsSystem"
+                         style="@style/preferencesTextStyle"
                          android:layout_height="fill_parent" android:layout_marginRight="15dip"
                          android:layout_width="fill_parent" android:layout_weight="1"/>
             </LinearLayout>
@@ -46,7 +47,7 @@
                           style="@style/preferencesTextStyle"
                           android:layout_height="fill_parent" android:layout_marginLeft="15dip"
                           android:layout_width="fill_parent" android:layout_weight="1"/>
-                <Spinner android:id="@+id/spnBand"
+                <Spinner android:id="@+id/spnBand" style="@style/preferencesTextStyle"
                          android:layout_height="fill_parent" android:layout_marginRight="15dip"
                          android:layout_width="fill_parent" android:layout_weight="1"/>
             </LinearLayout>
@@ -60,7 +61,7 @@
                           style="@style/preferencesTextStyle"
                           android:layout_height="fill_parent" android:layout_marginLeft="15dip"
                           android:layout_width="fill_parent" android:layout_weight="1"/>
-                <Spinner android:id="@+id/spnMode" android:textSize="18sp"
+                <Spinner android:id="@+id/spnMode" style="@style/preferencesTextStyle"
                          android:layout_height="fill_parent" android:layout_marginRight="15dip"
                          android:layout_width="fill_parent" android:layout_weight="1"/>
             </LinearLayout>
@@ -74,7 +75,7 @@
                           android:layout_height="50dip">
                 </TextView>
                 <Spinner android:id="@+id/spnEmp" android:layout_height="fill_parent"
-                         android:textSize="18sp" android:layout_weight="1"
+                         style="@style/preferencesTextStyle" android:layout_weight="1"
                          android:layout_marginRight="15dip"
                          android:layout_width="fill_parent">
                 </Spinner>
@@ -89,7 +90,7 @@
                           android:layout_height="fill_parent" android:layout_marginLeft="15dip"
                           android:layout_width="fill_parent" android:layout_weight="1"/>
                 <Spinner android:id="@+id/spnChannelSpace"
-                         android:textSize="18sp"
+                         style="@style/preferencesTextStyle"
                          android:layout_height="fill_parent" android:layout_marginRight="15dip"
                          android:layout_width="fill_parent" android:layout_weight="1"/>
             </LinearLayout>

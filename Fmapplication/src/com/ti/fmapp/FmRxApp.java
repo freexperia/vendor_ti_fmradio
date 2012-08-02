@@ -1,7 +1,7 @@
 /*
  * TI's FM
  *
- * Copyright 2001-2010 Texas Instruments, Inc. - http://www.ti.com/
+ * Copyright 2001-2011 Texas Instruments, Inc. - http://www.ti.com/
  * Copyright (C) 2010 Sony Ericsson Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,55 +31,71 @@
  \*******************************************************************************/
 package com.ti.fmapp;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-
-import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.app.*;
+import android.content.*;
+import android.content.res.Configuration;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.OrientationListener;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.view.*;
+import android.widget.*;
 import com.ti.fm.FmReceiver;
 import com.ti.fm.FmReceiverIntent;
 import com.ti.fm.IFmConstants;
-import android.app.AlertDialog;
-import android.os.Bundle;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.view.Window;
-import android.media.AudioManager;
-import android.widget.Toast;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+
+/*
+ FM Boot up Sequence:
+
+ FM APIS NON Blocking:
+
+ sFmReceiver.rxEnable() is called from FM application, when the user selects FM radio icon from main menu.
+
+ Once  the callback for sFmReceiver.rxEnable() is received (EVENT_FM_ENABLED),
+ the default configurations which have been saved in the preference will be loaded using loadDefaultConfiguration() function .
+ After this  sFmReceiver.rxSetVolume() with default volume will be called.
+
+ Once the callback for  sFmReceiver.rxSetVolume() is received(EVENT_VOLUME_CHANGE),
+ sFmReceiver.rxSetBand() with default band will be called.
+
+ Once the callback for sFmReceiver.rxSetBand() is received(EVENT_BAND_CHANGE), sFmReceiver.rxTune_nb()
+ with default frequency will be called.
+
+ Once the callback for sFmReceiver.rxTune_nb()is received (EVENT_TUNE_COMPLETE)
+ sFmReceiver.rxEnableAudioRouting()  will be called to enable audio.
+
+ After these sequences user can hear the FM audio.
+
+
+ The rest of the APIS will be called based on the user actions like when user presses seek up or down
+ sFmReceiver.rxSeek_nb() will be called and the callback for the same will be EVENT_SEEK_STARTED.
+
+ To increase decrease the volume  sFmReceiver.rxSetVolume() will be called and the callback for
+ the same will be EVENT_VOLUME_CHANGE.
+
+ To mute /unmute, sFmReceiver.rxSetMuteMode() will be called and the callback
+ for the same will be EVENT_MUTE_CHANGE.
+
+
+  FM APIS  Blocking:
+
+In case of blocking FM APIS, the above sequence holds good. The difference will be the FM Events will not posted
+as intents and the usage of FM APIS will be sequential.
+ */
 
 public class FmRxApp extends Activity implements View.OnClickListener,
         IFmConstants, FmRxAppConstants, FmReceiver.ServiceListener {
     public static final String TAG = "FmRxApp";
     private static final boolean DBG = false;
+
+    private static final boolean MAKE_FM_APIS_BLOCKING = true;
 
     /**
      * *****************************************
@@ -107,6 +123,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public static final int MENU_PRESET = Menu.FIRST + 4;
     public static final int MENU_SETFREQ = Menu.FIRST + 5;
 
+    public boolean mPreset = false;
+
     /**
      * *****************************************
      * private variables
@@ -114,10 +132,12 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      */
     private int mToggleMode = 0; // To toggle between the mono/stereo
     private int mToggleAudio = 1; // To toggle between the speaker/headset
-    private int mToggleMute = FM_UNMUTE; // To toggle between the mute/unmute
+    private boolean mToggleMute = false; // To toggle between the mute/unmute
 
+    private boolean mRdsState = false;
     /* Default values */
-    private int mMode = INITIAL_VAL;
+    private int mVolume = DEF_VOLUME;
+    private int mMode = DEFAULT_MODE;
     private boolean mRds = DEFAULT_RDS;
     private boolean mRdsAf = DEFAULT_RDS_AF;
     private int mRdsSystem = INITIAL_VAL;
@@ -131,6 +151,11 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     // variable to make sure that the next configuration change happens after
     // the current configuration request has been completed.
     private int configurationState = CONFIGURATION_STATE_IDLE;
+
+    // variable to make sure that the next volume change happens after the
+    // current volume request has been completed.
+
+    private boolean mVolState = VOL_REQ_STATE_IDLE;
     // variable to make sure that the next seek happens after the current seek
     // request has been completed.
     private boolean mSeekState = SEEK_REQ_STATE_IDLE;
@@ -139,13 +164,17 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     private int mIndex = 0;
     private int mStationIndex;
 
+
     /*
-      * Variable to identify whether we need to do the default setting when
-      * entering the FM application. Based on this variable,the default
-      * configurations for the FM will be done for the first time
-      */
+     * Variable to identify whether we need to do the default setting when
+     * entering the FM application. Based on this variable,the default
+     * configurations for the FM will be done for the first time
+     */
 
     private static boolean sdefaultSettingOn = false;
+
+    private static boolean mIsDbPresent = false;
+
     private NotificationManager mNotificationManager;
     private int FM_NOTIFICATION_ID;
 
@@ -153,6 +182,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     static final String FM_STATE_KEY = "fm_state";
     /* Flag to know whether FM App was interrupted due to orientation change */
     boolean mFmInterrupted = false;
+
+    /*Flag to check if service is connected*/
+    boolean mFmServiceConnected = false;
+
     /**
      * *****************************************
      * public variables
@@ -174,6 +207,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     Context mContext;
 
+    DBAdapter db;
+
     /**
      * Called when the activity is first created.
      */
@@ -192,57 +227,165 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             }
         }
 
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        // Create orientation listenter.
+
+
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         // Register for FM intent broadcasts.
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(FmReceiverIntent.FM_ENABLED_ACTION);
         intentFilter.addAction(FmReceiverIntent.FM_DISABLED_ACTION);
+        intentFilter.addAction(FmReceiverIntent.GET_FREQUENCY_ACTION);
         intentFilter.addAction(FmReceiverIntent.SEEK_ACTION);
+        intentFilter.addAction(FmReceiverIntent.BAND_CHANGE_ACTION);
+        intentFilter.addAction(FmReceiverIntent.GET_CHANNEL_SPACE_ACTION);
+        intentFilter.addAction(FmReceiverIntent.SET_MODE_MONO_STEREO_ACTION);
+        intentFilter.addAction(FmReceiverIntent.VOLUME_CHANGED_ACTION);
         intentFilter.addAction(FmReceiverIntent.RDS_TEXT_CHANGED_ACTION);
         intentFilter.addAction(FmReceiverIntent.PS_CHANGED_ACTION);
+        intentFilter.addAction(FmReceiverIntent.AUDIO_PATH_CHANGED_ACTION);
         intentFilter.addAction(FmReceiverIntent.TUNE_COMPLETE_ACTION);
-        intentFilter
-                .addAction(FmReceiverIntent.DISPLAY_MODE_MONO_STEREO_ACTION);
+        intentFilter.addAction(FmReceiverIntent.SEEK_STOP_ACTION);
+        intentFilter.addAction(FmReceiverIntent.MUTE_CHANGE_ACTION);
+        intentFilter.addAction(FmReceiverIntent.DISPLAY_MODE_MONO_STEREO_ACTION);
+        intentFilter.addAction(FmReceiverIntent.ENABLE_RDS_ACTION);
+        intentFilter.addAction(FmReceiverIntent.DISABLE_RDS_ACTION);
+        intentFilter.addAction(FmReceiverIntent.SET_RDS_AF_ACTION);
+        intentFilter.addAction(FmReceiverIntent.SET_RDS_SYSTEM_ACTION);
+        intentFilter.addAction(FmReceiverIntent.SET_DEEMP_FILTER_ACTION);
+        intentFilter.addAction(FmReceiverIntent.SET_RSSI_THRESHHOLD_ACTION);
+        intentFilter.addAction(FmReceiverIntent.SET_RF_DEPENDENT_MUTE_ACTION);
         intentFilter.addAction(FmReceiverIntent.PI_CODE_CHANGED_ACTION);
+        intentFilter.addAction(FmReceiverIntent.MASTER_VOLUME_CHANGED_ACTION);
+        intentFilter.addAction(FmReceiverIntent.CHANNEL_SPACING_CHANGED_ACTION);
         intentFilter.addAction(FmReceiverIntent.COMPLETE_SCAN_DONE_ACTION);
-        intentFilter.addAction(FmReceiverIntent.FM_ERROR_ACTION);
+        intentFilter.addAction(FmReceiverIntent.COMPLETE_SCAN_STOP_ACTION);
+        intentFilter.addAction(FmReceiverIntent.GET_BAND_ACTION);
+        intentFilter.addAction(FmReceiverIntent.GET_MONO_STEREO_MODE_ACTION);
+        intentFilter.addAction(FmReceiverIntent.GET_MUTE_MODE_ACTION);
+        intentFilter.addAction(FmReceiverIntent.GET_RF_MUTE_MODE_ACTION);
+        intentFilter.addAction(FmReceiverIntent.GET_RSSI_THRESHHOLD_ACTION);
+        intentFilter.addAction(FmReceiverIntent.GET_DEEMPHASIS_FILTER_ACTION);
+        intentFilter.addAction(FmReceiverIntent.GET_VOLUME_ACTION);
+        intentFilter.addAction(FmReceiverIntent.GET_RDS_SYSTEM_ACTION);
+        intentFilter.addAction(FmReceiverIntent.GET_RDS_GROUPMASK_ACTION);
+        intentFilter.addAction(FmReceiverIntent.GET_RDS_AF_SWITCH_MODE_ACTION);
+        intentFilter.addAction(FmReceiverIntent.GET_RSSI_ACTION);
+        intentFilter.addAction(FmReceiverIntent.COMPLETE_SCAN_PROGRESS_ACTION);
+        intentFilter.addAction(FmReceiverIntent.SET_RDS_AF_ACTION);
+        intentFilter.addAction(FmReceiverIntent.SET_RF_DEPENDENT_MUTE_ACTION);
+        intentFilter.addAction(FmReceiverIntent.SET_CHANNEL_SPACE_ACTION);
+        // intentFilter.addAction(FmReceiverIntent.FM_ERROR_ACTION);
 
         registerReceiver(mReceiver, intentFilter);
 
+        db = new DBAdapter(this);
+        createEmptyList();
         /*
-           * Need to enable the FM if it is not enabled earlier
-           */
+         * Need to enable the FM if it was not enabled earlier
+         */
 
         sFmReceiver = new FmReceiver(this, this);
+    }
+
+    private void setButtonLabels() {
+
+        //Log.d(TAG, "setButtonLabels");
+        Iterator<HashMap<String, String>> stationIterator = stations.iterator();
+        while (stationIterator.hasNext()) {
+            HashMap<String, String> item = (HashMap<String, String>) stationIterator.next();
+
+            //Log.d(TAG, "setButtonLabels item " + item);
+            String freq = item.get(ITEM_VALUE);
+            int iButtonNo = Integer.parseInt(item.get(ITEM_KEY));
+            switch (iButtonNo) {
+                case 1:
+                    if (freq.equals(""))
+                        btnStation1.setEnabled(false);
+                    else {
+                        btnStation1.setEnabled(true);
+                        btnStation1.setText(freq);
+                    }
+                    break;
+                case 2:
+                    if (freq.equals(""))
+                        btnStation2.setEnabled(false);
+                    else {
+                        btnStation2.setEnabled(true);
+                        btnStation2.setText(freq);
+                    }
+                    break;
+                case 3:
+                    if (freq.equals(""))
+                        btnStation3.setEnabled(false);
+                    else {
+                        btnStation3.setEnabled(true);
+                        btnStation3.setText(freq);
+                    }
+                    break;
+                case 4:
+                    if (freq.equals(""))
+                        btnStation4.setEnabled(false);
+                    else {
+                        btnStation4.setEnabled(true);
+                        btnStation4.setText(freq);
+                    }
+                    break;
+                case 5:
+                    if (freq.equals(""))
+                        btnStation5.setEnabled(false);
+                    else {
+                        btnStation5.setEnabled(true);
+                        btnStation5.setText(freq);
+                    }
+                    break;
+                case 6:
+                    if (freq.equals(""))
+                        btnStation6.setEnabled(false);
+                    else {
+                        btnStation6.setEnabled(true);
+                        btnStation6.setText(freq);
+                    }
+                    break;
+
+            }
+
+        }
+
     }
 
     private void startup() {
 
         switch (sFmReceiver.getFMState()) {
+
             /* FM is alreary enabled. Just update the UI. */
             case FmReceiver.STATE_ENABLED:
                 // Fm app is on and we are entering from the other screens
+                loadDefaultConfiguration();
                 setContentView(R.layout.fmrxmain);
                 initControls();
-                loadDefaultConfiguration();
+                setButtonLabels();
+                /* if (sFmReceiver.isFMPaused()) {
+                        Log.i(TAG, "FmReceiver.STATE_PAUSE ");
+                   mStatus = sFmReceiver.resumeFm();
+                 if (mStatus == false) {
+                   showAlert(this, "FmReceiver", "Cannot resume Radio!!!!");
+                     }
+                }*/
                 // Clear the notification which was displayed.
-                this.mNotificationManager.cancel(FM_NOTIFICATION_ID);
-                break;
-
-            /* FM enable has been started from service. Inform the user */
-            case FmReceiver.STATE_RESUME:
-                /* Display the dialog till FM is enabled */
-                pd = ProgressDialog.show(this, "Please wait..",
-                        "Powering on Radio", true, false);
+                // this.mNotificationManager.cancel(FM_NOTIFICATION_ID);
                 break;
 
             case FmReceiver.STATE_DISABLED:
+                Log.i(TAG, "FmReceiver.STATE_DISABLED ");
+                //TODO: should this be set to false?
+                sdefaultSettingOn = false;
 
                 mStatus = sFmReceiver.enable();
                 if (!mStatus) {
-                    showAlert(this, "FmRadio", "Cannot enable Radio!!!!");
+                    showAlert(this, "FmReceiver", "Cannot enable Radio!!!!");
 
                 } else { /* Display the dialog till FM is enabled */
                     pd = ProgressDialog.show(this, "Please wait..",
@@ -250,13 +393,14 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 }
 
                 break;
+
             /* FM has not been started. Start the FM */
             case FmReceiver.STATE_DEFAULT:
-
+                sdefaultSettingOn = false;
                 /*
-                 * Make sure not to start the FM_Enable() again, if it has been
-                 * already called before orientation change
-                 */
+                * Make sure not to start the FM_Enable() again, if it has been
+                * already called before orientation change
+                */
                 if (!mFmInterrupted) {
                     mStatus = sFmReceiver.create();
                     if (!mStatus) {
@@ -272,7 +416,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                                 "Powering on Radio", true, false);
                     }
                 } else {
-                    Log.i(TAG, "mFmInterrupted is true dont  call enable");
+                    Log.i(TAG, "mFmInterrupted is true dont call enable");
 
                 }
                 break;
@@ -281,11 +425,13 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     public void onServiceConnected() {
         Log.i(TAG, "onServiceConnected");
+        mFmServiceConnected = true;
         startup();
     }
 
     public void onServiceDisconnected() {
-        Log.i(TAG, "Lost connection to service");
+        Log.d(TAG, "Lost connection to service");
+        mFmServiceConnected = false;
         sFmReceiver = null;
     }
 
@@ -431,6 +577,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     /* Set particular station name or frequency in the stations arraylist */
     public static void SetStation(Integer index, String freq, String name) {
+        Log.i(TAG, "SetStation");
         Integer pos = index + 1;
         try {
             HashMap<String, String> item = stations.get(index.intValue());
@@ -453,11 +600,11 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         } catch (NullPointerException e) {
             Log.e(TAG, "Tried to add null value");
         }
-
     }
 
     /* UnSet particular station name and frequency in the stations arraylist */
     public static void UnSetStation(Integer index, String freq, String name) {
+        Log.i(TAG, "UnSetStation");
         Integer pos = index + 1;
         try {
             HashMap<String, String> item = stations.get(index.intValue());
@@ -473,6 +620,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     /* Get particular station from the stations arraylist */
 
     public static String GetStation(Integer index) {
+        Log.i(TAG, "GetStation");
         Integer pos = index + 1;
         try {
             HashMap<String, String> item = stations.get(index.intValue());
@@ -496,28 +644,36 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     }
 
     /*
-      * Handler for all the FM related events. The events will be handled only
-      * when we are in the FM application main menu
-      */
+     * Handler for all the FM related events. The events will be handled only
+     * when we are in the FM application main menu
+     */
 
     private Handler mHandler = new Handler() {
+        StringBuilder sb;
+        StringBuilder sbPs;
 
         public void handleMessage(Message msg) {
 
             switch (msg.what) {
 
                 /*
-                 * After FM is enabled dismiss the progress dialog and display the
-                 * FM main screen. Set the default volume.
-                 */
+                * After FM is enabled dismiss the progress dialog and display the
+                * FM main screen. Set the default volume.
+                */
 
                 case EVENT_FM_ENABLED:
 
+                    Log.i(TAG, "enter handleMessage ----EVENT_FM_ENABLED");
                     if (pd != null)
                         pd.dismiss();
-                    setContentView(R.layout.fmrxmain);
-                    initControls();
+
                     loadDefaultConfiguration();
+                    setContentView(R.layout.fmrxmain);
+                    /* At Power up, FM should be always unmuted. */
+                    mToggleMute = false;
+                    //Log.i(TAG, " handleMessage  init mToggleMute" + mToggleMute);
+                    initControls();
+                    setButtonLabels();
                     imgFmPower.setImageResource(R.drawable.poweron);
 
 
@@ -525,8 +681,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                       * Setting the default band when FM app is started for
                       * the first time or after reentering the Fm app
                       */
-                    if (!sdefaultSettingOn) {
-                        /* Set the default band */
+                    /*if (!sdefaultSettingOn) {
                         mStatus = sFmReceiver.setBand(sBand);
                         if (!mStatus) {
                             showAlert(getParent(), "FmRadio",
@@ -543,47 +698,155 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                             lastTunedFrequency = lastTunedFrequency / 1000;
                         }
 
-                    }
+                    }*/
 
 
                     break;
 
-                /* Update the icon on main screen with appropriate mono/stereo icon */
-                case EVENT_MONO_STEREO_DISPLAY:
+                /*
+                * Update the icon on main screen with appropriate mono/stereo
+                * icon
+                */
+                case EVENT_MONO_STEREO_CHANGE:
 
-                    Integer mode = (Integer) msg.obj;
-                    if (DBG)
-                        Log.d(TAG, "enter handleMessage ---mode" + mode);
-                    if (mode == 0) {
+                    Log.i(TAG, "enter handleMessage ---EVENT_MONO_STEREO_CHANGE");
+                    if (mMode == 0) {
                         imgFmMode.setImageResource(R.drawable.fm_stereo);
                     } else {
                         imgFmMode.setImageResource(R.drawable.fm_mono);
                     }
                     break;
 
+                /*
+                * Update the icon on main screen with appropriate mono/stereo
+                * icon
+                */
+                case EVENT_MONO_STEREO_DISPLAY:
+
+                    Log.i(TAG, "enter handleMessage ---EVENT_MONO_STEREO_DISPLAY");
+
+                    Integer mode = (Integer) msg.obj;
+                    //Log.i(TAG, "enter handleMessage ---mode" + mode.intValue());
+                    if (mode.intValue() == 0) {
+                        imgFmMode.setImageResource(R.drawable.fm_stereo);
+                    } else {
+                        imgFmMode.setImageResource(R.drawable.fm_mono);
+                    }
+                    break;
+
+                /*
+                * Update the icon on main screen with appropriate mute/unmute icon
+                */
+                case EVENT_MUTE_CHANGE:
+                    Log.i(TAG, "enter handleMessage ---EVENT_MUTE_CHANGE  ");
+
+                    break;
+
+                case EVENT_SEEK_STOPPED:
+
+                    Log.i(TAG, "enter handleMessage ---EVENT_SEEK_STOPPED");
+                    Integer seekFreq = (Integer) msg.obj;
+                    //Log.i(TAG, "enter handleMessage ----EVENT_SEEK_STOPPED seekFreq" + seekFreq);
+                    lastTunedFrequency = (float) seekFreq / 1000;
+                    txtStatusMsg.setText(R.string.playing);
+                    txtFmRxTunedFreq.setText(lastTunedFrequency.toString());
+
+                    break;
+
                 case EVENT_FM_DISABLED:
 
+                    Log.i(TAG, "enter handleMessage ----EVENT_FM_DISABLED");
+
                     /*
-                      * we have exited the FM App. Set the sdefaultSettingOn flag to
-                      * false Save the default configuration in the preference
-                      */
+                    * we have exited the FM App. Set the sdefaultSettingOn flag to
+                    * false Save the default configuration in the preference
+                    */
                     sdefaultSettingOn = false;
                     saveDefaultConfiguration();
-
-                    mStatus = sFmReceiver.destroy();
-                    if (!mStatus) {
-                        showAlert(getParent(), "FmRadio", "Not able to destroy!!!!");
-                    }
-
                     finish();
                     break;
 
                 case EVENT_SEEK_STARTED:
 
                     Integer freq = (Integer) msg.obj;
-                    Log.i(TAG, "enter handleMessage ----EVENT_SEEK_STARTED freq"
-                            + freq);
+                    //Log.i(TAG, "enter handleMessage ----EVENT_SEEK_STARTED freq" + freq);
                     lastTunedFrequency = (float) freq / 1000;
+                    txtStatusMsg.setText(R.string.playing);
+                    txtFmRxTunedFreq.setText(lastTunedFrequency.toString());
+                    // clear the RDS text
+                    txtRadioText.setText(null);
+
+                    // clear the PS text
+                    txtPsText.setText(null);
+
+                    /*
+                    * Seek up/down will be completed here. So set the state to
+                    * idle, so that user can seek to other frequency.
+                    */
+
+                    mSeekState = SEEK_REQ_STATE_IDLE;
+
+                    break;
+
+                /*
+                * Set the default band , if the fm app is getting started first
+                * time
+                */
+                case EVENT_VOLUME_CHANGE:
+                    Log.i(TAG, "enter handleMessage ----EVENT_VOLUME_CHANGE");
+
+                    /*
+                    * volume change will be completed here. So set the state to
+                    * idle, so that user can set other volume.
+                    */
+                    mVolState = VOL_REQ_STATE_IDLE;
+                    /*
+                    * Setting the default band after the volume change when FM app
+                    * is started for the first time
+                    */
+                    if (sdefaultSettingOn == false) {
+                        /* Set the default band */
+                        if (MAKE_FM_APIS_BLOCKING == true) {
+                            // Code for blocking call
+                            mStatus = sFmReceiver.setBand(sBand);
+                            if (mStatus == false) {
+                                showAlert(getParent(), "FmReceiver", "Not able to setband!!!!");
+                            } else {
+                                lastTunedFrequency = (float) lastTunedFrequency;
+                                mStatus = sFmReceiver.tune((int) (lastTunedFrequency.floatValue() * 1000));
+                                if (mStatus == false) {
+                                    showAlert(getParent(), "FmReceiver", "Not able to tune!!!!");
+                                }
+                            }
+
+                        } else {
+                            // Code for non blocking call
+                            //  mStatus = sFmReceiver.rxSetBand_nb(sBand);
+                            if (mStatus == false) {
+                                showAlert(getParent(), "FmReceiver", "Not able to setband!!!!");
+                            }
+                        }
+
+
+                    }
+                    break;
+
+                case EVENT_COMPLETE_SCAN_PROGRESS:
+                    Log.i(TAG, "enter handleMessage ----EVENT_COMPLETE_SCAN_PROGRESS");
+
+                    Integer progress = (Integer) msg.obj;
+                    // Log.i(TAG,"enter handleMessage ----EVENT_COMPLETE_SCAN_PROGRESS progress"+ progress);
+                    break;
+
+                /*
+                * enable audio routing , if the fm app is getting started first
+                * time
+                */
+                case EVENT_TUNE_COMPLETE:
+                    Integer tuneFreq = (Integer) msg.obj;
+                    Log.i(TAG, "enter handleMessage ----EVENT_TUNE_COMPLETE tuneFreq"
+                            + tuneFreq);
+                    lastTunedFrequency = (float) tuneFreq / 1000;
                     txtStatusMsg.setText(R.string.playing);
                     txtFmRxTunedFreq.setText(lastTunedFrequency.toString());
                     // clear the RDS text
@@ -591,40 +854,26 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     // clear the PS text
                     txtPsText.setText(null);
 
+                    Log.d(TAG, "sdefaultSettingOn" + sdefaultSettingOn);
+
                     /*
-                      * Seek up/down will be completed here. So set the state to
-                      * idle, so that user can seek to other frequency.
-                      */
-
-                    mSeekState = SEEK_REQ_STATE_IDLE;
-
-                    break;
-
-                /*
-                 * enable audio routing , if the fm app is getting started first
-                 * time
-                 */
-                case EVENT_TUNE_COMPLETE:
-                    Integer tuneFreq = (Integer) msg.obj;
-                    if (DBG)
-                        Log.d(TAG,
-                                "enter handleMessage ----EVENT_TUNE_COMPLETE tuneFreq"
-                                        + tuneFreq);
-
-                    lastTunedFrequency = (float) tuneFreq / 1000;
-                    txtStatusMsg.setText(R.string.playing);
-                    txtFmRxTunedFreq.setText(lastTunedFrequency.toString());
-                    // clear the RDS text
-                    txtRadioText.setText(null);
-                    if (DBG)
-                        Log.d(TAG, "sdefaultSettingOn" + sdefaultSettingOn);
-
+                    * Enable the Audio routing after the tune complete , when FM
+                    * app is started for the first time or after reentering the Fm
+                    * app
+                    */
                     if (sdefaultSettingOn == false) {
+/*
+                mStatus = sFmReceiver.rxEnableAudioRouting();
+                    if (mStatus == false) {
+                        showAlert(getParent(), "FmReceiver",
+                                "Not able to enable audio!!!!");
+                    }
+*/
                         /*
-                           * The default setting for the FMApp are completed here. If
-                           * the user selects back and goes out of the FM App, when he
-                           * reenters we dont have to do the default configurations
-                           */
+                        * The default setting for the FMApp are completed here. If
+                        * the user selects back and goes out of the FM App, when he
+                        * reenters we dont have to do the default configurations
+                        */
                         sdefaultSettingOn = true;
                     }
 
@@ -638,6 +887,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
                 /* Display the RDS text on UI */
                 case EVENT_RDS_TEXT:
+                    Log.i(TAG, "enter handleMessage ----EVENT_RDS_TEXT");
                     if (FM_SEND_RDS_IN_BYTEARRAY == true) {
                         byte[] rdsText = (byte[]) msg.obj;
 
@@ -645,21 +895,85 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                             Log.i(TAG, "rdsText" + rdsText[i]);
                     } else {
                         String rds = (String) msg.obj;
-                        if (DBG)
-                            Log.d(TAG, "enter handleMessage ----EVENT_RDS_TEXT rds"
-                                    + rds);
-                        txtRadioText.setText(rds);
+                        Log.i(TAG, "enter handleMessage ----EVENT_RDS_TEXT rds" + rds);
+                        sb = new StringBuilder("[RDS] ");
+                        sb.append(rds);
+                        Log.i(TAG, "enter handleMessage ----EVENT_RDS_TEXT sb.toString()" + sb.toString());
+                        txtRadioText.setText(sb.toString());
                     }
                     break;
 
                 /* Display the RDS text on UI */
                 case EVENT_PI_CODE:
                     String pi = (String) msg.obj;
+                    Log.i(TAG, "enter handleMessage ----EVENT_PI_CODE rds" + pi);
 
+                    break;
+
+                case EVENT_SET_CHANNELSPACE:
+                    Log.i(TAG, "enter handleMessage ----EVENT_SET_CHANNELSPACE");
+                    break;
+
+
+                case EVENT_GET_CHANNEL_SPACE_CHANGE:
+                    Log.i(TAG, "enter handleMessage ----EVENT_GET_CHANNEL_SPACE_CHANGE");
+                    Long gChSpace = (Long) msg.obj;
+                    //Log.d(TAG, "enter handleMessage ----gChSpace" + gChSpace);
+                    break;
+
+                /* tune to default frequency after the band change callback . */
+
+                case EVENT_BAND_CHANGE:
+                    Log.i(TAG, "enter handleMessage ----EVENT_BAND_CHANGE");
+                    /*
+                    * Tune to the last stored frequency at the
+                    * enable/re-enable,else tune to the default frequency when band
+                    * changes
+                    */
+
+                    if (sdefaultSettingOn == true) {
+                        /* Set the default frequency */
+                        if (sBand == FM_BAND_EUROPE_US)
+                            lastTunedFrequency = (float) DEFAULT_FREQ_EUROPE;
+                        else
+                            lastTunedFrequency = (float) DEFAULT_FREQ_JAPAN;
+                    }
+
+                    mStatus = sFmReceiver.tune((int) (lastTunedFrequency.floatValue() * 1000));
+                    if (mStatus == false) {
+                        showAlert(getParent(), "FmReceiver", "Not able to tune!!!!");
+                    }
+
+                    break;
+
+                /* Enable RDS system after enale RDS callback . */
+
+                case EVENT_ENABLE_RDS:
+                    Log.i(TAG, "enter handleMessage ----EVENT_ENABLE_RDS");
+                    break;
+
+                /* Set RSSI after SET_RDS_AF callback */
+                case EVENT_SET_RDS_AF:
+                    Log.i(TAG, "enter handleMessage ----EVENT_SET_RDS_AF");
+                    break;
+                /* Set RDS AF after SET_RDS_SYSTEM callback */
+                case EVENT_SET_RDS_SYSTEM:
+                    Log.i(TAG, "enter handleMessage ----EVENT_SET_RDS_SYSTEM");
+                    break;
+                /* Set RSSI after disable RDS callback */
+                case EVENT_DISABLE_RDS:
+                    Log.i(TAG, "enter handleMessage ----EVENT_DISABLE_RDS");
+                    txtPsText.setText(null);
+                    txtRadioText.setText(null);
+                    break;
+
+                case EVENT_SET_DEEMP_FILTER:
+                    Log.i(TAG, "enter handleMessage ----EVENT_SET_DEEMP_FILTER");
                     break;
 
                 /* Display the PS text on UI */
                 case EVENT_PS_CHANGED:
+                    Log.i(TAG, "enter handleMessage ----EVENT_PS_CHANGED");
 
                     if (FM_SEND_RDS_IN_BYTEARRAY == true) {
                         byte[] psName = (byte[]) msg.obj;
@@ -668,25 +982,118 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                             Log.i(TAG, "psName" + psName[i]);
                     } else {
                         String ps = (String) msg.obj;
-                        if (DBG)
-                            Log.d(TAG, "ps  String is " + ps);
-
-                        txtPsText.setText(ps);
+                        Log.i(TAG, "ps  String is " + ps);
+                        sbPs = new StringBuilder("[PS] ");
+                        sbPs.append(ps);
+                        //Log.i(TAG, "enter handleMessage ----EVENT_PS_CHANGED sbPs.toString()"+ sbPs.toString());
+                        txtPsText.setText(sbPs.toString());
                     }
 
                     break;
 
+                case EVENT_SET_RSSI_THRESHHOLD:
+                    Log.i(TAG, "enter handleMessage ----EVENT_SET_RSSI_THRESHHOLD");
+                    /*
+                    * All the configurations will be completed here. So set the
+                    * state to idle, so that user can configure again
+                    */
+                    configurationState = CONFIGURATION_STATE_IDLE;
+                    break;
+                case EVENT_SET_RF_DEPENDENT_MUTE:
+                    Log.i(TAG, "enter handleMessage ----EVENT_SET_RF_DEPENDENT_MUTE");
+                    break;
+
+                case EVENT_COMPLETE_SCAN_STOP:
+                    Log.i(TAG, "enter handleMessage ----EVENT_COMPLETE_SCAN_STOP");
+                    break;
+
                 case EVENT_COMPLETE_SCAN_DONE:
+                    Log.i(TAG, "enter handleMessage ----EVENT_COMPLETE_SCAN_DONE");
 
                     int[] channelList = (int[]) msg.obj;
                     int noOfChannels = (int) msg.arg2;
 
-                    if (DBG) {
+                    Log.i(TAG, "noOfChannels" + noOfChannels);
 
-                        for (int i = 0; i < noOfChannels; i++)
+                    for (int i = 0; i < noOfChannels; i++)
+                        Log.i(TAG, "channelList" + channelList[i]);
 
-                            Log.d(TAG, "channelList" + channelList[i]);
-                    }
+                    break;
+
+                case EVENT_GET_BAND:
+
+                    Long gBand = (Long) msg.obj;
+                    Log.i(TAG, "enter handleMessage ----EVENT_GET_BAND");
+                    Log.d(TAG, "enter handleMessage ----gBand" + gBand);
+                    break;
+
+                case EVENT_GET_FREQUENCY:
+
+                    Integer gFreq = (Integer) msg.obj;
+                    Log.i(TAG, "enter handleMessage ----EVENT_GET_FREQUENCY");
+                    //Log.d(TAG, "enter handleMessage ----gFreq" + gFreq);
+                    break;
+                case EVENT_GET_VOLUME:
+                    Long gVol = (Long) msg.obj;
+                    Log.i(TAG, "enter handleMessage ----EVENT_GET_VOLUME");
+                    Log.d(TAG, "enter handleMessage ----gVol" + gVol);
+                    break;
+                case EVENT_GET_MODE:
+                    Long gMode = (Long) msg.obj;
+                    Log.i(TAG, "enter handleMessage ----EVENT_GET_MODE");
+                    Log.d(TAG, "enter handleMessage ----gMode" + gMode);
+                    break;
+                case EVENT_GET_MUTE_MODE:
+
+                    Long gMuteMode = (Long) msg.obj;
+
+                    if (gMuteMode == (long) FM_UNMUTE)
+                        imgFmVolume.setImageResource(R.drawable.fm_volume);
+                    else if (gMuteMode == (long) FM_MUTE)
+                        imgFmVolume.setImageResource(R.drawable.fm_volume_mute);
+
+                    Log.i(TAG, "enter handleMessage ----EVENT_GET_MUTE_MODE");
+                    //Log.d(TAG, "enter handleMessage ----gMuteMode" + gMuteMode);
+                    break;
+                case EVENT_GET_RF_MUTE_MODE:
+
+                    Long gRfMuteMode = (Long) msg.obj;
+                    Log.i(TAG, "enter handleMessage ----EVENT_GET_RF_MUTE_MODE");
+                    //Log.d(TAG, "enter handleMessage ----gRfMuteMode" + gRfMuteMode);
+                    break;
+                case EVENT_GET_RSSI_THRESHHOLD:
+                    Long gRssi = (Long) msg.obj;
+                    Log.i(TAG, "enter handleMessage ----EVENT_GET_RSSI_THRESHHOLD");
+                    Log.d(TAG, "enter handleMessage ----gRssi" + gRssi);
+                    break;
+
+                case EVENT_GET_RSSI:
+                    Integer rssi = (Integer) msg.obj;
+                    Log.i(TAG, "enter handleMessage ----EVENT_GET_RSSI");
+                    Log.d(TAG, "enter handleMessage ----rssi" + rssi);
+                    break;
+                case EVENT_GET_DEEMPHASIS_FILTER:
+                    Long gFilter = (Long) msg.obj;
+                    Log.i(TAG, "enter handleMessage ----EVENT_GET_DEEMPHASIS_FILTER");
+                    Log.d(TAG, "enter handleMessage ----gFilter" + gFilter);
+                    break;
+
+                case EVENT_GET_RDS_SYSTEM:
+                    Long gRdsSys = (Long) msg.obj;
+                    Log.i(TAG, "enter handleMessage ----EVENT_GET_RDS_SYSTEM");
+                    Log.d(TAG, "enter handleMessage ----gRdsSys" + gRdsSys);
+                    break;
+                case EVENT_GET_RDS_GROUPMASK:
+                    Long gRdsMask = (Long) msg.obj;
+                    Log.i(TAG, "enter handleMessage ----EVENT_GET_RDS_GROUPMASK");
+                    Log.d(TAG, "enter handleMessage ----gRdsMask" + gRdsMask);
+                    break;
+
+                case EVENT_MASTER_VOLUME_CHANGED:
+                    Integer vol = (Integer) msg.obj;
+                    mVolume = vol;
+                    Log.i(TAG, "enter handleMessage ----EVENT_MASTER_VOLUME_CHANGED");
+                    Log.d(TAG, "enter handleMessage ----mVolume" + vol);
 
                     break;
 
@@ -723,55 +1130,82 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     }
 
+
     private void setRdsConfig() {
+        Log.i(TAG, "setRdsConfig()-entered");
         configurationState = CONFIGURATION_STATE_PENDING;
         SharedPreferences fmConfigPreferences = getSharedPreferences(
                 "fmConfigPreferences", MODE_PRIVATE);
 
         // Set Band
         int band = fmConfigPreferences.getInt(BAND, DEFAULT_BAND);
-        if (DBG)
-            Log.d(TAG, "setRdsConfig()--- band= " + band);
+        Log.i(TAG, "setRdsConfig()--- band= " + band);
         if (band != sBand) // If Band is same as the one set already donot set
         // it again
         {
-            mStatus = sFmReceiver.setBand(band);
-            if (mStatus == false) {
-                Log.e(TAG, "setRdsConfig()-- setBand ->Erorr");
-                showAlert(this, "FmRadio",
-                        "Cannot  setBand to selected Value!!!!");
-            } else {
-                sBand = band;
-                if (sdefaultSettingOn == true) {
-                    /* Set the default frequency */
-                    if (sBand == FM_BAND_EUROPE_US)
-                        lastTunedFrequency = (float) DEFAULT_FREQ_EUROPE;
-                    else
-                        lastTunedFrequency = (float) DEFAULT_FREQ_JAPAN;
-                }
 
-                lastTunedFrequency = (float) lastTunedFrequency * 1000;
-                mStatus = sFmReceiver.tune(lastTunedFrequency.intValue());
+            if (MAKE_FM_APIS_BLOCKING == true) {
+                // Code for blocking call
+                mStatus = sFmReceiver.setBand(band);
                 if (mStatus == false) {
-                    showAlert(getParent(), "FmRadio", "Not able to tune!!!!");
-                }
-                lastTunedFrequency = lastTunedFrequency / 1000;
-            }
+                    Log.e(TAG, "setRdsConfig()-- setBand ->Erorr");
+                    showAlert(this, "FmReceiver",
+                            "Cannot  setBand to selected Value!!!!");
+                } else {
+                    sBand = band;
+                    if (sdefaultSettingOn == true) {
+                        /* Set the default frequency */
+                        if (sBand == FM_BAND_EUROPE_US)
+                            lastTunedFrequency = (float) DEFAULT_FREQ_EUROPE;
+                        else
+                            lastTunedFrequency = (float) DEFAULT_FREQ_JAPAN;
+                    }
 
+                    lastTunedFrequency = (float) lastTunedFrequency;
+                    mStatus = sFmReceiver.tune((int) (lastTunedFrequency.floatValue() * 1000));
+                    if (mStatus == false) {
+                        showAlert(getParent(), "FmReceiver", "Not able to tune!!!!");
+                    }
+
+                }
+
+            } else {
+
+                mStatus = sFmReceiver.setBand(band);
+                if (mStatus == false) {
+                    Log.e(TAG, "setRdsConfig()-- setBand ->Erorr");
+                    showAlert(this, "FmReceiver",
+                            "Cannot  setBand to selected Value!!!!");
+                } else {
+                    sBand = band;
+                    if (sdefaultSettingOn == true) {
+                        /* Set the default frequency */
+                        if (sBand == FM_BAND_EUROPE_US)
+                            lastTunedFrequency = (float) DEFAULT_FREQ_EUROPE;
+                        else
+                            lastTunedFrequency = (float) DEFAULT_FREQ_JAPAN;
+                    }
+
+                }
+            }
         }
+
 
         // Set De-emp Filter
         int deEmp = fmConfigPreferences.getInt(DEEMP, DEFAULT_DEEMP);
         if (mDeEmpFilter != deEmp)// If De-Emp filter is same as the one set
         // already donot set it again
         {
-            mStatus = sFmReceiver.setDeEmphasisFilter(deEmp);
-            if (DBG)
-                Log.d(TAG, "setRdsConfig()--- DeEmp= " + deEmp);
+            if (MAKE_FM_APIS_BLOCKING == true)
+                mStatus = sFmReceiver.setDeEmphasisFilter(deEmp);
+            //else
+            // mStatus = sFmReceiver.rxSetDeEmphasisFilter_nb(deEmp);
+
+            Log.i(TAG, "setRdsConfig()--- DeEmp= " + deEmp);
 
             if (mStatus == false) {
                 Log.e(TAG, "setRdsConfig()-- setDeEmphasisFilter ->Erorr");
-                showAlert(this, "FmRadio",
+                showAlert(this, "FmReceiver",
                         "Cannot set De-Emp Fileter to selected Value!!!!");
 
             }
@@ -779,18 +1213,19 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         }
 
+
         // Set Mode
         int mode = fmConfigPreferences.getInt(MODE, DEFAULT_MODE);
         if (mMode != mode)// If Mode is same as the one set already donot set it
         // again
         {
-            if (DBG)
-                Log.d(TAG, "setRdsConfig()--- Band= "
-                        + fmConfigPreferences.getInt(BAND, DEFAULT_BAND));
 
-            mStatus = sFmReceiver.setMonoStereoMode(mode);
+            if (MAKE_FM_APIS_BLOCKING == true)
+                mStatus = sFmReceiver.setMonoStereoMode(mode);
+            //else
+            //mStatus = sFmReceiver.rxSetMonoStereoMode_nb(mode);
             if (mStatus == false) {
-                showAlert(this, "FmRadio", "Not able to setmode!!!!");
+                showAlert(this, "FmReceiver", "Not able to setmode!!!!");
             } else {
                 mMode = mode;
                 if (mMode == 0) {
@@ -802,60 +1237,55 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         }
 
+
         /** Set channel spacing to the one selected by the user */
         int channelSpace = fmConfigPreferences.getInt(CHANNELSPACE,
                 DEFAULT_CHANNELSPACE);
-        if (DBG)
-            Log.d(TAG, "setChannelSpacing()--- channelSpace= " + channelSpace);
+        Log.i(TAG, "setChannelSpacing()--- channelSpace= " + channelSpace);
         if (channelSpace != sChannelSpace) // If channelSpace is same as the one
         // set already donot set
         // it again
         {
-            mStatus = sFmReceiver.setChannelSpacing(channelSpace);
+            if (MAKE_FM_APIS_BLOCKING == true)
+                mStatus = sFmReceiver.setChannelSpacing(channelSpace);
+            // else
+            //     mStatus = sFmReceiver.rxSetChannelSpacing_nb(channelSpace);
+
             if (mStatus == false) {
                 Log.e(TAG, "setChannelSpacing()-- setChannelSpacing ->Erorr");
-                showAlert(this, "FmRadio",
+                showAlert(this, "FmReceiver",
                         "Cannot  setChannelSpacing to selected Value!!!!");
             }
             sChannelSpace = channelSpace;
         }
 
-        // Set Rssi
-        int rssiThreshHold = fmConfigPreferences.getInt(RSSI, DEFAULT_RSSI);
-        if (DBG)
-            Log.d(TAG, "setRssi()-ENTER --- rssiThreshHold= " + rssiThreshHold);
-
-        if (mRssi != rssiThreshHold) {
-
-            // Set RSSI if a new value is entered by the user
-
-            mStatus = sFmReceiver.setRssiThreshold(rssiThreshHold);
-            if (mStatus == false) {
-                showAlert(this, "FmRadio", "Not able to setRssiThreshold!!!!");
-            }
-
-            mRssi = rssiThreshHold;
-        }
 
         // set RDS related configuration
         boolean rdsEnable = fmConfigPreferences.getBoolean(RDS, DEFAULT_RDS);
-        if (DBG)
-            Log.d(TAG, "setRDS()--- rdsEnable= " + rdsEnable);
+        Log.i(TAG, "setRDS()--- rdsEnable= " + rdsEnable);
         if (mRds != rdsEnable) {
 
             if (rdsEnable) {
-                mStatus = sFmReceiver.enableRds();
+                if (MAKE_FM_APIS_BLOCKING == true)
+                    mStatus = sFmReceiver.enableRds();
+                //else
+                //    mStatus = sFmReceiver.rxEnableRds_nb();
                 if (mStatus == false) {
                     Log.e(TAG, "setRDS()-- enableRds() ->Erorr");
-                    showAlert(this, "FmRadio", "Cannot enable RDS!!!!");
+                    showAlert(this, "FmReceiver", "Cannot enable RDS!!!!");
                 }
 
             } else {
-                mStatus = sFmReceiver.disableRds();
+                if (MAKE_FM_APIS_BLOCKING == true)
+                    mStatus = sFmReceiver.disableRds();
+                // else
+                //     mStatus = sFmReceiver.rxDisableRds_nb();
+
                 if (mStatus == false) {
                     Log.e(TAG, "setRDS()-- disableRds() ->Erorr");
-                    showAlert(this, "FmRadio", "Cannot disable RDS!!!!");
+                    showAlert(this, "FmReceiver", "Cannot disable RDS!!!!");
                 } else {
+                    Log.e(TAG, "setRDS()-- disableRds() ->success");
                     /* clear the PS and RDS text */
                     txtPsText.setText(null);
                     txtRadioText.setText(null);
@@ -869,15 +1299,19 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 DEFAULT_RDS_SYSTEM);
         if (DBG)
             Log.d(TAG, "setRdsSystem()--- rdsSystem= " + rdsSystem);
-
         if (mRdsSystem != rdsSystem) {
             // Set RDS-SYSTEM if a new choice is made by the user
 
-            mStatus = sFmReceiver.setRdsSystem(fmConfigPreferences.getInt(
-                    RDSSYSTEM, DEFAULT_RDS_SYSTEM));
+            if (MAKE_FM_APIS_BLOCKING == true)
+                mStatus = sFmReceiver.setRdsSystem(fmConfigPreferences.getInt(
+                        RDSSYSTEM, DEFAULT_RDS_SYSTEM));
+            //else
+            //mStatus = sFmReceiver.rxSetRdsSystem_nb(fmConfigPreferences.getInt(
+            //        RDSSYSTEM, DEFAULT_RDS_SYSTEM));
+
             if (mStatus == false) {
                 Log.e(TAG, " setRdsSystem()-- setRdsSystem ->Erorr");
-                showAlert(this, "FmRadio",
+                showAlert(this, "FmReceiver",
                         "Cannot set Rds System to selected Value!!!!");
             }
             mRdsSystem = rdsSystem;
@@ -889,109 +1323,197 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         rdsAf = rdsAfSwitch ? 1 : 0;
         if (DBG)
             Log.d(TAG, "setRdsAf()--- rdsAfSwitch= " + rdsAf);
-
         if (mRdsAf != rdsAfSwitch) {
             // Set RDS-AF if a new choice is made by the user
 
-            mStatus = sFmReceiver.setRdsAfSwitchMode(rdsAf);
+            if (MAKE_FM_APIS_BLOCKING == true)
+                mStatus = sFmReceiver.setRdsAfSwitchMode(rdsAf);
+            //else
+            //mStatus = sFmReceiver.rxSetRdsAfSwitchMode_nb(rdsAf);
             if (mStatus == false) {
-                Log.e(TAG, "setRdsAf()-- setRdsAfSwitchMode(1) ->Erorr");
-                showAlert(this, "FmRadio", "Cannot set RDS AF Mode ON!!!!");
+                Log.e(TAG, "setRdsAf()-- setRdsAfSwitchMode(1) ->Error");
+                showAlert(this, "FmReceiver", "Cannot set RDS AF Mode ON!!!!");
             }
             mRdsAf = rdsAfSwitch;
         }
+        // Set Rssi
+        int rssiThreshHold = fmConfigPreferences.getInt(RSSI, DEFAULT_RSSI);
+        Log.i(TAG, "setRssi()-ENTER --- rssiThreshHold= " + rssiThreshHold);
+
+        // Set RSSI if a new value is entered by the user
+
+        if (MAKE_FM_APIS_BLOCKING == true)
+            mStatus = sFmReceiver.setRssiThreshold(rssiThreshHold);
+        //else
+        //    mStatus = sFmReceiver.rxSetRssiThreshold_nb(rssiThreshHold);
+
+        if (mStatus == false) {
+            showAlert(this, "FmReceiver", "Not able to setRssiThreshold!!!!");
+        }
+
+        mRssi = rssiThreshHold;
+
+
+        Log.i(TAG, "setRdsConfig()-exit");
 
     }
 
     /* Load the Default values from the preference when the application starts */
     private void loadDefaultConfiguration() {
 
+        Log.i(TAG, "loadDefaultConfiguration()-entered");
+        SharedPreferences fmConfigPreferences = getSharedPreferences("fmConfigPreferences",
+                MODE_PRIVATE);
+
+        if (mPreset)
+            saveObject();
+
+        /* Read the stations stored in DB and update the UI */
+        try {
+            db.open();
+            Cursor c = db.getStation(1);
+            if (c != null && c.moveToFirst())
+                mIsDbPresent = true;
+            else
+                mIsDbPresent = false;
+            c.close();
+            db.close();
+        } catch (SQLException e) {
+            mIsDbPresent = false;
+        } catch (Exception ex) {
+            mIsDbPresent = false;
+        }
+
+        if (mIsDbPresent == false) {
+
+            Log.d(TAG, " mIsDbPresent writeobject" + mIsDbPresent);
+            writeObject();
+            mIsDbPresent = true;
+        } else {
+            Log.d(TAG, " mIsDbPresent readobject" + mIsDbPresent);
+            readObject();
+        }
+
+        Log.d(TAG, " mIsDbPresent " + mIsDbPresent);
+        sBand = fmConfigPreferences.getInt(BAND, DEFAULT_BAND);
+        lastTunedFrequency = fmConfigPreferences.getFloat(FREQUENCY,
+                (sBand == FM_BAND_EUROPE_US ? DEFAULT_FREQ_EUROPE
+                        : DEFAULT_FREQ_JAPAN));
+        mMode = fmConfigPreferences.getInt(MODE, DEFAULT_MODE);
+        mToggleMute = fmConfigPreferences.getBoolean(MUTE, false);
+        mRdsState = fmConfigPreferences.getBoolean(RDS, false);
+
+        if (DBG)
+            Log.d(TAG, " Load default band " + sBand + "default volume" + mVolume + "last fre"
+                    + lastTunedFrequency + "mode" + mMode + "mToggleMute" + mToggleMute + "mRdsState" + mRdsState);
+
+    }
+
+    private void createEmptyList() {
+
+        Log.d(TAG, " createEmptyList ");
+        stations = new ArrayList<HashMap<String, String>>(6);
+        for (int i = 1; i < 7; i++) {
+            HashMap<String, String> stationsMap = new HashMap<String, String>();
+
+            stationsMap.put(ITEM_KEY, String.valueOf(i));
+            stationsMap.put(ITEM_VALUE, "");
+            stationsMap.put(ITEM_NAME, "");
+            stations.add(i - 1, stationsMap);
+        }
+
+    }
+
+    /* Save the Default values to the preference when the application exits */
+    private void saveDefaultConfiguration() {
+        Log.i(TAG, "saveDefaultConfiguration()-Entered");
+
         SharedPreferences fmConfigPreferences = getSharedPreferences(
                 "fmConfigPreferences", MODE_PRIVATE);
-        /* Read the stations stored in text file and update the UI */
-        readObject();
+        SharedPreferences.Editor editor = fmConfigPreferences.edit();
+        editor.putInt(BAND, sBand);
+        editor.putBoolean(MUTE, mToggleMute);
+        editor.putFloat(FREQUENCY, lastTunedFrequency);
         if (DBG)
-            Log.d(TAG, "stations" + stations);
+            Log.d(TAG, " save default band " + sBand + "default volume" + mVolume
+                    + "last fre" + lastTunedFrequency + "mToggleMute" + mToggleMute);
+        /* Write the stations stored to text file */
 
+        //writeObject();
+        saveObject();
+        editor.commit();
+    }
+
+    /* Read the Stations from the text file in file system */
+    void readObject() {
+        Log.i(TAG, "readObject ");
+
+        db.open();
+        Cursor c = db.getAllStations();
+        int count = c.getCount();
+
+        Log.i(TAG, "readObject cursor count " + count);
+        int iCount = 0;
+        if (c.moveToFirst()) {
+            do {
+
+                HashMap<String, String> stations1 = new HashMap<String, String>();
+
+                stations1.put(ITEM_KEY, c.getString(1));
+                stations1.put(ITEM_VALUE, c.getString(2));
+                stations1.put(ITEM_NAME, c.getString(3));
+                stations.set(iCount, stations1);
+                iCount++;
+
+            } while (c.moveToNext());
+
+        } else
+            Toast.makeText(this, "No station found", Toast.LENGTH_LONG).show();
+        c.close();
+        db.close();
+
+    }
+
+    /* Write the Stations to the text file in file system */
+    void writeObject() {
+        Log.i(TAG, "writeObject ");
+
+        db.open();
+        long id;
+        id = db.insertStation("1", "", "");
+        id = db.insertStation("2", "", " ");
+        id = db.insertStation("3", "", "");
+        id = db.insertStation("4", "", " ");
+        id = db.insertStation("5", "", " ");
+        id = db.insertStation("6", "", " ");
+        db.close();
+
+    }
+
+    void saveObject() {
+
+        Log.i(TAG, "enter saveObject");
+        db.open();
         Iterator iterator = stations.iterator();
 
         while (iterator.hasNext()) {
-            HashMap<String, String> item = (HashMap<String, String>) iterator
-                    .next();
+            HashMap<String, String> item = (HashMap<String, String>) iterator.next();
             Object v = item.get(ITEM_VALUE);
             Object n = item.get(ITEM_NAME);
             Object i = item.get(ITEM_KEY);
+
             try {
                 mIndex = Integer.parseInt(i.toString());
                 updateSetStation((mIndex - 1), v.toString(), n.toString());
+                db.updateStation(mIndex, i.toString(), v.toString(), n.toString());
             } catch (Exception e) {
                 Log.e(TAG, "Exception");
                 e.printStackTrace();
             }
 
         }
-        sBand = fmConfigPreferences.getInt(BAND, DEFAULT_BAND);
-        lastTunedFrequency = fmConfigPreferences.getFloat(FREQUENCY,
-                (sBand == FM_BAND_EUROPE_US ? DEFAULT_FREQ_EUROPE
-                        : DEFAULT_FREQ_JAPAN));
 
-        if (DBG)
-            Log.d(TAG, " Load default band " + sBand + "last fre" + lastTunedFrequency);
-
-    }
-
-    /* Save the Default values to the preference when the application exits */
-    private void saveDefaultConfiguration() {
-
-        SharedPreferences fmConfigPreferences = getSharedPreferences(
-                "fmConfigPreferences", MODE_PRIVATE);
-        SharedPreferences.Editor editor = fmConfigPreferences.edit();
-        editor.putInt(BAND, sBand);
-        editor.putFloat(FREQUENCY, lastTunedFrequency);
-        if (DBG)
-            Log.d(TAG, " save default band " + sBand + "last fre" + lastTunedFrequency);
-        /* Write the stations stored to text file */
-        writeObject();
-        editor.commit();
-    }
-
-    /* Read the Stations from the text file in file system */
-    void readObject() {
-        String filename = "data/data/com.ti.fmapp/presets.txt";
-        FileInputStream fis = null;
-        ObjectInputStream in = null;
-        Log.i(TAG, "readObject");
-
-        try {
-            fis = new FileInputStream(filename);
-            in = new ObjectInputStream(fis);
-            stations = (ArrayList<HashMap<String, String>>) in.readObject();
-            in.close();
-        } catch (IOException ex) {
-            Log.e(TAG, "IOException");
-            ex.printStackTrace();
-        } catch (ClassNotFoundException ex) {
-            Log.e(TAG, "ClassNotFoundException");
-            ex.printStackTrace();
-        }
-    }
-
-    /* Write the Stations to the text file in file system */
-    void writeObject() {
-        String filename = "data/data/com.ti.fmapp/presets.txt";
-        FileOutputStream fos = null;
-        ObjectOutputStream out = null;
-
-        Log.i(TAG, "writeObject");
-        try {
-            fos = new FileOutputStream(filename);
-            out = new ObjectOutputStream(fos);
-            out.writeObject(stations);
-            out.close();
-        } catch (IOException ex) {
-            Log.e(TAG, "IOException");
-            ex.printStackTrace();
-        }
+        db.close();
 
     }
 
@@ -1000,17 +1522,31 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         /**
          * Start FM RX
          */
+        Log.i(TAG, "enter initControls");
 
         imgFmPower = (ImageView) findViewById(R.id.imgPower);
         imgFmPower.setOnClickListener(this);
 
-        imgFmAudiopath = (ImageView) findViewById(R.id.imgAudiopath);
-        imgFmAudiopath.setOnClickListener(this);
-
         imgFmMode = (ImageView) findViewById(R.id.imgMode);
+        if (mMode == 0) {
+            Log.i(TAG, " setting stereo icon" + mMode);
+            imgFmMode.setImageResource(R.drawable.fm_stereo);
+        } else {
+            Log.i(TAG, " setting mono icon" + mMode);
+            imgFmMode.setImageResource(R.drawable.fm_mono);
+        }
 
         imgFmVolume = (ImageView) findViewById(R.id.imgMute);
         imgFmVolume.setOnClickListener(this);
+
+        if (mToggleMute == true) {
+            imgFmVolume.setImageResource(R.drawable.fm_volume_mute);
+            Log.i(TAG, " initControls  mute" + mToggleMute);
+        } else {
+            imgFmVolume.setImageResource(R.drawable.fm_volume);
+            Log.i(TAG, " initControls  mute" + mToggleMute);
+        }
+
 
         imgFmSeekUp = (ImageButton) findViewById(R.id.imgseekup);
         imgFmSeekUp.setOnClickListener(this);
@@ -1023,8 +1559,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         txtStatusMsg = (TextView) findViewById(R.id.txtStatusMsg);
         txtRadioText = (TextView) findViewById(R.id.txtRadioText);
-        txtPsText = (TextView) findViewById(R.id.txtPsText);
-
         txtPsText = (TextView) findViewById(R.id.txtPsText);
 
         txtStationName = (TextView) findViewById(R.id.txtStationName);
@@ -1060,7 +1594,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     }
 
     /**
-     * Adds Delay of 2 seconds
+     * Adds Delay of 3 seconds
      */
     private void insertDelayThread() {
 
@@ -1069,7 +1603,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 try {
                     // Add some delay to make sure all configuration has been
                     // completed.
-                    sleep(1500);
+                    sleep(3000);
                 } catch (Exception e) {
                     Log.e(TAG, "InsertDelayThread()-- Exception !!");
                 }
@@ -1082,18 +1616,28 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.i(TAG, "onActivityResult");
+
         switch (requestCode) {
+            case (ACTIVITY_PRESET): {
+                if (resultCode == Activity.RESULT_OK) {
+                    Log.i(TAG, "Prests saved");
+                    saveObject();
+
+                }
+            }
+            break;
             case (ACTIVITY_TUNE): {
                 if (resultCode == Activity.RESULT_OK && data != null) {
 
                     Bundle extras = data.getExtras();
                     if (extras != null) {
-                        Integer freqSet = (int) extras.getFloat(FREQ_VALUE, 0);
-                        lastTunedFrequency = (float) freqSet / 1000;
+
+                        lastTunedFrequency = (float) extras.getFloat(FREQ_VALUE, 0);
                         txtFmRxTunedFreq.setText(lastTunedFrequency.toString());
-                        mStatus = sFmReceiver.tune(freqSet);
+                        mStatus = sFmReceiver.tune((int) (lastTunedFrequency.floatValue() * 1000));
                         if (mStatus == false) {
-                            showAlert(this, "FmRadio", "Not able to tune!!!!");
+                            showAlert(this, "FmReceiver", "Not able to tune!!!!");
                         }
                     }
                 }
@@ -1102,17 +1646,20 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
             case (ACTIVITY_CONFIG): {
                 if (resultCode == Activity.RESULT_OK) {
-                    if (DBG)
-                        Log.d(TAG, "ActivityFmRdsConfig configurationState "
-                                + configurationState);
-                    setRdsConfig();
-                    configPd = ProgressDialog.show(this, "Please wait..",
-                            "Applying new Configuration", true, false);
-                    // The delay is inserted to make sure all the configurations
-                    // have been completed.
-                    insertDelayThread();
+                    Log.i(TAG, "ActivityFmRdsConfig configurationState "
+                            + configurationState);
+                    if (configurationState == CONFIGURATION_STATE_IDLE) {
 
+
+                        setRdsConfig();
+                        configPd = ProgressDialog.show(this, "Please wait..",
+                                "Applying new Configuration", true, false);
+                        // The delay is inserted to make sure all the configurations
+                        // have been completed.
+                        insertDelayThread();
+                    }
                 }
+
             }
             break;
 
@@ -1133,97 +1680,217 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                  * Show a radio notification when the user presses back button and
                  * leaves FM app. The FM radio is still on
                  */
-                this.showNotification(R.drawable.radio, R.string.app_rx,
-                        txtFmRxTunedFreq.getText(), false);
+//                this.showNotification(R.drawable.radio, R.string.app_rx,
+                //                      txtFmRxTunedFreq.getText(), false);
                 saveDefaultConfiguration();
                 finish();
                 return true;
-            /* Keys B to L are mapped to different get APIs for Testing */
+
+            /* Keys A to L are mapped to different get APIs for Testing */
+            case KeyEvent.KEYCODE_A:
+
+                /*if (MAKE_FM_APIS_BLOCKING == true) {
+                          // Code for blocking call
+                                      Log.i(TAG, "Testing getVolume()  returned volume = "
+                        + sFmReceiver.rxGetVolume());
+
+                        } else {
+                          // Code for non blocking call
+                                      Log.i(TAG, "Testing getVolume_nb()  returned volume = "
+                        + sFmReceiver.rxGetVolume_nb());
+
+                        }
+
+                */
+                return true;
 
             case KeyEvent.KEYCODE_B:
-                Log.i(TAG, "Testing getTunedFrequency()  returned Tuned Freq = "
-                        + sFmReceiver.getTunedFrequency());
+
+                if (MAKE_FM_APIS_BLOCKING == true) {
+                    // Code for blocking call
+                    Log.i(TAG, "Testing getTunedFrequency()  returned Tuned Freq = "
+                            + sFmReceiver.getTunedFrequency());
+
+                } else {
+                    // Code for non blocking call
+                    //            Log.i(TAG, "Testing getTunedFrequency_nb()  returned Tuned Freq = "
+                    //          + sFmReceiver.rxGetTunedFrequency_nb());
+
+                }
+
                 return true;
 
             case KeyEvent.KEYCODE_C:
-                Log.i(TAG, "Testing getRssiThreshold()	returned RSSI thrshld = "
-                        + sFmReceiver.getRssiThreshold());
+                if (MAKE_FM_APIS_BLOCKING == true) {
+                    // Code for blocking call
+                    Log.i(TAG, "Testing getRssiThreshold()    returned RSSI thrshld = "
+                            + sFmReceiver.getRssiThreshold());
+                } else {
+                    // Code for non blocking call
+                    //  Log.i(TAG, "Testing getRssiThreshold_nb()    returned RSSI thrshld = "
+                    // + sFmReceiver.rxGetRssiThreshold_nb());
+                }
+
                 return true;
 
             case KeyEvent.KEYCODE_D:
-                Log.i(TAG, "Testing getBand() returned Band  = "
-                        + sFmReceiver.getBand());
+                if (MAKE_FM_APIS_BLOCKING == true) {
+                    // Code for blocking call
+                    Log.i(TAG, "Testing getBand() returned Band  = "
+                            + sFmReceiver.getBand());
+                } else {
+                    // Code for non blocking call
+                    //       Log.i(TAG, "Testing getBand_nb() returned Band  = "
+                    //       + sFmReceiver.rxGetBand_nb());
+                }
+
                 return true;
 
             case KeyEvent.KEYCODE_E:
-                Log.i(TAG, "Testing getDeEmphasisFilter()	returned De-emp  = "
-                        + sFmReceiver.getDeEmphasisFilter());
+                if (MAKE_FM_APIS_BLOCKING == true) {
+                    // Code for blocking call
+                    Log.i(TAG, "Testing getDeEmphasisFilter()    returned De-emp  = "
+                            + sFmReceiver.getDeEmphasisFilter());
+                } else {
+                    // Code for non blocking call
+                    //       Log.i(TAG, "Testing getDeEmphasisFilter_nb()    returned De-emp  = "
+                    //       + sFmReceiver.rxGetDeEmphasisFilter_nb());
+                }
+
                 return true;
 
             case KeyEvent.KEYCODE_F:
-                Log.i(TAG, "Testing getMonoStereoMode() returned MonoStereo = "
-                        + sFmReceiver.getMonoStereoMode());
+                if (MAKE_FM_APIS_BLOCKING == true) {
+                    // Code for blocking call
+                    Log.i(TAG, "Testing getMonoStereoMode() returned MonoStereo = "
+                            + sFmReceiver.getMonoStereoMode());
+
+                } else {
+                    // Code for non blocking call
+                    //            Log.i(TAG, "Testing getMonoStereoMode_nb() returned MonoStereo = "
+                    //         + sFmReceiver.rxGetMonoStereoMode_nb());
+
+                }
+
                 return true;
 
             case KeyEvent.KEYCODE_G:
-                Log.i(TAG, "Testing getMuteMode()  returned MuteMode = "
-                        + sFmReceiver.getMuteMode());
+                if (MAKE_FM_APIS_BLOCKING == true) {
+                    // Code for blocking call
+                    Log.i(TAG, "Testing getMuteMode()  returned MuteMode = "
+                            + sFmReceiver.getMuteMode());
+                } else {
+                    // Code for non blocking call
+                    //      Log.i(TAG, "Testing getMuteMode_nb()  returned MuteMode = "
+                    //      + sFmReceiver.rxGetMuteMode_nb());
+                }
+
                 return true;
 
             case KeyEvent.KEYCODE_H:
-                Log.i(TAG,
-                        "Testing getRdsAfSwitchMode()	returned RdsAfSwitchMode = "
-                                + sFmReceiver.getRdsAfSwitchMode());
+                if (MAKE_FM_APIS_BLOCKING == true) {
+                    // Code for blocking call
+                    Log.i(TAG,
+                            "Testing getRdsAfSwitchMode()    returned RdsAfSwitchMode = "
+                                    + sFmReceiver.getRdsAfSwitchMode());
+                } else {
+                    // Code for non blocking call
+                    //       Log.i(TAG,
+                    //       "Testing getRdsAfSwitchMode_nb()    returned RdsAfSwitchMode = "
+                    //               + sFmReceiver.rxGetRdsAfSwitchMode_nb());
+                }
+
                 return true;
 
             case KeyEvent.KEYCODE_I:
-                Log.i(TAG, "Testing getRdsGroupMask() returned RdsGrpMask = "
-                        + sFmReceiver.getRdsGroupMask());
+                if (MAKE_FM_APIS_BLOCKING == true) {
+                    // Code for blocking call
+                    Log.i(TAG, "Testing getRdsGroupMask() returned RdsGrpMask = "
+                            + sFmReceiver.getRdsGroupMask());
+                } else {
+                    // Code for non blocking call
+                    //    Log.i(TAG, "Testing getRdsGroupMask_nb() returned RdsGrpMask = "
+                    //    + sFmReceiver.rxGetRdsGroupMask_nb());
+                }
+
                 return true;
 
             case KeyEvent.KEYCODE_J:
-                Log.i(TAG, "Testing getRdsSystem() returned Rds System = "
-                        + sFmReceiver.getRdsSystem());
+                if (MAKE_FM_APIS_BLOCKING == true) {
+                    // Code for blocking call
+                    Log.i(TAG, "Testing getRdsSystem() returned Rds System = "
+                            + sFmReceiver.getRdsSystem());
+                } else {
+                    // Code for non blocking call
+                    //    Log.i(TAG, "Testing getRdsSystem_nb() returned Rds System = "
+                    //    + sFmReceiver.rxGetRdsSystem_nb());
+                }
+
                 return true;
 
             case KeyEvent.KEYCODE_K:
-                Log.i(TAG,
-                        "Testing getRfDependentMuteMode()	returned RfDepndtMuteMode = "
-                                + sFmReceiver.getRfDependentMuteMode());
+                if (MAKE_FM_APIS_BLOCKING == true) {
+                    // Code for blocking call
+                    Log.i(TAG,
+                            "Testing getRfDependentMuteMode()    returned RfDepndtMuteMode = "
+                                    + sFmReceiver.getRfDependentMuteMode());
+                } else {
+                    // Code for non blocking call
+                    //      Log.i(TAG,
+                    //      "Testing getRfDependentMuteMode_nb()    returned RfDepndtMuteMode = "
+                    //              + sFmReceiver.rxGetRfDependentMuteMode_nb());
+                }
+
                 return true;
 
             case KeyEvent.KEYCODE_L:
 
-                LayoutInflater inflater = getLayoutInflater();
-                View layout = inflater.inflate(R.layout.toast,
-                        (ViewGroup) findViewById(R.id.toast_layout));
-                TextView text = (TextView) layout.findViewById(R.id.text);
-                text.setText("The current Rssi     " + sFmReceiver.getRssi());
+                if (MAKE_FM_APIS_BLOCKING == true) {
 
-                Toast toast = new Toast(getApplicationContext());
-                toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_VERTICAL, 0, 0);
-                toast.setDuration(Toast.LENGTH_LONG);
-                toast.setView(layout);
-                toast.show();
+                    LayoutInflater inflater = getLayoutInflater();
+                    View layout = inflater.inflate(R.layout.toast,
+                            (ViewGroup) findViewById(R.id.toast_layout));
+                    TextView text = (TextView) layout.findViewById(R.id.text);
+                    text.setText("The current Rssi    " + sFmReceiver.getRssi());
+
+                    Toast toast = new Toast(getApplicationContext());
+                    toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_VERTICAL, 0, 0);
+                    toast.setDuration(Toast.LENGTH_LONG);
+                    toast.setView(layout);
+                    toast.show();
+                } else {
+                    // Log.i(TAG,
+                    //     "Testing rxGetRssi_nb()    returned  = "
+                    //             + sFmReceiver.rxGetRssi_nb());
+                }
 
                 return true;
 
             case KeyEvent.KEYCODE_M:
-                Log.i(TAG, "Testing isValidChannel()	returned isValidChannel = "
+                Log.i(TAG, "Testing isValidChannel()    returned isValidChannel = "
                         + sFmReceiver.isValidChannel());
 
                 return true;
 
             case KeyEvent.KEYCODE_N:
-                Log.i(TAG, "Testing getFwVersion()	returned getFwVersion = "
+                Log.i(TAG, "Testing getFwVersion()    returned getFwVersion = "
                         + sFmReceiver.getFwVersion());
 
                 return true;
 
             case KeyEvent.KEYCODE_O:
-                Log.i(TAG,
-                        "Testing getChannelSpacing()	returned getChannelSpacing = "
-                                + sFmReceiver.getChannelSpacing());
+                if (MAKE_FM_APIS_BLOCKING == true) {
+                    // Code for blocking call
+                    Log.i(TAG,
+                            "Testing getChannelSpacing()    returned getChannelSpacing = "
+                                    + sFmReceiver.getChannelSpacing());
+                } else {
+                    // Code for non blocking call
+                    //  Log.i(TAG,
+                    //  "Testing getChannelSpacing_nb()    returned getChannelSpacing = "
+                    //          + sFmReceiver.rxGetChannelSpacing_nb());
+                }
+
 
                 return true;
 
@@ -1233,31 +1900,43 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 return true;
 
             case KeyEvent.KEYCODE_Q:
-                Log.i(TAG,
-                        "Testing getCompleteScanProgress()	returned scan progress = "
-                                + sFmReceiver.getCompleteScanProgress());
+
+                if (MAKE_FM_APIS_BLOCKING == true) {
+                    Log.i(TAG,
+                            "Testing getCompleteScanProgress()    returned scan progress = "
+                                    + sFmReceiver.getCompleteScanProgress());
+                } else {
+                    //               Log.i(TAG,
+                    //       "Testing getCompleteScanProgress()    returned scan progress = "
+                    //               + sFmReceiver.rxGetCompleteScanProgress_nb());
+                }
 
                 return true;
 
             case KeyEvent.KEYCODE_R:
-                Log.i(TAG, "Testing stopCompleteScan()	returned status = "
-                        + sFmReceiver.stopCompleteScan());
+                if (MAKE_FM_APIS_BLOCKING == true) {
+                    Log.i(TAG, "Testing stopCompleteScan()    returned status = "
+                            + sFmReceiver.stopCompleteScan());
+                } else {
+                    //             Log.i(TAG, "Testing stopCompleteScan()    returned status = "
+                    //     + sFmReceiver.rxStopCompleteScan_nb());
+                }
 
                 return true;
 
             case KeyEvent.KEYCODE_S:
-                Log.i(TAG,
-                        "Testing setRfDependentMuteMode()	returned RfDepndtMuteMode = "
-                                + sFmReceiver.setRfDependentMuteMode(1));
-                return true;
 
-            case KeyEvent.KEYCODE_T:
-                Log.i(TAG, "Testing setRdsGroupMask() returned RdsGrpMask = "
-                        + sFmReceiver.setRdsGroupMask(16));
-                return true;
-            case KeyEvent.KEYCODE_X:
-                Log.i(TAG, "Testing setRssiThreshold() returned rssiThreshHold = "
-                        + sFmReceiver.setRssiThreshold(128));
+                if (MAKE_FM_APIS_BLOCKING == true) {
+                    // Code for blocking call
+                    Log.i(TAG,
+                            "Testing setRfDependentMuteMode()    returned RfDepndtMuteMode = "
+                                    + sFmReceiver.setRfDependentMuteMode(1));
+                } else {
+                    // Code for non blocking call
+                    /*Log.i(TAG,
+       "Testing setRfDependentMuteMode()    returned RfDepndtMuteMode = "
+               + sFmReceiver.rxSetRfDependentMuteMode_nb(1));    */
+                }
 
                 return true;
 
@@ -1271,14 +1950,13 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         try {
             float iFreq = Float.parseFloat(text);
             if (iFreq != 0) {
-                lastTunedFrequency = (float) iFreq * 1000;
+                lastTunedFrequency = (float) iFreq;
                 if (DBG)
                     Log.d(TAG, "lastTunedFrequency" + lastTunedFrequency);
-                mStatus = sFmReceiver.tune(lastTunedFrequency.intValue());
+                mStatus = sFmReceiver.tune(lastTunedFrequency.intValue() * 1000);
                 if (mStatus == false) {
-                    showAlert(getParent(), "FmRadio", "Not able to tune!!!!");
+                    showAlert(getParent(), "FmReceiver", "Not able to tune!!!!");
                 }
-                lastTunedFrequency = lastTunedFrequency / 1000;
             } else {
 
                 new AlertDialog.Builder(this).setIcon(
@@ -1302,25 +1980,31 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                  * The exit from the FM application happens here. FM will be
                  * disabled
                  */
+                //TODO: should disable Audio Routing!
                 mStatus = sFmReceiver.disable();
-
+                mPreset = false;
                 break;
+
             case R.id.imgMode:
                 break;
+
             case R.id.imgAudiopath:
                 // TODO
                 break;
             case R.id.imgMute:
-                mStatus = sFmReceiver.setMuteMode(mToggleMute);
+                if (mToggleMute)
+                    mStatus = sFmReceiver.setMuteMode(FM_MUTE);
+                else
+                    mStatus = sFmReceiver.setMuteMode(FM_UNMUTE);
                 if (mStatus == false) {
                     showAlert(this, "FmRadio", "Not able to setmute!!!!");
                 } else {
-                    if (mToggleMute == FM_MUTE) {
+                    if (mToggleMute) {
                         imgFmVolume.setImageResource(R.drawable.fm_volume_mute);
-                        mToggleMute = FM_UNMUTE;
+                        mToggleMute = false;
                     } else {
                         imgFmVolume.setImageResource(R.drawable.fm_volume);
-                        mToggleMute = FM_MUTE;
+                        mToggleMute = true;
                     }
                 }
 
@@ -1334,7 +2018,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     txtStationName.setText(null); // set the station name to null
                     mStatus = sFmReceiver.seek(mDirection);
                     if (mStatus == false) {
-                        showAlert(this, "FmRadio", "Not able to seek down!!!!");
+                        showAlert(this, "FmReceiver", "Not able to seek down!!!!");
                     } else {
                         mSeekState = SEEK_REQ_STATE_PENDING;
                         txtStatusMsg.setText(R.string.seeking);
@@ -1436,6 +2120,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             case MENU_PRESET:
                 /* Start the Presets window */
                 Intent i = new Intent(INTENT_PRESET);
+                mPreset = true;
                 startActivity(i);
                 break;
             case MENU_EXIT:
@@ -1444,7 +2129,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                  * disabled
                  */
                 mStatus = sFmReceiver.disable();
-
+                mPreset = false;
                 break;
             case MENU_ABOUT:
                 /* Start the help window */
@@ -1464,6 +2149,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     protected void onSaveInstanceState(Bundle icicle) {
         super.onSaveInstanceState(icicle);
+        Log.i(TAG, "onSaveInstanceState");
         /* save the fm state into bundle for the activity restart */
         mFmInterrupted = true;
         Bundle fmState = new Bundle();
@@ -1473,14 +2159,18 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     }
 
     public void onStart() {
+        Log.i(TAG, "onStart");
         super.onStart();
     }
 
     public void onPause() {
         super.onPause();
+        Log.i(TAG, "onPause");
 
         if (pd != null)
             pd.dismiss();
+
+        saveDefaultConfiguration();
 
     }
 
@@ -1493,6 +2183,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public void onResume() {
         Log.i(TAG, "onResume");
         super.onResume();
+        //if(mFmServiceConnected == true)
         startup();
     }
 
@@ -1500,11 +2191,12 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         Log.i(TAG, "onDestroy");
         super.onDestroy();
         /*
-           * Unregistering the receiver , so that we don't handle any FM events
-           * when out of the FM application screen
-           */
+         * Unregistering the receiver , so that we dont handle any FM events
+         * when out of the FM application screen
+         */
         unregisterReceiver(mReceiver);
-        sFmReceiver.close();
+        // TODO : uncomment line bellow?
+        //sFmReceiver.close();
     }
 
     // Receives all of the FM intents and dispatches to the proper handler
@@ -1515,19 +2207,29 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
             String fmAction = intent.getAction();
 
+            Log.i(TAG, "enter onReceive" + fmAction);
             if (fmAction.equals(FmReceiverIntent.FM_ENABLED_ACTION)) {
+                Log.i(TAG, "enter onReceive FM_ENABLED_ACTION " + fmAction);
 
                 mHandler.sendMessage(mHandler
                         .obtainMessage(EVENT_FM_ENABLED, 0));
             }
             if (fmAction.equals(FmReceiverIntent.FM_DISABLED_ACTION)) {
+                Log.i(TAG, "enter onReceive FM_DISABLED_ACTION " + fmAction);
                 mHandler.sendMessage(mHandler.obtainMessage(EVENT_FM_DISABLED,
                         0));
             }
 
+            if (fmAction.equals(FmReceiverIntent.SET_MODE_MONO_STEREO_ACTION)) {
+                Log.i(TAG, "enter onReceive SET_MODE_MONO_STEREO_ACTION "
+                        + fmAction);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_MONO_STEREO_CHANGE, 0));
+            }
             if (fmAction
                     .equals(FmReceiverIntent.DISPLAY_MODE_MONO_STEREO_ACTION)) {
-
+                Log.i(TAG, "enter onReceive DISPLAY_MODE_MONO_STEREO_ACTION "
+                        + fmAction);
                 Integer modeDisplay = intent.getIntExtra(
                         FmReceiverIntent.MODE_MONO_STEREO, 0);
                 mHandler.sendMessage(mHandler.obtainMessage(
@@ -1535,6 +2237,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             }
 
             if (fmAction.equals(FmReceiverIntent.RDS_TEXT_CHANGED_ACTION)) {
+                Log.i(TAG, "enter onReceive RDS_TEXT_CHANGED_ACTION "
+                        + fmAction);
                 if (FM_SEND_RDS_IN_BYTEARRAY) {
                     Bundle extras = intent.getExtras();
 
@@ -1551,6 +2255,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 }
             }
             if (fmAction.equals(FmReceiverIntent.PI_CODE_CHANGED_ACTION)) {
+                Log
+                        .i(TAG, "enter onReceive PI_CODE_CHANGED_ACTION "
+                                + fmAction);
 
                 Integer pi = intent.getIntExtra(FmReceiverIntent.PI, 0);
 
@@ -1559,6 +2266,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             }
 
             if (fmAction.equals(FmReceiverIntent.TUNE_COMPLETE_ACTION)) {
+                Log.i(TAG, "enter onReceive TUNE_COMPLETE_ACTION " + fmAction);
 
                 int tuneFreq = intent.getIntExtra(
                         FmReceiverIntent.TUNED_FREQUENCY, 0);
@@ -1568,7 +2276,43 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
             }
 
+            if (fmAction.equals(FmReceiverIntent.COMPLETE_SCAN_PROGRESS_ACTION)) {
+                Log.i(TAG, "enter onReceive COMPLETE_SCAN_PROGRESS_ACTION " + fmAction);
+
+                int progress = intent.getIntExtra(
+                        FmReceiverIntent.SCAN_PROGRESS, 0);
+
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_COMPLETE_SCAN_PROGRESS, progress));
+
+            }
+
+
+            if (fmAction.equals(FmReceiverIntent.VOLUME_CHANGED_ACTION)) {
+                Log.i(TAG, "enter onReceive VOLUME_CHANGED_ACTION " + fmAction);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_VOLUME_CHANGE, 0));
+            }
+
+            if (fmAction.equals(FmReceiverIntent.MUTE_CHANGE_ACTION)) {
+                Log.i(TAG, "enter onReceive MUTE_CHANGE_ACTION " + fmAction);
+                mHandler.sendMessage(mHandler.obtainMessage(EVENT_MUTE_CHANGE,
+                        0));
+            }
+
+            if (fmAction.equals(FmReceiverIntent.SEEK_STOP_ACTION)) {
+                Log.i(TAG, "enter onReceive SEEK_STOP_ACTION " + fmAction);
+
+                int freq = intent.getIntExtra(FmReceiverIntent.SEEK_FREQUENCY,
+                        0);
+
+                mHandler.sendMessage(mHandler.obtainMessage(EVENT_SEEK_STOPPED,
+                        freq));
+            }
+
             if (fmAction.equals(FmReceiverIntent.SEEK_ACTION)) {
+                Log.i(TAG, "enter onReceive SEEK_ACTION " + fmAction);
+
                 int freq = intent.getIntExtra(FmReceiverIntent.SEEK_FREQUENCY,
                         0);
 
@@ -1576,7 +2320,190 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                         freq));
             }
 
+            if (fmAction.equals(FmReceiverIntent.BAND_CHANGE_ACTION)) {
+                Log.i(TAG, "enter onReceive BAND_CHANGE_ACTION " + fmAction);
+
+                mHandler.sendMessage(mHandler.obtainMessage(EVENT_BAND_CHANGE,
+                        0));
+            }
+
+
+            if (fmAction.equals(FmReceiverIntent.GET_CHANNEL_SPACE_ACTION)) {
+                Log.i(TAG, "enter onReceive GET_CHANNEL_SPACE_ACTION " + fmAction);
+
+                Long chSpace = intent.getLongExtra(
+                        FmReceiverIntent.GET_CHANNEL_SPACE, 0);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_GET_CHANNEL_SPACE_CHANGE, chSpace));
+            }
+
+
+            if (fmAction.equals(FmReceiverIntent.SET_CHANNEL_SPACE_ACTION)) {
+                Log.i(TAG, "enter onReceive SET_CHANNEL_SPACE_ACTION " + fmAction);
+
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_SET_CHANNELSPACE, 0));
+            }
+
+
+            if (fmAction.equals(FmReceiverIntent.GET_RDS_AF_SWITCH_MODE_ACTION)) {
+                Log.i(TAG, "enter onReceive GET_RDS_AF_SWITCH_MODE_ACTION " + fmAction);
+
+                Long switchMode = intent.getLongExtra(
+                        FmReceiverIntent.GET_RDS_AF_SWITCHMODE, 0);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_GET_RDS_AF_SWITCHMODE, switchMode));
+            }
+
+
+            if (fmAction.equals(FmReceiverIntent.GET_VOLUME_ACTION)) {
+                Log.i(TAG, "enter onReceive GET_VOLUME_ACTION " + fmAction);
+
+                Long gVolume = intent.getLongExtra(
+                        FmReceiverIntent.GET_VOLUME, 0);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_GET_VOLUME, gVolume));
+            }
+
+
+            if (fmAction.equals(FmReceiverIntent.GET_MONO_STEREO_MODE_ACTION)) {
+                Log.i(TAG, "enter onReceive GET_MONO_STEREO_MODE_ACTION " + fmAction);
+
+                Long gMode = intent.getLongExtra(
+                        FmReceiverIntent.GET_MODE, 0);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_GET_MODE, gMode));
+            }
+
+
+            if (fmAction.equals(FmReceiverIntent.GET_MUTE_MODE_ACTION)) {
+                Log.i(TAG, "enter onReceive GET_MUTE_MODE_ACTION " + fmAction);
+
+                Long gMuteMode = intent.getLongExtra(
+                        FmReceiverIntent.GET_MUTE_MODE, 0);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_GET_MUTE_MODE, gMuteMode));
+            }
+
+
+            if (fmAction.equals(FmReceiverIntent.GET_BAND_ACTION)) {
+                Log.i(TAG, "enter onReceive GET_BAND_ACTION " + fmAction);
+
+                Long gBand = intent.getLongExtra(
+                        FmReceiverIntent.GET_BAND, 0);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_GET_BAND, gBand));
+            }
+
+
+            if (fmAction.equals(FmReceiverIntent.GET_FREQUENCY_ACTION)) {
+                Log.i(TAG, "enter onReceive GET_FREQUENCY_ACTION " + fmAction);
+
+                int gFreq = intent.getIntExtra(
+                        FmReceiverIntent.TUNED_FREQUENCY, 0);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_GET_FREQUENCY, gFreq));
+            }
+
+
+            if (fmAction.equals(FmReceiverIntent.GET_RF_MUTE_MODE_ACTION)) {
+                Log.i(TAG, "enter onReceive GET_RF_MUTE_MODE_ACTION " + fmAction);
+
+                Long gRfMuteMode = intent.getLongExtra(
+                        FmReceiverIntent.GET_RF_MUTE_MODE, 0);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_GET_RF_MUTE_MODE, gRfMuteMode));
+            }
+
+
+            if (fmAction.equals(FmReceiverIntent.GET_RSSI_THRESHHOLD_ACTION)) {
+                Log.i(TAG, "enter onReceive GET_RSSI_THRESHHOLD_ACTION " + fmAction);
+
+                Long gRssiThreshhold = intent.getLongExtra(
+                        FmReceiverIntent.GET_RSSI_THRESHHOLD, 0);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_GET_RSSI_THRESHHOLD, gRssiThreshhold));
+            }
+
+
+            if (fmAction.equals(FmReceiverIntent.GET_DEEMPHASIS_FILTER_ACTION)) {
+                Log.i(TAG, "enter onReceive GET_DEEMPHASIS_FILTER_ACTION " + fmAction);
+
+                Long gFilter = intent.getLongExtra(
+                        FmReceiverIntent.GET_DEEMPHASIS_FILTER, 0);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_GET_DEEMPHASIS_FILTER, gFilter));
+            }
+
+
+            if (fmAction.equals(FmReceiverIntent.GET_RSSI_ACTION)) {
+                Log.i(TAG, "enter onReceive GET_RSSI_ACTION " + fmAction);
+
+                int gRssi = intent.getIntExtra(
+                        FmReceiverIntent.GET_RSSI, 0);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_GET_RSSI, gRssi));
+            }
+
+
+            if (fmAction.equals(FmReceiverIntent.GET_RDS_SYSTEM_ACTION)) {
+                Log.i(TAG, "enter onReceive GET_RDS_SYSTEM_ACTION " + fmAction);
+
+                Long gRdsSystem = intent.getLongExtra(
+                        FmReceiverIntent.GET_RDS_SYSTEM, 0);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_GET_RDS_SYSTEM, gRdsSystem));
+            }
+
+
+            if (fmAction.equals(FmReceiverIntent.GET_RDS_GROUPMASK_ACTION)) {
+                Log.i(TAG, "enter onReceive GET_RDS_GROUPMASK_ACTION " + fmAction);
+
+                Long gRdsMask = intent.getLongExtra(
+                        FmReceiverIntent.GET_RDS_GROUPMASK, 0);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_GET_RDS_GROUPMASK, gRdsMask));
+            }
+
+
+            if (fmAction.equals(FmReceiverIntent.ENABLE_RDS_ACTION)) {
+                Log.i(TAG, "enter onReceive ENABLE_RDS_ACTION " + fmAction);
+
+                mHandler.sendMessage(mHandler
+                        .obtainMessage(EVENT_ENABLE_RDS, 0));
+            }
+
+            if (fmAction.equals(FmReceiverIntent.DISABLE_RDS_ACTION)) {
+                Log.i(TAG, "enter onReceive DISABLE_RDS_ACTION " + fmAction);
+
+                mHandler.sendMessage(mHandler.obtainMessage(EVENT_DISABLE_RDS,
+                        0));
+            }
+
+            if (fmAction.equals(FmReceiverIntent.SET_RDS_AF_ACTION)) {
+                Log.i(TAG, "enter onReceive SET_RDS_AF_ACTION " + fmAction);
+
+                mHandler.sendMessage(mHandler
+                        .obtainMessage(EVENT_SET_RDS_AF, 0));
+            }
+
+            if (fmAction.equals(FmReceiverIntent.SET_RDS_SYSTEM_ACTION)) {
+                Log.i(TAG, "enter onReceive SET_RDS_SYSTEM_ACTION " + fmAction);
+
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_SET_RDS_SYSTEM, 0));
+            }
+
+            if (fmAction.equals(FmReceiverIntent.SET_DEEMP_FILTER_ACTION)) {
+                Log.i(TAG, "enter onReceive SET_DEEMP_FILTER_ACTION "
+                        + fmAction);
+
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_SET_DEEMP_FILTER, 0));
+            }
+
             if (fmAction.equals(FmReceiverIntent.PS_CHANGED_ACTION)) {
+                Log.i(TAG, "enter onReceive PS_CHANGED_ACTION " + fmAction);
 
                 if (FM_SEND_RDS_IN_BYTEARRAY) {
                     Bundle extras = intent.getExtras();
@@ -1595,7 +2522,25 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 }
             }
 
+            if (fmAction.equals(FmReceiverIntent.SET_RSSI_THRESHHOLD_ACTION)) {
+                Log.i(TAG, "enter onReceive SET_RSSI_THRESHHOLD_ACTION "
+                        + fmAction);
+
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_SET_RSSI_THRESHHOLD, 0));
+            }
+
+            if (fmAction.equals(FmReceiverIntent.SET_RF_DEPENDENT_MUTE_ACTION)) {
+                Log.i(TAG, "enter onReceive SET_RF_DEPENDENT_MUTE_ACTION "
+                        + fmAction);
+
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_SET_RF_DEPENDENT_MUTE, 0));
+            }
+
             if (fmAction.equals(FmReceiverIntent.COMPLETE_SCAN_DONE_ACTION)) {
+                Log.i(TAG, "enter onReceive COMPLETE_SCAN_DONE_ACTION "
+                        + fmAction);
 
                 Bundle extras = intent.getExtras();
 
@@ -1607,6 +2552,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
                 int status = extras.getInt(FmReceiverIntent.STATUS, 0);
 
+                Log.i(TAG, "noOfChannels" + noOfChannels);
+
                 for (int i = 0; i < noOfChannels; i++)
 
                     Log.i(TAG, "channelList" + channelList[i]);
@@ -1616,12 +2563,44 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                         channelList));
             }
 
-            if (fmAction.equals(FmReceiverIntent.FM_ERROR_ACTION)) {
-                mHandler.sendMessage(mHandler.obtainMessage(EVENT_FM_ERROR, 0));
+            if (fmAction.equals(FmReceiverIntent.COMPLETE_SCAN_STOP_ACTION)) {
+                Log.i(TAG, "enter onReceive COMPLETE_SCAN_STOP_ACTION "
+                        + fmAction);
+                Bundle extras = intent.getExtras();
+                int status = extras.getInt(FmReceiverIntent.STATUS, 0);
+                int channelValue = extras.getInt(
+                        FmReceiverIntent.LAST_SCAN_CHANNEL, 0);
+                Log.i(TAG, "Last Scanned Channel Frequency before calling Stop Scan" + channelValue);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_COMPLETE_SCAN_STOP, status, channelValue));
             }
+
+            if (fmAction.equals(FmReceiverIntent.MASTER_VOLUME_CHANGED_ACTION)) {
+                Log.i(TAG, "enter onReceive MASTER_VOLUME_CHANGED_ACTION "
+                        + fmAction);
+                mVolume = intent.getIntExtra(FmReceiverIntent.MASTER_VOLUME, 0);
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        EVENT_MASTER_VOLUME_CHANGED, mVolume));
+            }
+
+            //TODO: handle this errors or deprecate?
+            /* if (fmAction.equals(FmReceiverIntent.FM_ERROR_ACTION)) {
+                mHandler.sendMessage(mHandler.obtainMessage(EVENT_FM_ERROR, 0));
+            }*/
 
         }
     };
 
+    /* Get the volume */
+    void getNewGain(int volume) {
+        Log.d(TAG, "getNewGain" + volume);
+        if (volume <= GAIN_STEP) {
+            mVolume = MIN_VOLUME;
+        } else if (volume >= MAX_VOLUME) {
+            mVolume = MAX_VOLUME;
+        } else {
+            mVolume = volume;
+        }
+    }
 
 }

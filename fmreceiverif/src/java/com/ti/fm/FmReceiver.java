@@ -205,14 +205,6 @@ public class FmReceiver {
         return -1;
     }
 
-    public boolean isFMPaused() {
-        try {
-            return (mService.getFMState() == STATE_PAUSE);
-        } catch (RemoteException e) {
-            Log.e(TAG, e.toString());
-        }
-        return false;
-    }
 
     /**
      * Returns true if the FM RX is enabled. Returns false if not enabled, or if

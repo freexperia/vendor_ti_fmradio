@@ -101,4 +101,24 @@
     <string name="unsetStation">Unset Station</string>
     <string name="unsetStationQuestion">Unset Station?</string>
 
+    <!-- Main UI -->
+    <string name="cannot_enable_radio">Cannot enable Radio!!!!</string>
+    <string name="please_wait">Please wait…</string>
+    <string name="powering_radio">Powering on Radio</string>
+    <string name="not_able_to_tune">Not able to tune!!!!</string>
+    <string name="not_able_enable_rds">Cannot enable RDS!!!!</string>
+    <string name="not_able_disable_rds">Cannot disable RDS!!!!</string>
+    <string name="not_able_to_set_mode">Not able to set mode!!!!</string>
+    <string name="not_able_to_setband">Not able to set band!!!!</string>
+    <string name="not_able_to_setmute">Not able to set mute!!!!</string>
+    <string name="not_able_to_seek_up">Not able to seek up!!!!</string>
+    <string name="not_able_to_seek_down">Not able to seek down!!!!</string>
+    <string name="not_able_to_setband_to_value">Cannot setBand to selected Value!!!!</string>
+    <string name="not_able_to_set_deemp_filter_to_value">Cannot set De-Emp Filter to selected Value!!!!</string>
+    <string name="not_able_to_set_channel_spacing_to_value">Cannot setChannelSpacing to selected Value!!!!</string>
+    <string name="not_able_to_set_rds_to_value">Cannot set RDS System to selected Value!!!!</string>
+    <string name="not_able_to_set_rds_af_on">Cannot set RDS AF Mode ON!!!!</string>
+    <string name="not_able_to_set_rssi_threshold">Not able to setRssiThreshold!!!!</string>
+
+
 </resources>

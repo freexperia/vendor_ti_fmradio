@@ -537,6 +537,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
       */
 
     public static void updateUnSetStation(int index) {
+        Log.d(TAG, "updateUnSetStation: " + index);
         switch (index) {
             case 0:
                 btnStation1.setEnabled(false);
@@ -557,7 +558,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             case 4:
 
                 btnStation5.setEnabled(false);
-                btnStation5.setText("4");
+                btnStation5.setText("5");
                 break;
             case 5:
                 btnStation6.setEnabled(false);
@@ -1460,7 +1461,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         db.open();
         long id;
-        id = db.insertStation("1", "", "");
+        id = db.insertStation("1", "", " ");
         id = db.insertStation("2", "", " ");
         id = db.insertStation("3", "", " ");
         id = db.insertStation("4", "", " ");
@@ -1544,7 +1545,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         btnStation1 = (Button) findViewById(R.id.station1);
         btnStation1.setOnClickListener(this);
-        btnStation1.setEnabled(false);
+        btnStation1.setEnabled(true);
 
         btnStation2 = (Button) findViewById(R.id.station2);
         btnStation2.setOnClickListener(this);

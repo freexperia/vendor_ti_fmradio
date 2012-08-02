@@ -662,6 +662,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     if (pd != null)
                         pd.dismiss();
 
+                    // load RDS configs
+                    setRdsConfig();
+
                     loadDefaultConfiguration();
                     setContentView(R.layout.fmrxmain);
                     /* At Power up, FM should be always unmuted. */
@@ -670,31 +673,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     initControls();
                     setButtonLabels();
                     imgFmPower.setImageResource(R.drawable.poweron);
-
-
-                    /*
-                      * Setting the default band when FM app is started for
-                      * the first time or after reentering the Fm app
-                      */
-                    /*if (!sdefaultSettingOn) {
-                        mStatus = sFmReceiver.setBand(sBand);
-                        if (!mStatus) {
-                            showAlert(getParent(), "FmRadio",
-                                    "Not able to setband!!!!");
-                        } else {
-
-                            lastTunedFrequency = lastTunedFrequency * 1000;
-                            mStatus = sFmReceiver.tune(lastTunedFrequency
-                                    .intValue());
-                            if (!mStatus) {
-                                showAlert(getParent(), "FmRadio",
-                                        "Not able to tune!!!!");
-                            }
-                            lastTunedFrequency = lastTunedFrequency / 1000;
-                        }
-
-                    }*/
-
 
                     break;
 
@@ -1088,7 +1066,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     View layout = inflater.inflate(R.layout.toast,
                             (ViewGroup) findViewById(R.id.toast_layout));
                     TextView text = (TextView) layout.findViewById(R.id.text);
-                    text.setText("Error in FM Application");
+                    text.setText(R.string.error_in_fm_app);
 
                     Toast toast = new Toast(getApplicationContext());
                     toast
@@ -1138,9 +1116,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     if (sdefaultSettingOn) {
                         /* Set the default frequency */
                         if (sBand == FM_BAND_EUROPE_US)
-                            lastTunedFrequency = (float) DEFAULT_FREQ_EUROPE;
+                            lastTunedFrequency = DEFAULT_FREQ_EUROPE;
                         else
-                            lastTunedFrequency = (float) DEFAULT_FREQ_JAPAN;
+                            lastTunedFrequency = DEFAULT_FREQ_JAPAN;
                     }
 
                     mStatus = sFmReceiver.tune((int) (lastTunedFrequency * 1000));
@@ -1197,7 +1175,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         // Set Mode
         int mode = fmConfigPreferences.getInt(MODE, DEFAULT_MODE);
-        if (mMode != mode)// If Mode is same as the one set already donot set it
+        if (mMode != mode)// If Mode is same as the one set already do not set it
         // again
         {
 
@@ -1224,7 +1202,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 DEFAULT_CHANNELSPACE);
         Log.i(TAG, "setChannelSpacing()--- channelSpace= " + channelSpace);
         if (channelSpace != sChannelSpace) // If channelSpace is same as the one
-        // set already donot set
+        // set already do not set
         // it again
         {
             if (MAKE_FM_APIS_BLOCKING)
@@ -1631,8 +1609,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
                         setRdsConfig();
-                        configPd = ProgressDialog.show(this, "Please wait..",
-                                "Applying new Configuration", true, false);
+                        configPd = ProgressDialog.show(this, getString(R.string.please_wait),
+                                getString(R.string.applying_new_config), true, false);
                         // The delay is inserted to make sure all the configurations
                         // have been completed.
                         insertDelayThread();

@@ -119,6 +119,8 @@
     <string name="not_able_to_set_rds_to_value">Cannot set RDS System to selected Value!!!!</string>
     <string name="not_able_to_set_rds_af_on">Cannot set RDS AF Mode ON!!!!</string>
     <string name="not_able_to_set_rssi_threshold">Not able to setRssiThreshold!!!!</string>
+    <string name="error_in_fm_app">Error in FM Application</string>
+    <string name="applying_new_config">Applying new Configuration</string>
 
 
 </resources>

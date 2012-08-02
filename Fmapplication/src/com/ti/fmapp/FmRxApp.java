@@ -289,9 +289,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     private void setButtonLabels() {
 
-        //Log.d(TAG, "setButtonLabels");
+        Log.d(TAG, "setButtonLabels");
         for (HashMap<String, String> item : stations) {
-            //Log.d(TAG, "setButtonLabels item " + item);
+            Log.d(TAG, "setButtonLabels item " + item);
             String freq = item.get(ITEM_VALUE);
             int iButtonNo = Integer.parseInt(item.get(ITEM_KEY));
             switch (iButtonNo) {
@@ -1966,9 +1966,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             case R.id.imgMode:
                 break;
 
-            case R.id.imgAudiopath:
-                // TODO
-                break;
             case R.id.imgMute:
                 if (mToggleMute)
                     mStatus = sFmReceiver.setMuteMode(FM_MUTE);
@@ -2022,6 +2019,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
                 break;
             case R.id.station1:
+                Log.d(TAG, "Clicked Station 1");
                 mStationIndex = 0;
                 updateStationDisplay(mStationIndex);
 

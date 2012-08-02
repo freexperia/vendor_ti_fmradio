@@ -52,17 +52,32 @@
             </LinearLayout>
 
 
-            <LinearLayout android:id="@+id/widget174"
-                          android:layout_width="fill_parent"
-                          android:layout_height="50dip">
+            <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="50dip">
 
                 <TextView android:id="@+id/txtMode" android:text="@string/mode"
-                          android:textSize="18sp"
+                          style="@style/preferencesTextStyle"
                           android:layout_height="fill_parent" android:layout_marginLeft="15dip"
                           android:layout_width="fill_parent" android:layout_weight="1"/>
                 <Spinner android:id="@+id/spnMode" android:textSize="18sp"
                          android:layout_height="fill_parent" android:layout_marginRight="15dip"
                          android:layout_width="fill_parent" android:layout_weight="1"/>
+            </LinearLayout>
+
+            <LinearLayout
+                    android:layout_width="fill_parent" android:layout_height="50dip">
+                <TextView android:text="@string/deemphasis"
+                          android:layout_width="fill_parent" android:layout_weight="1"
+                          style="@style/preferencesTextStyle"
+                          android:layout_marginLeft="15dip"
+                          android:layout_height="50dip">
+                </TextView>
+                <Spinner android:id="@+id/spnEmp" android:layout_height="fill_parent"
+                         android:textSize="18sp" android:layout_weight="1"
+                         android:layout_marginRight="15dip"
+                         android:layout_width="fill_parent">
+                </Spinner>
             </LinearLayout>
 
 
@@ -88,6 +103,7 @@
                           style="@style/preferencesTextStyle"
                           android:layout_height="fill_parent" android:layout_marginLeft="15dip"
                           android:layout_width="fill_parent" android:layout_weight="1"/>
+
                 <EditText android:id="@+id/Rssi" android:text="@string/empty"
                           style="@style/preferencesTextStyle"
                           android:layout_height="fill_parent" android:layout_width="fill_parent"

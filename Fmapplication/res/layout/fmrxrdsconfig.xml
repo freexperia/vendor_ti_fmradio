@@ -109,6 +109,7 @@
                           style="@style/preferencesTextStyle"
                           android:layout_height="fill_parent" android:layout_width="fill_parent"
                           android:layout_weight="1" android:layout_marginLeft="8dip"
+                          android:inputType="numberDecimal"
                           android:layout_marginRight="8dip"/>
             </LinearLayout>
         </LinearLayout>

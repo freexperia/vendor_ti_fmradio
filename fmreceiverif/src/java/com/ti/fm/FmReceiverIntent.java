@@ -1,14 +1,14 @@
 /*
  * TI's FM
  *
- * Copyright 2001-2010 Texas Instruments, Inc. - http://www.ti.com/
+ * Copyright 2001-2011 Texas Instruments, Inc. - http://www.ti.com/
  * Copyright 2010, 2011 Sony Ericsson Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -240,83 +240,5 @@ public interface FmReceiverIntent {
 
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String SET_CHANNEL_SPACE_ACTION = "com.ti.fm.rx.intent.action.SET_CHANNEL_SPACE_ACTION";
-
-    /**
-     * Fm TX Intents **
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_ENABLED_ACTION = "com.ti.fm.tx.intent.action.FM_TX_ENABLED";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_TUNE_ACTION = "com.ti.fm.tx.intent.action.FM_TX_TUNE_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_DISABLED_ACTION = "com.ti.fm.tx.intent.action.FM_TX_DISABLED";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_START_TRANSMISSION_ACTION = "com.ti.fm.tx.intent.action.FM_TX_START_TRANSMISSION_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_STOP_TRANSMISSION_ACTION = "com.ti.fm.tx.intent.action.FM_TX_STOP_TRANSMISSION_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_DESTROY_ACTION = "com.ti.fm.tx.intent.action.FM_TX_DESTROY_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_ENABLE_RSD_ACTION = "com.ti.fm.tx.intent.action.FM_TX_ENABLE_RSD_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_DISABLE_RSD_ACTION = "com.ti.fm.tx.intent.action.FM_TX_DISABLE_RSD_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_SET_RDS_TRAFFIC_CODES_ACTION = "com.ti.fm.tx.intent.action.FM_TX_SET_RDS_TRAFFIC_CODES";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_SET_RDS_TEXT_PS_MSG_ACTION = "com.ti.fm.tx.intent.action.FM_TX_SET_RDS_TEXT_PS_MSG_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_SET_RDS_TEXT_RT_MSG_ACTION = "com.ti.fm.tx.intent.action.FM_TX_SET_RDS_TEXT_RT_MSG_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_WRITE_RDS_RAW_DATA_ACTION = "com.ti.fm.tx.intent.action.FM_TX_WRITE_RDS_RAW_DATA_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_READ_RDS_RAW_DATA_ACTION = "com.ti.fm.tx.intent.action.FM_TX_READ_RDS_RAW_DATA_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_SET_MONO_STEREO_MODE_ACTION = "com.ti.fm.tx.intent.action.FM_TX_SET_MONO_STEREO_MODE_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_SET_POWER_LEVEL_ACTION = "com.ti.fm.tx.intent.action.FM_TX_SET_POWER_LEVEL_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_SET_MUTE_MODE_ACTION = "com.ti.fm.tx.intent.action.FM_TX_SET_MUTE_MODE_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_SET_RDS_AF_CODE_ACTION = "com.ti.fm.tx.intent.action.FM_TX_SET_RDS_AF_CODE_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_RDS_PI_CODE_ACTION = "com.ti.fm.tx.intent.action.FM_TX_RDS_PI_CODE_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_RDS_PTY_CODE_ACTION = "com.ti.fm.tx.intent.action.FM_TX_RDS_PTY_CODE_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_SET_RDS_TEXT_REPERTOIRE_ACTION = "com.ti.fm.tx.intent.action.FM_TX_SET_RDS_TEXT_REPERTOIRE_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_PS_DISPLAY_MODE_ACTION = "com.ti.fm.tx.intent.action.FM_TX_PS_DISPLAY_MODE_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_SET_RDS_PS_DISPLAY_SPEED_ACTION = "com.ti.fm.tx.intent.action.FM_TX_SET_RDS_PS_DISPLAY_SPEED_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_SET_RDS_MUSIC_SPEECH_FLAG_ACTION = "com.ti.fm.tx.intent.action.FM_TX_SET_RDS_MUSIC_SPEECH_FLAG_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_SET_TRANSMISSION_MODE_ACTION = "com.ti.fm.tx.intent.action.FM_TX_SET_TRANSMISSION_MODE_ACTION";
-
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String FM_TX_SET_RDS_TRANSMISSION_GROUPMASK_ACTION = "com.ti.fm.tx.intent.action.FM_TX_SET_RDS_TRANSMISSION_GROUPMASK_ACTION";
 
 }

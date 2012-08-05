@@ -1,5 +1,4 @@
 /*
- * TI's FM
  *
  * Copyright 2001-2011 Texas Instruments, Inc. - http://www.ti.com/
  *
@@ -15,21 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*******************************************************************************\
- *
- *   FILE NAME:      IJFmEnum.java
- *
- *   BRIEF:          This file defines the API of the FM Rx stack.
- *
- *   DESCRIPTION:    General
- *
- *
- *
- *   AUTHOR:
- *
- \*******************************************************************************/
+
 package com.ti.jfm.core;
 
-public interface IJFmEnum<V> {
-    V getValue();
+import android.util.Log;
+
+public final class JFmLog {
+
+    public static int v(String tag, String msg) {
+       return Log.v(tag, msg);
+    }
+
+    public static int d(String tag, String msg) {
+       return Log.d(tag, msg);
+    }
+
+    public static int i(String tag, String msg) {
+       return Log.i(tag, msg);
+    }
+
+    public static int w(String tag, String msg) {
+       return Log.w(tag, msg);
+    }
+
+    public static int e(String tag, String msg) {
+       return Log.e(tag, msg);
+    }
 }

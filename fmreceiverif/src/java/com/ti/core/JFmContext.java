@@ -1,13 +1,13 @@
 /*
  * TI's FM
  *
- * Copyright 2001-2010 Texas Instruments, Inc. - http://www.ti.com/
+ * Copyright 2001-2011 Texas Instruments, Inc. - http://www.ti.com/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,41 +33,39 @@ package com.ti.jfm.core;
 import android.util.Log;
 
 public class JFmContext {
-	private long value = 0;
+    private long value = 0;
 
-	public static final long INVALID_CONTEXT_VALUE = -1;
-	private static final boolean DBG = false;
+    public static final long INVALID_CONTEXT_VALUE = -1;
 
-	public JFmContext() {
-		value = INVALID_CONTEXT_VALUE;
-	}
+    public JFmContext() {
+       value = INVALID_CONTEXT_VALUE;
+    }
 
-	public JFmContext(long contextValue) {
-		value = contextValue;
-	}
+    public JFmContext(long contextValue) {
+       value = contextValue;
+    }
 
-	@Override
-	public boolean equals(Object otherContextAsObject) {
-		if (otherContextAsObject instanceof JFmContext) {
-			return (value == ((JFmContext) otherContextAsObject).getValue());
-		} else {
-			return false;
-		}
-	}
+    @Override
+    public boolean equals(Object otherContextAsObject) {
+       if (otherContextAsObject instanceof JFmContext) {
+          return (value == ((JFmContext) otherContextAsObject).getValue());
+       } else {
+          return false;
+       }
+    }
 
-	@Override
-	public int hashCode() {
-		return (int) value;
-	}
+    @Override
+    public int hashCode() {
+       return (int) value;
+    }
 
-	public final long getValue() {
-		return value;
-	}
+    public final long getValue() {
+       return value;
+    }
 
-	public final void setValue(int value) {
-		if (DBG)
-			Log.d("JFmContext()", "setValue: setValue called, value:" + value);
-		this.value = value;
-	}
+    public final void setValue(int value) {
+       Log.d("JFmContext()", "setValue: setValue called, value:" + value);
+       this.value = value;
+    }
 
 }

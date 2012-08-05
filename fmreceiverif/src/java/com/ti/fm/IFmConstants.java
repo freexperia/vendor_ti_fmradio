@@ -1,13 +1,13 @@
 /*
  * TI's FM
  *
- * Copyright 2001-2010 Texas Instruments, Inc. - http://www.ti.com/
+ * Copyright 2001-2011 Texas Instruments, Inc. - http://www.ti.com/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,41 +32,74 @@ package com.ti.fm;
 
 public interface IFmConstants {
 
-	public static final boolean FM_SEND_RDS_IN_BYTEARRAY = false;
+    /*
+    * By setting this flag true, FM APIS can be used in blocking mode. else FM
+    * APIS will be non blocking
+    */
+    public static final boolean MAKE_FM_APIS_BLOCKING = false;
 
-	public static final int FM_SEEK_IN_PROGRESS = 0xFF;
+    /*
+    * By setting this flag true, FM RDS data(PS and RDS Text) can be sent to
+    * the application as bytearray. else FM RDS data(PS and RDS Text) will be
+    * sent to the application as String
+    */
 
-	public static final int FM_BAND_EUROPE_US = 0;
-	public static final int FM_BAND_JAPAN = 1;
+    public static final boolean FM_SEND_RDS_IN_BYTEARRAY = false;
 
-	/* Europe / US band limits */
-	public static final int FM_FIRST_FREQ_US_EUROPE_KHZ = 87500;
-	public static final int FM_LAST_FREQ_US_EUROPE_KHZ = 108000;
+    public static final int FM_SEEK_IN_PROGRESS = 0xFF;
 
-	/* Japan band limits */
-	public static final int FM_FIRST_FREQ_JAPAN_KHZ = 76000;
-	public static final int FM_LAST_FREQ_JAPAN_KHZ = 90000;
+    public static final int FM_BAND_EUROPE_US = 0;
+    public static final int FM_BAND_JAPAN = 1;
 
-	public static final int DEF_VOL = 1;
-	public static final int FM_MAX_VOLUME = 70;
+    /* Europe / US band limits */
+    public static final int FM_FIRST_FREQ_US_EUROPE_KHZ = 87500;
+    public static final int FM_LAST_FREQ_US_EUROPE_KHZ = 108000;
 
-	/* volume states */
+    /* Japan band limits */
+    public static final int FM_FIRST_FREQ_JAPAN_KHZ = 76000;
+    public static final int FM_LAST_FREQ_JAPAN_KHZ = 90000;
+
+    public static final int DEF_VOL = 1;
+    public static final int FM_MAX_VOLUME = 16383; //32767,//65535;
+
+    /* volume states */
 
 	public static final boolean VOL_REQ_STATE_IDLE = true;
 	public static final boolean VOL_REQ_STATE_PENDING = false;
-
 	public static final int FM_CHANNEL_SPACE = 2;
 	public static final int FM_NOT_MUTE = 1;
 	public static final int FM_UNDEFINED_FREQ = 0xFFFFFFFF;
 	public static final int FM_RF_DEP_MUTE_OFF = 0;
 	public static final int FM_RSSI_THRESHHOLD = 7;
 
-	public static final int FM_SUCCESS = 0 ;
-	public static final int FM_FAILED = 1 ;
-	public static final int FM_COMPLETE_SCAN_IS_NOT_IN_PROGRESS = 115 ;
-	public static final int FM_COMPLETE_SCAN_STOPPED = 116;
+    /* Mute constants */
 
+    public static final int FM_MUTE = 0;
+    public static final int FM_UNMUTE = 1;
 
+    public static final int FM_ATT = 2;
+
+    /* Fm Radio State */
+    public static final int STATE_ENABLED = 0;
+    public static final int STATE_DISABLED = 1;
+    public static final int STATE_ENABLING = 2;
+    public static final int STATE_DISABLING = 3;
+    public static final int STATE_PAUSE = 4;
+    public static final int STATE_RESUME = 5;
+    public static final int STATE_DEFAULT = 6;
+
+    // public static final int FM_SUCCESS = 0 ;
+    /* FM Error Returns */
+    public static final int FM_FAILED = 0xFFF;
+    public static final int FM_UNDEFINED_FREQ = 0xFFFFFFFF;
+    public static final int FM_COMPLETE_SCAN_IS_NOT_IN_PROGRESS = 115;
+    public static final int FM_COMPLETE_SCAN_STOPPED = 116;
+
+    /* Recovery Params */
+    // must be a long time to account for turning off stale btipsd + turning on
+    // new one
+    public static final long FM_RADIO_ON_TIMEOUT_MSEC = 20 * 1000;
+    public static final long FM_RADIO_OFF_TIMEOUT_MSEC = 10 * 1000;
 
 	/***********************************************************************************************
 	 * 

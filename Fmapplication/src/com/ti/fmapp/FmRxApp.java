@@ -46,8 +46,6 @@ import android.widget.*;
 import com.ti.fm.FmReceiver;
 import com.ti.fm.FmReceiverIntent;
 
-import static com.ti.fmapp.FmRxAppConstants.*;
-
 import com.ti.fm.IFmConstants;
 
 import java.util.ArrayList;
@@ -93,7 +91,8 @@ as intents and the usage of FM APIS will be sequential.
  */
 
 public class FmRxApp extends Activity implements View.OnClickListener,
-        IFmConstants, FmRxAppConstants, ViewSwitcher.ViewFactory {
+        IFmConstants, FmRxAppConstants, FmReceiver.ServiceListener,
+        ViewSwitcher.ViewFactory {
     public static final String TAG = "FmRxApp";
     private static final boolean DBG = false;
 
@@ -238,7 +237,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         // ImageSwitcher for FM frequency
         initImageSwitcher();
-
 
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);

@@ -1,66 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.ti.fmapp"
-      android:versionCode="2"
-      android:versionName="1.0.1">
-    <uses-permission android:name="ti.permission.FMRX" />
-    <uses-permission android:name="ti.permission.FMRX_ADMIN" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+          package="com.ti.fmapp"
+          android:versionCode="3"
+          android:versionName="1.0.2">
+    <uses-permission android:name="ti.permission.FMRX"/>
+    <uses-permission android:name="ti.permission.FMRX_ADMIN"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <application android:icon="@drawable/radio" android:label="@string/app_name">
-        <uses-library android:name="fmreceiverif" />
+        <uses-library android:name="fmreceiverif"/>
         <activity android:name=".FmRxApp"
                   android:label="@string/app_name"
-				  android:screenOrientation="portrait">
+                  android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".FmRxApp"
                   android:label="@string/app_rx"
-				  android:screenOrientation="portrait">
-             <intent-filter>
-                <action android:name="android.intent.action.START_FMRX" />
-                 <category android:name="android.intent.category.DEFAULT" />
+                  android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.START_FMRX"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
 
 
-              <activity android:name=".FmRxHelp"
+        <activity android:name=".FmRxHelp"
                   android:label="@string/app_rxhelp"
-				  android:screenOrientation="portrait">
-             <intent-filter>
-                <action android:name="android.intent.action.START_RXHELP" />
-                <category android:name="android.intent.category.DEFAULT" />
+                  android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.START_RXHELP"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
 
-		<activity android:name=".FmRxFreqInput" android:theme="@android:style/Theme.Dialog"
-		    	  android:label="@string/enterFreq_Dialog"
-				  android:screenOrientation="portrait">
-    		<intent-filter>
-             <action android:name="android.intent.action.START_RXFREQ" />
-             <category android:name="android.intent.category.DEFAULT" />
-    		</intent-filter>
-		</activity>
+        <activity android:name=".FmRxFreqInput" android:theme="@android:style/Theme.Dialog"
+                  android:label="@string/enterFreq_Dialog"
+                  android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.START_RXFREQ"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
 
-		<activity android:name=".FmRxRdsConfig"
-		    	  android:label="@string/app_rds"
-				  android:screenOrientation="portrait">
-    		<intent-filter>
-             <action android:name="android.intent.action.RDS_CONFIG" />
-             <category android:name="android.intent.category.DEFAULT" />
-    		</intent-filter>
-		</activity>
-    <activity android:name=".FmPresetList"
-		    	  android:label="@string/stations"
-				  android:screenOrientation="portrait">
-    		<intent-filter>
-             <action android:name="android.intent.action.PRESET" />
-             <category android:name="android.intent.category.DEFAULT" />
-    		</intent-filter>
-		</activity>
+        <activity android:name=".FmRxRdsConfig"
+                  android:label="@string/app_rds"
+                  android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.RDS_CONFIG"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

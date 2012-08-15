@@ -105,7 +105,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      */
 
     private ImageView imgFmPower, imgFmMode, imgFmVolume, imgFmAudiopath;
-    private ImageButton imgFmSeekUp, imgFmSeekDown;
     private TextView txtStatusMsg, txtRadioText;
     private TextView txtPsText;
     static TextView txtStationName;
@@ -119,8 +118,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public static final int MENU_CONFIGURE = Menu.FIRST + 1;
     public static final int MENU_EXIT = Menu.FIRST + 2;
     public static final int MENU_ABOUT = Menu.FIRST + 3;
-    public static final int MENU_PRESET = Menu.FIRST + 4;
-    public static final int MENU_SETFREQ = Menu.FIRST + 5;
+    public static final int MENU_SETFREQ = Menu.FIRST + 4;
 
     public boolean mPreset = false;
 
@@ -455,47 +453,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         } catch (NullPointerException e) {
             Log.e(TAG, "Tried to add null value");
         }
-    }
-
-    /* UnSet particular station name and frequency in the stations arraylist */
-    public static void UnSetStation(Integer index, String freq, String name) {
-        Log.i(TAG, "UnSetStation");
-        Integer pos = index + 1;
-        try {
-            HashMap<String, String> item = stations.get(index.intValue());
-            item.put(ITEM_KEY, pos.toString());
-            item.put(ITEM_VALUE, freq);
-            item.put(ITEM_NAME, name);
-            stations.set(index, item);
-        } catch (NullPointerException e) {
-            Log.e(TAG, "Tried to add null value");
-        }
-    }
-
-    /* Get particular station from the stations arraylist */
-
-    public static String GetStation(Integer index) {
-        Log.i(TAG, "GetStation");
-        Integer pos = index + 1;
-        try {
-            HashMap<String, String> item = stations.get(index.intValue());
-            Object freq = item.get(ITEM_VALUE);
-            Object name = item.get(ITEM_NAME);
-            if (name != null) {
-                txtStationName.setText(name.toString());
-            } else {
-                Log.w(TAG, "There is no name in the HashMap.");
-            }
-
-            if (freq != null) {
-                return freq.toString();
-            } else {
-                Log.w(TAG, "There is no key in the HashMap.");
-            }
-        } catch (NullPointerException e) {
-            Log.e(TAG, "Tried to add null value");
-        }
-        return null;
     }
 
     /*
@@ -1389,11 +1346,11 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         }
 
 
-        imgFmSeekUp = (ImageButton) findViewById(R.id.imgseekup);
-        imgFmSeekUp.setOnClickListener(this);
+        ImageButton imageButtonAux = (ImageButton) findViewById(R.id.imgseekup);
+        imageButtonAux.setOnClickListener(this);
 
-        imgFmSeekDown = (ImageButton) findViewById(R.id.imgseekdown);
-        imgFmSeekDown.setOnClickListener(this);
+        imageButtonAux = (ImageButton) findViewById(R.id.imgseekdown);
+        imageButtonAux.setOnClickListener(this);
 
         txtFmRxTunedFreq = (TextView) findViewById(R.id.txtRxFreq);
         txtFmRxTunedFreq.setText(lastTunedFrequency.toString());
@@ -1863,14 +1820,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     }
 
-    /* Gets the stored frequency and tunes to it. */
-    void updateStationDisplay(int index) {
-        String tunedFreq = GetStation(index);
-        tuneStationFrequency(tunedFreq);
-        txtFmRxTunedFreq.setText(tunedFreq);
-
-    }
-
     /* Creates the menu items */
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -1886,9 +1835,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         item = menu.add(0, MENU_EXIT, 0, R.string.exit);
         item.setIcon(R.drawable.icon);
 
-        item = menu.add(0, MENU_PRESET, 0, R.string.preset);
-        item.setIcon(R.drawable.fm_menu_preferences);
-
         item = menu.add(0, MENU_SETFREQ, 0, R.string.setfreq);
         item.setIcon(R.drawable.fm_menu_manage);
 
@@ -1899,17 +1845,13 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
+
             case MENU_CONFIGURE:
                 /* Start the configuration window */
                 Intent irds = new Intent(INTENT_RDS_CONFIG);
                 startActivityForResult(irds, ACTIVITY_CONFIG);
                 break;
-            case MENU_PRESET:
-                /* Start the Presets window */
-                Intent i = new Intent(INTENT_PRESET);
-                mPreset = true;
-                startActivity(i);
-                break;
+
             case MENU_EXIT:
                 /*
                  * The exit from the FM application happens here. FM will be
@@ -1918,6 +1860,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 mStatus = sFmReceiver.disable();
                 mPreset = false;
                 break;
+
             case MENU_ABOUT:
                 /* Start the help window */
                 Intent iTxHelp = new Intent(INTENT_RXHELP);
@@ -2404,7 +2347,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     private void updateFrequencyDisplay(Float currentFreq) {
 
         int digit1, digit2, digit3, digit4, freq = (int) Math.floor(currentFreq * 10);//100.4 > 1004
-
 
         digit1 = freq / 10000;
         freq -= digit1 * 10000;

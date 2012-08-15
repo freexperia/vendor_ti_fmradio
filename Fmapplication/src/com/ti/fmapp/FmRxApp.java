@@ -45,6 +45,9 @@ import android.view.*;
 import android.widget.*;
 import com.ti.fm.FmReceiver;
 import com.ti.fm.FmReceiverIntent;
+
+import static com.ti.fmapp.FmRxAppConstants.*;
+
 import com.ti.fm.IFmConstants;
 
 import java.util.ArrayList;
@@ -90,7 +93,7 @@ as intents and the usage of FM APIS will be sequential.
  */
 
 public class FmRxApp extends Activity implements View.OnClickListener,
-        IFmConstants, FmRxAppConstants, FmReceiver.ServiceListener {
+        IFmConstants, FmRxAppConstants, ViewSwitcher.ViewFactory {
     public static final String TAG = "FmRxApp";
     private static final boolean DBG = false;
 
@@ -169,6 +172,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             R.drawable.fm_number_9
     };
 
+    private ImageSwitcher[] mFreqDigits;
+
     /*
      * Variable to identify whether we need to do the default setting when
      * entering the FM application. Based on this variable,the default
@@ -231,6 +236,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             }
         }
 
+        // ImageSwitcher for FM frequency
+        initImageSwitcher();
+
 
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -290,6 +298,19 @@ public class FmRxApp extends Activity implements View.OnClickListener,
          */
 
         sFmReceiver = new FmReceiver(this, this);
+    }
+
+
+    private void initImageSwitcher() {
+        mFreqDigits = new ImageSwitcher[5];
+        mFreqDigits[0] = (ImageSwitcher) findViewById(R.id.is_1);
+        mFreqDigits[1] = (ImageSwitcher) findViewById(R.id.is_2);
+        mFreqDigits[2] = (ImageSwitcher) findViewById(R.id.is_3);
+        mFreqDigits[3] = (ImageSwitcher) findViewById(R.id.is_4);
+        mFreqDigits[4] = (ImageSwitcher) findViewById(R.id.is_4);
+        for (ImageSwitcher switcher : mFreqDigits) {
+            switcher.setFactory(this);
+        }
     }
 
 
@@ -564,7 +585,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     lastTunedFrequency = (float) seekFreq / 1000;
                     txtStatusMsg.setText(R.string.playing);
                     txtFmRxTunedFreq.setText(lastTunedFrequency.toString());
-
+                    updateFrequencyDisplay(lastTunedFrequency);
                     break;
 
                 case EVENT_FM_DISABLED:
@@ -587,6 +608,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     lastTunedFrequency = (float) freq / 1000;
                     txtStatusMsg.setText(R.string.playing);
                     txtFmRxTunedFreq.setText(lastTunedFrequency.toString());
+                    updateFrequencyDisplay(lastTunedFrequency);
                     // clear the RDS text
                     txtRadioText.setText(null);
 
@@ -662,6 +684,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     lastTunedFrequency = (float) tuneFreq / 1000;
                     txtStatusMsg.setText(R.string.playing);
                     txtFmRxTunedFreq.setText(lastTunedFrequency.toString());
+                    updateFrequencyDisplay(lastTunedFrequency);
                     // clear the RDS text
                     txtRadioText.setText(null);
                     // clear the PS text
@@ -2372,4 +2395,37 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         }
     }
 
+    @Override
+    public View makeView() {
+        ImageView i = new ImageView(this);
+        i.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        i.setLayoutParams(new ImageSwitcher.LayoutParams(-1, -1));
+        return i;
+    }
+
+    private void updateFrequencyDisplay(Float currentFreq) {
+
+        int digit1, digit2, digit3, digit4, freq = (int) Math.floor(currentFreq * 10);//100.4 > 1004
+
+
+        digit1 = freq / 10000;
+        freq -= digit1 * 10000;
+        digit2 = freq / 1000;
+        freq -= digit2 * 1000;
+        digit3 = freq / 100;
+        freq -= digit3 * 100;
+        digit4 = freq / 10;
+
+        Log.v(TAG, "FMRadio updateDisplay: currentFreq " + currentFreq + " -> digits " +
+                digit1 + " " + digit2 + " " + digit3 + " " + digit4);
+
+        int[] numbers = NUMBER_IMAGES;
+
+        mFreqDigits[0].setImageResource(numbers[digit1]);
+        mFreqDigits[0].setVisibility(digit1 == 0 ? View.GONE : View.VISIBLE);
+        mFreqDigits[1].setImageResource(numbers[digit2]);
+        mFreqDigits[2].setImageResource(numbers[digit3]);
+        mFreqDigits[3].setImageResource(R.drawable.fm_number_point);
+        mFreqDigits[4].setImageResource(numbers[digit4]);
+    }
 }

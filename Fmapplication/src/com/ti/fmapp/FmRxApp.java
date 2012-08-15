@@ -303,9 +303,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         mFreqDigits[1] = (ImageSwitcher) findViewById(R.id.is_2);
         mFreqDigits[2] = (ImageSwitcher) findViewById(R.id.is_3);
         mFreqDigits[3] = (ImageSwitcher) findViewById(R.id.is_4);
-        mFreqDigits[4] = (ImageSwitcher) findViewById(R.id.is_4);
+        mFreqDigits[4] = (ImageSwitcher) findViewById(R.id.is_5);
         for (ImageSwitcher switcher : mFreqDigits) {
-            switcher.setFactory(this);
+            switcher.setFactory(FmRxApp.this);
         }
     }
 

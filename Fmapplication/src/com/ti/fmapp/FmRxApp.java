@@ -107,8 +107,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     private TextView txtStatusMsg, txtRadioText;
     private TextView txtPsText;
     static TextView txtStationName;
-    private static Button btnStation1, btnStation2, btnStation3;
-    private static Button btnStation4, btnStation5, btnStation6;
     private ProgressDialog pd = null, configPd;
 
     /**
@@ -163,6 +161,13 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     private int mIndex = 0;
     private int mStationIndex;
 
+    //to use with frequency display on main screen
+    private static final int[] NUMBER_IMAGES = new int[]{
+            R.drawable.fm_number_0, R.drawable.fm_number_1, R.drawable.fm_number_2,
+            R.drawable.fm_number_3, R.drawable.fm_number_4, R.drawable.fm_number_5,
+            R.drawable.fm_number_6, R.drawable.fm_number_7, R.drawable.fm_number_8,
+            R.drawable.fm_number_9
+    };
 
     /*
      * Variable to identify whether we need to do the default setting when
@@ -287,68 +292,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         sFmReceiver = new FmReceiver(this, this);
     }
 
-    private void setButtonLabels() {
-
-        Log.d(TAG, "setButtonLabels");
-        for (HashMap<String, String> item : stations) {
-            Log.d(TAG, "setButtonLabels item " + item);
-            String freq = item.get(ITEM_VALUE);
-            int iButtonNo = Integer.parseInt(item.get(ITEM_KEY));
-            switch (iButtonNo) {
-                case 1:
-                    if (freq.equals(""))
-                        btnStation1.setEnabled(false);
-                    else {
-                        btnStation1.setEnabled(true);
-                        btnStation1.setText(freq);
-                    }
-                    break;
-                case 2:
-                    if (freq.equals(""))
-                        btnStation2.setEnabled(false);
-                    else {
-                        btnStation2.setEnabled(true);
-                        btnStation2.setText(freq);
-                    }
-                    break;
-                case 3:
-                    if (freq.equals(""))
-                        btnStation3.setEnabled(false);
-                    else {
-                        btnStation3.setEnabled(true);
-                        btnStation3.setText(freq);
-                    }
-                    break;
-                case 4:
-                    if (freq.equals(""))
-                        btnStation4.setEnabled(false);
-                    else {
-                        btnStation4.setEnabled(true);
-                        btnStation4.setText(freq);
-                    }
-                    break;
-                case 5:
-                    if (freq.equals(""))
-                        btnStation5.setEnabled(false);
-                    else {
-                        btnStation5.setEnabled(true);
-                        btnStation5.setText(freq);
-                    }
-                    break;
-                case 6:
-                    if (freq.equals(""))
-                        btnStation6.setEnabled(false);
-                    else {
-                        btnStation6.setEnabled(true);
-                        btnStation6.setText(freq);
-                    }
-                    break;
-
-            }
-
-        }
-
-    }
 
     private void startup() {
 
@@ -360,7 +303,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 loadDefaultConfiguration();
                 setContentView(R.layout.fmrxmain);
                 initControls();
-                setButtonLabels();
                 /* if (sFmReceiver.isFMPaused()) {
                         Log.i(TAG, "FmReceiver.STATE_PAUSE ");
                    mStatus = sFmReceiver.resumeFm();
@@ -467,108 +409,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     }
 
-    /*
-      * Set the arraylist and the buttons with the selected station and make the
-      * button enabled so that user can select it to select the stored stations
-      */
-    public static void updateSetStation(int index, String freq, String name) {
-        switch (index) {
-            case 0:
-                if (freq.equals(""))
-                    btnStation1.setEnabled(false);
-                else {
-                    btnStation1.setEnabled(true);
-                    btnStation1.setText(freq);
-                }
-
-                break;
-            case 1:
-                if (freq.equals(""))
-                    btnStation2.setEnabled(false);
-                else {
-                    btnStation2.setEnabled(true);
-                    btnStation2.setText(freq);
-                }
-
-                break;
-            case 2:
-                if (freq.equals(""))
-                    btnStation3.setEnabled(false);
-                else {
-                    btnStation3.setEnabled(true);
-                    btnStation3.setText(freq);
-                }
-                break;
-            case 3:
-                if (freq.equals(""))
-                    btnStation4.setEnabled(false);
-                else {
-                    btnStation4.setEnabled(true);
-                    btnStation4.setText(freq);
-                }
-
-                break;
-            case 4:
-                if (freq.equals(""))
-                    btnStation5.setEnabled(false);
-                else {
-                    btnStation5.setEnabled(true);
-                    btnStation5.setText(freq);
-                }
-
-                break;
-            case 5:
-                if (freq.equals(""))
-                    btnStation6.setEnabled(false);
-                else {
-                    btnStation6.setEnabled(true);
-                    btnStation6.setText(freq);
-                }
-                break;
-        }
-        // Store the freq in the selected index in Arraylist
-        SetStation(index, freq, "");
-
-    }
-
-    /*
-      * Unset the arraylist and the button with the empty station and make the
-      * button disabled so that user cannot select it
-      */
-
-    public static void updateUnSetStation(int index) {
-        Log.d(TAG, "updateUnSetStation: " + index);
-        switch (index) {
-            case 0:
-                btnStation1.setEnabled(false);
-                btnStation1.setText("1");
-                break;
-            case 1:
-                btnStation2.setEnabled(false);
-                btnStation2.setText("2");
-                break;
-            case 2:
-                btnStation3.setEnabled(false);
-                btnStation3.setText("3");
-                break;
-            case 3:
-                btnStation4.setEnabled(false);
-                btnStation4.setText("4");
-                break;
-            case 4:
-
-                btnStation5.setEnabled(false);
-                btnStation5.setText("5");
-                break;
-            case 5:
-                btnStation6.setEnabled(false);
-                btnStation6.setText("6");
-                break;
-        }
-
-        UnSetStation(index, "", "");
-
-    }
 
     /* Set particular station name or frequency in the stations arraylist */
     public static void SetStation(Integer index, String freq, String name) {
@@ -582,8 +422,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 item.put(ITEM_NAME, name);
 
                 // Empty name string is passed. Update the name
-                if ((name.equals("")))
+                if ((name.equals(""))) {
                     item.put(ITEM_NAME, name);
+                }
             }
 
             // Update the frequency only
@@ -659,8 +500,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 case EVENT_FM_ENABLED:
 
                     Log.i(TAG, "enter handleMessage ----EVENT_FM_ENABLED");
-                    if (pd != null)
+                    if (pd != null) {
                         pd.dismiss();
+                    }
 
                     // load RDS configs
                     setRdsConfig();
@@ -671,7 +513,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     mToggleMute = false;
                     //Log.i(TAG, " handleMessage  init mToggleMute" + mToggleMute);
                     initControls();
-                    setButtonLabels();
                     imgFmPower.setImageResource(R.drawable.poweron);
 
                     break;
@@ -863,8 +704,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     if (FM_SEND_RDS_IN_BYTEARRAY) {
                         byte[] rdsText = (byte[]) msg.obj;
 
-                        for (int i = 0; i < 4; i++)
+                        for (int i = 0; i < 4; i++) {
                             Log.i(TAG, "rdsText" + rdsText[i]);
+                        }
                     } else {
                         String rds = (String) msg.obj;
                         Log.i(TAG, "enter handleMessage ----EVENT_RDS_TEXT rds" + rds);
@@ -905,10 +747,11 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
                     if (sdefaultSettingOn) {
                         /* Set the default frequency */
-                        if (sBand == FM_BAND_EUROPE_US)
+                        if (sBand == FM_BAND_EUROPE_US) {
                             lastTunedFrequency = (float) DEFAULT_FREQ_EUROPE;
-                        else
+                        } else {
                             lastTunedFrequency = (float) DEFAULT_FREQ_JAPAN;
+                        }
                     }
 
                     mStatus = sFmReceiver.tune((int) (lastTunedFrequency * 1000));
@@ -950,8 +793,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     if (FM_SEND_RDS_IN_BYTEARRAY) {
                         byte[] psName = (byte[]) msg.obj;
 
-                        for (int i = 0; i < 4; i++)
+                        for (int i = 0; i < 4; i++) {
                             Log.i(TAG, "psName" + psName[i]);
+                        }
                     } else {
                         String ps = (String) msg.obj;
                         Log.i(TAG, "ps  String is " + ps);
@@ -987,8 +831,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
                     Log.i(TAG, "noOfChannels" + noOfChannels);
 
-                    for (int i = 0; i < noOfChannels; i++)
+                    for (int i = 0; i < noOfChannels; i++) {
                         Log.i(TAG, "channelList" + channelList[i]);
+                    }
 
                     break;
 
@@ -1015,10 +860,11 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
                     Long gMuteMode = (Long) msg.obj;
 
-                    if (gMuteMode == (long) FM_UNMUTE)
+                    if (gMuteMode == (long) FM_UNMUTE) {
                         imgFmVolume.setImageResource(R.drawable.fm_volume);
-                    else if (gMuteMode == (long) FM_MUTE)
+                    } else if (gMuteMode == (long) FM_MUTE) {
                         imgFmVolume.setImageResource(R.drawable.fm_volume_mute);
+                    }
 
                     Log.d(TAG, "enter handleMessage ----gMuteMode" + gMuteMode);
                     break;
@@ -1115,10 +961,11 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     sBand = band;
                     if (sdefaultSettingOn) {
                         /* Set the default frequency */
-                        if (sBand == FM_BAND_EUROPE_US)
+                        if (sBand == FM_BAND_EUROPE_US) {
                             lastTunedFrequency = DEFAULT_FREQ_EUROPE;
-                        else
+                        } else {
                             lastTunedFrequency = DEFAULT_FREQ_JAPAN;
+                        }
                     }
 
                     mStatus = sFmReceiver.tune((int) (lastTunedFrequency * 1000));
@@ -1139,10 +986,11 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     sBand = band;
                     if (sdefaultSettingOn) {
                         /* Set the default frequency */
-                        if (sBand == FM_BAND_EUROPE_US)
+                        if (sBand == FM_BAND_EUROPE_US) {
                             lastTunedFrequency = DEFAULT_FREQ_EUROPE;
-                        else
+                        } else {
                             lastTunedFrequency = DEFAULT_FREQ_JAPAN;
+                        }
                     }
 
                 }
@@ -1155,8 +1003,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         if (mDeEmpFilter != deEmp)// If De-Emp filter is same as the one set
         // already do not set it again
         {
-            if (MAKE_FM_APIS_BLOCKING)
+            if (MAKE_FM_APIS_BLOCKING) {
                 mStatus = sFmReceiver.setDeEmphasisFilter(deEmp);
+            }
             //else
             // mStatus = sFmReceiver.rxSetDeEmphasisFilter_nb(deEmp);
 
@@ -1179,8 +1028,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         // again
         {
 
-            if (MAKE_FM_APIS_BLOCKING)
+            if (MAKE_FM_APIS_BLOCKING) {
                 mStatus = sFmReceiver.setMonoStereoMode(mode);
+            }
             //else
             //mStatus = sFmReceiver.rxSetMonoStereoMode_nb(mode);
             if (!mStatus) {
@@ -1205,8 +1055,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         // set already do not set
         // it again
         {
-            if (MAKE_FM_APIS_BLOCKING)
+            if (MAKE_FM_APIS_BLOCKING) {
                 mStatus = sFmReceiver.setChannelSpacing(channelSpace);
+            }
             // else
             //     mStatus = sFmReceiver.rxSetChannelSpacing_nb(channelSpace);
 
@@ -1225,8 +1076,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         if (mRds != rdsEnable) {
 
             if (rdsEnable) {
-                if (MAKE_FM_APIS_BLOCKING)
+                if (MAKE_FM_APIS_BLOCKING) {
                     mStatus = sFmReceiver.enableRds();
+                }
                 //else
                 //    mStatus = sFmReceiver.rxEnableRds_nb();
                 if (!mStatus) {
@@ -1235,8 +1087,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 }
 
             } else {
-                if (MAKE_FM_APIS_BLOCKING)
+                if (MAKE_FM_APIS_BLOCKING) {
                     mStatus = sFmReceiver.disableRds();
+                }
                 // else
                 //     mStatus = sFmReceiver.rxDisableRds_nb();
 
@@ -1256,14 +1109,16 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         // setRdssystem
         int rdsSystem = fmConfigPreferences.getInt(RDSSYSTEM,
                 DEFAULT_RDS_SYSTEM);
-        if (DBG)
+        if (DBG) {
             Log.d(TAG, "setRdsSystem()--- rdsSystem= " + rdsSystem);
+        }
         if (mRdsSystem != rdsSystem) {
             // Set RDS-SYSTEM if a new choice is made by the user
 
-            if (MAKE_FM_APIS_BLOCKING)
+            if (MAKE_FM_APIS_BLOCKING) {
                 mStatus = sFmReceiver.setRdsSystem(fmConfigPreferences.getInt(
                         RDSSYSTEM, DEFAULT_RDS_SYSTEM));
+            }
             //else
             //mStatus = sFmReceiver.rxSetRdsSystem_nb(fmConfigPreferences.getInt(
             //        RDSSYSTEM, DEFAULT_RDS_SYSTEM));
@@ -1280,13 +1135,15 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 DEFAULT_RDS_AF);
         int rdsAf = 0;
         rdsAf = rdsAfSwitch ? 1 : 0;
-        if (DBG)
+        if (DBG) {
             Log.d(TAG, "setRdsAf()--- rdsAfSwitch= " + rdsAf);
+        }
         if (mRdsAf != rdsAfSwitch) {
             // Set RDS-AF if a new choice is made by the user
 
-            if (MAKE_FM_APIS_BLOCKING)
+            if (MAKE_FM_APIS_BLOCKING) {
                 mStatus = sFmReceiver.setRdsAfSwitchMode(rdsAf);
+            }
             //else
             //mStatus = sFmReceiver.rxSetRdsAfSwitchMode_nb(rdsAf);
             if (!mStatus) {
@@ -1301,8 +1158,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         // Set RSSI if a new value is entered by the user
 
-        if (MAKE_FM_APIS_BLOCKING)
+        if (MAKE_FM_APIS_BLOCKING) {
             mStatus = sFmReceiver.setRssiThreshold(rssiThreshHold);
+        }
         //else
         //    mStatus = sFmReceiver.rxSetRssiThreshold_nb(rssiThreshHold);
 
@@ -1324,17 +1182,19 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         SharedPreferences fmConfigPreferences = getSharedPreferences("fmConfigPreferences",
                 MODE_PRIVATE);
 
-        if (mPreset)
+        if (mPreset) {
             saveObject();
+        }
 
         /* Read the stations stored in DB and update the UI */
         try {
             db.open();
             Cursor c = db.getStation(1);
-            if (c != null && c.moveToFirst())
+            if (c != null && c.moveToFirst()) {
                 mIsDbPresent = true;
-            else
+            } else {
                 mIsDbPresent = false;
+            }
             c.close();
             db.close();
         } catch (SQLException e) {
@@ -1362,9 +1222,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         mToggleMute = fmConfigPreferences.getBoolean(MUTE, false);
         mRdsState = fmConfigPreferences.getBoolean(RDS, false);
 
-        if (DBG)
+        if (DBG) {
             Log.d(TAG, " Load default band " + sBand + "default volume" + mVolume + "last fre"
                     + lastTunedFrequency + "mode" + mMode + "mToggleMute" + mToggleMute + "mRdsState" + mRdsState);
+        }
 
     }
 
@@ -1393,9 +1254,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         editor.putInt(BAND, sBand);
         editor.putBoolean(MUTE, mToggleMute);
         editor.putFloat(FREQUENCY, lastTunedFrequency);
-        if (DBG)
+        if (DBG) {
             Log.d(TAG, " save default band " + sBand + "default volume" + mVolume
                     + "last fre" + lastTunedFrequency + "mToggleMute" + mToggleMute);
+        }
         /* Write the stations stored to text file */
 
         //writeObject();
@@ -1426,8 +1288,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
             } while (c.moveToNext());
 
-        } else
+        } else {
             Toast.makeText(this, "No station found", Toast.LENGTH_LONG).show();
+        }
         c.close();
         db.close();
 
@@ -1461,7 +1324,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
             try {
                 mIndex = Integer.parseInt(i.toString());
-                updateSetStation((mIndex - 1), v.toString(), n.toString());
+                //updateSetStation((mIndex - 1), v.toString(), n.toString());
                 db.updateStation(mIndex, i.toString(), v.toString(), n.toString());
             } catch (Exception e) {
                 Log.e(TAG, "Exception");
@@ -1521,30 +1384,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         txtStationName = (TextView) findViewById(R.id.txtStationName);
         txtStationName.setText(null);
 
-        btnStation1 = (Button) findViewById(R.id.station1);
-        btnStation1.setOnClickListener(this);
-        btnStation1.setEnabled(true);
-
-        btnStation2 = (Button) findViewById(R.id.station2);
-        btnStation2.setOnClickListener(this);
-        btnStation2.setEnabled(false);
-
-        btnStation3 = (Button) findViewById(R.id.station3);
-        btnStation3.setOnClickListener(this);
-        btnStation3.setEnabled(false);
-
-        btnStation4 = (Button) findViewById(R.id.station4);
-        btnStation4.setOnClickListener(this);
-        btnStation4.setEnabled(false);
-
-        btnStation5 = (Button) findViewById(R.id.station5);
-        btnStation5.setOnClickListener(this);
-        btnStation5.setEnabled(false);
-
-        btnStation6 = (Button) findViewById(R.id.station6);
-        btnStation6.setOnClickListener(this);
-        btnStation6.setEnabled(false);
-
         // Get the notification manager service.
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -1590,7 +1429,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     Bundle extras = data.getExtras();
                     if (extras != null) {
 
-                        lastTunedFrequency = (float) extras.getFloat(FREQ_VALUE, 0);
+                        lastTunedFrequency = extras.getFloat(FREQ_VALUE, 0);
                         txtFmRxTunedFreq.setText(lastTunedFrequency.toString());
                         mStatus = sFmReceiver.tune((int) (lastTunedFrequency * 1000));
                         if (!mStatus) {
@@ -1908,8 +1747,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             float iFreq = Float.parseFloat(text);
             if (iFreq != 0) {
                 lastTunedFrequency = iFreq;
-                if (DBG)
+                if (DBG) {
                     Log.d(TAG, "lastTunedFrequency" + lastTunedFrequency);
+                }
                 mStatus = sFmReceiver.tune(lastTunedFrequency.intValue() * 1000);
                 if (!mStatus) {
                     showAlert(getParent(), "FmReceiver", getString(R.string.not_able_to_tune));
@@ -1946,10 +1786,11 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 break;
 
             case R.id.imgMute:
-                if (mToggleMute)
+                if (mToggleMute) {
                     mStatus = sFmReceiver.setMuteMode(FM_MUTE);
-                else
+                } else {
                     mStatus = sFmReceiver.setMuteMode(FM_UNMUTE);
+                }
                 if (!mStatus) {
                     showAlert(this, "FmRadio", getString(R.string.not_able_to_setmute));
                 } else {
@@ -1996,36 +1837,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     }
                 }
 
-                break;
-            case R.id.station1:
-                Log.d(TAG, "Clicked Station 1");
-                mStationIndex = 0;
-                updateStationDisplay(mStationIndex);
-
-                break;
-            case R.id.station2:
-                mStationIndex = 1;
-                updateStationDisplay(mStationIndex);
-
-                break;
-            case R.id.station3:
-                mStationIndex = 2;
-                updateStationDisplay(mStationIndex);
-
-                break;
-            case R.id.station4:
-                mStationIndex = 3;
-                updateStationDisplay(mStationIndex);
-                break;
-
-            case R.id.station5:
-                mStationIndex = 4;
-                updateStationDisplay(mStationIndex);
-
-                break;
-            case R.id.station6:
-                mStationIndex = 5;
-                updateStationDisplay(mStationIndex);
                 break;
         }
 
@@ -2122,8 +1933,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         super.onPause();
         Log.i(TAG, "onPause");
 
-        if (pd != null)
+        if (pd != null) {
             pd.dismiss();
+        }
 
         saveDefaultConfiguration();
 
@@ -2511,7 +2323,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
                 for (int i = 0; i < noOfChannels; i++)
 
+                {
                     Log.i(TAG, "channelList" + channelList[i]);
+                }
 
                 mHandler.sendMessage(mHandler.obtainMessage(
                         EVENT_COMPLETE_SCAN_DONE, status, noOfChannels,

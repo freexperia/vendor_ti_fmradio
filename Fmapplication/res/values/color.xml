@@ -19,5 +19,7 @@
     <color name="light_grey">#ffc9c9c9</color>
     <color name="magic_flame">#00ff2222</color>
     <color name="button_text">#ffffffff</color>
+    <color name="cyan_neon">#ff4595c4</color>
+    <color name="cyan_neon_lighter">#ff47a1d1</color>
 
 </resources>

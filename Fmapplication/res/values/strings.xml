@@ -9,10 +9,10 @@
     <string name="lblversion">Version:</string>
     <string name="app_rxtune">Enter Frequency</string>
     <string name="app_rxhelp">About</string>
-    <string name="radioTxt">Radio Text Display</string>
     <string name="mono">Mono</string>
     <string name="pgmSrv">Program Service</string>
     <string name="statusMsg">Receiving.....</string>
+    <string name="statusMsgStopped">Press seek button to start playing.</string>
     <string name="notiMsg">Notification Message</string>
     <string name="btnOk">OK</string>
     <string name="btnCancel">Cancel</string>
@@ -86,7 +86,6 @@
     <string name="number">Enter valid number</string>
     <string name="seeking">Seeking ....</string>
     <string name="playing">Playing ....</string>
-    <string name="pstxt">PS String.</string>
     <string name="index">Index</string>
     <string name="freq">Freq</string>
     <string name="name">""</string>

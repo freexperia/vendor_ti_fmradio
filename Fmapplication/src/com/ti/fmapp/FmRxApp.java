@@ -233,8 +233,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             }
         }
 
-        // ImageSwitcher for FM frequency
-        initImageSwitcher();
 
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -320,6 +318,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 loadDefaultConfiguration();
                 setContentView(R.layout.fmrxmain);
                 initControls();
+
                 /* if (sFmReceiver.isFMPaused()) {
                         Log.i(TAG, "FmReceiver.STATE_PAUSE ");
                    mStatus = sFmReceiver.resumeFm();
@@ -1362,6 +1361,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         txtStationName = (TextView) findViewById(R.id.txtStationName);
         txtStationName.setText(null);
 
+        // ImageSwitcher for FM frequency
+        initImageSwitcher();
+
         // Get the notification manager service.
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -2340,7 +2342,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public View makeView() {
         ImageView i = new ImageView(this);
         i.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        i.setLayoutParams(new ImageSwitcher.LayoutParams(-1, -1));
+        i.setLayoutParams(new ImageSwitcher.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
         return i;
     }
 

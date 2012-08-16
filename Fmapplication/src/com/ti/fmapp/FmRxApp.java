@@ -104,7 +104,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      * ******************************************
      */
 
-    private ImageView imgFmPower, imgFmMode, imgFmVolume, imgFmAudiopath;
+    private ImageView imgFmMode, imgFmVolume;
     private TextView txtStatusMsg, txtRadioText;
     private TextView txtPsText;
     static TextView txtStationName;
@@ -487,8 +487,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     mToggleMute = false;
                     //Log.i(TAG, " handleMessage  init mToggleMute" + mToggleMute);
                     initControls();
-                    imgFmPower.setImageResource(R.drawable.poweron);
-
                     break;
 
                 /*
@@ -1306,13 +1304,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     /* Initialise all the widgets */
     private void initControls() {
-        /**
-         * Start FM RX
-         */
         Log.i(TAG, "enter initControls");
-
-        imgFmPower = (ImageView) findViewById(R.id.imgPower);
-        imgFmPower.setOnClickListener(this);
 
         imgFmMode = (ImageView) findViewById(R.id.imgMode);
         if (mMode == 0) {
@@ -1729,15 +1721,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         int id = v.getId();
 
         switch (id) {
-            case R.id.imgPower:
-                /*
-                 * The exit from the FM application happens here. FM will be
-                 * disabled
-                 */
-                //TODO: should disable Audio Routing!
-                mStatus = sFmReceiver.disable();
-                mPreset = false;
-                break;
 
             case R.id.imgMute:
                 if (mToggleMute) {

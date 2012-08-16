@@ -73,6 +73,13 @@
                 android:textSize="12dip"
                 android:layout_marginTop="100dip"/>
 
+        <ImageView android:id="@+id/imgMode"
+                   android:layout_height="wrap_content"
+                   android:src="@drawable/fm_stereo"
+                   android:layout_width="wrap_content"
+                   android:layout_marginTop="12dip"
+                   android:layout_marginLeft="13dip"/>
+
     </RelativeLayout>
 
     <TextView android:id="@+id/txtStatusMsg"
@@ -92,17 +99,6 @@
         <ImageView android:id="@+id/imgMute" android:src="@drawable/fm_volume"
                    android:layout_gravity="left" android:layout_height="wrap_content"
                    android:layout_width="wrap_content" android:layout_marginLeft="20dip"/>
-
-
-        <ImageView android:id="@+id/imgMode" android:layout_height="wrap_content"
-                   android:src="@drawable/fm_stereo" android:layout_width="wrap_content"
-                   android:layout_marginLeft="20dip"/>
-
-        <ImageView android:id="@+id/imgPower" android:layout_height="wrap_content"
-                   android:layout_width="wrap_content" android:layout_gravity="center"
-                   android:adjustViewBounds="true" android:baselineAlignBottom="true"
-                   android:cropToPadding="true" android:drawingCacheQuality="auto"
-                   android:src="@drawable/poweron" android:layout_marginLeft="20dip"/>
 
     </LinearLayout>
 

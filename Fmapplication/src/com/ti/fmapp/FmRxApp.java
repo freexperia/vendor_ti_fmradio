@@ -671,7 +671,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
                 /* Display the RDS text on UI */
                 case EVENT_RDS_TEXT:
-                    Log.i(TAG, "enter handleMessage ----EVENT_RDS_TEXT");
+                    //Log.i(TAG, "enter handleMessage ----EVENT_RDS_TEXT");
                     if (FM_SEND_RDS_IN_BYTEARRAY) {
                         byte[] rdsText = (byte[]) msg.obj;
 
@@ -681,7 +681,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     } else {
                         String rds = (String) msg.obj;
                         Log.i(TAG, "enter handleMessage ----EVENT_RDS_TEXT RDS:" + rds);
-                        txtRadioText.setText(" - " + rds);
+                        //only change if new text. avoids RDS text flickering on radio interferences
+                        if (rds.length() > 0) {
+                            txtRadioText.setText(" - " + rds);
+                        }
                     }
                     break;
 
@@ -1944,9 +1947,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 }
             }
             if (fmAction.equals(FmReceiverIntent.PI_CODE_CHANGED_ACTION)) {
-                Log
-                        .i(TAG, "enter onReceive PI_CODE_CHANGED_ACTION "
-                                + fmAction);
+                Log.i(TAG, "enter onReceive PI_CODE_CHANGED_ACTION " + fmAction);
 
                 Integer pi = intent.getIntExtra(FmReceiverIntent.PI, 0);
 

@@ -5,67 +5,75 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <LinearLayout
+    <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:background="@drawable/fm_background">
 
         <!-- The numbers and floating point for displayed frequency-->
-        <ImageSwitcher
-                android:id="@+id/is_1"
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
+            <ImageSwitcher
+                    android:id="@+id/is_1"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:padding="2dip"/>
+
+            <ImageSwitcher
+                    android:id="@+id/is_2"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:padding="2dip"/>
+
+            <ImageSwitcher
+                    android:id="@+id/is_3"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:padding="2dip"/>
+
+            <ImageSwitcher
+                    android:id="@+id/is_4"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:padding="2dip"/>
+
+            <ImageSwitcher
+                    android:id="@+id/is_5"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="2dip"/>
+        </LinearLayout>
+
+        <TextView
+                android:id="@+id/txtPsText"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:layout_gravity="center"
-                android:padding="2dip"/>
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:layout_marginTop="100dip"
+                android:textStyle="bold"
+                android:layout_marginLeft="6dip"
+                android:textColor="@color/cyan_neon_lighter"
+                android:textSize="12dip"/>
 
-        <ImageSwitcher
-                android:id="@+id/is_2"
+        <TextView
+                android:id="@+id/txtRadioText"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:layout_gravity="center"
-                android:padding="2dip"/>
+                android:textColor="@color/cyan_neon"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:layout_marginRight="6dip"
+                android:layout_toRightOf="@id/txtPsText"
+                android:textSize="12dip"
+                android:layout_marginTop="100dip"/>
 
-        <ImageSwitcher
-                android:id="@+id/is_3"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:layout_gravity="center"
-                android:padding="2dip"/>
-
-        <ImageSwitcher
-                android:id="@+id/is_4"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:layout_gravity="center"
-                android:padding="2dip"/>
-
-        <ImageSwitcher
-                android:id="@+id/is_5"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:layout_gravity="center"
-                android:padding="2dip"/>
-
-        <TextView android:id="@+id/txtRadioText"
-                  android:layout_height="wrap_content"
-                  android:layout_width="wrap_content"
-                  android:textColor="@color/cyan_neon"
-                  android:textStyle="bold" android:textSize="18sp"
-                  android:layout_gravity="bottom"/>
-
-        <TextView android:id="@+id/txtPsText"
-                  android:layout_height="wrap_content"
-                  android:layout_width="fill_parent"
-                  android:singleLine="true"
-                  android:ellipsize="marquee"
-                  android:textColor="@color/cyan_neon_lighter"
-                  android:layout_gravity="bottom" android:textStyle="bold"
-                  android:textSize="18sp"
-                  android:paddingLeft="15dip"/>
-
-
-    </LinearLayout>
+    </RelativeLayout>
 
     <TextView android:id="@+id/txtStatusMsg"
               android:layout_width="wrap_content"
@@ -118,21 +126,6 @@
                       android:layout_gravity="center" android:textSize="22dip"
                       android:layout_height="35dip">
             </TextView>
-            <LinearLayout
-                    android:layout_width="144dip" android:orientation="horizontal"
-                    android:layout_height="40dip">
-                <TextView android:id="@+id/txtRxFreq" android:layout_width="90dip"
-                          android:text="@string/rx_freq_val" android:textStyle="bold"
-                          android:visibility="visible" android:paddingLeft="7dip"
-                          android:layout_gravity="center" android:textSize="28dip"
-                          android:layout_height="wrap_content"/>
-
-                <TextView android:id="@+id/txtLabel" android:layout_width="50dip"
-                          android:layout_height="wrap_content" android:text="@string/labelhz"
-                          android:layout_gravity="center" android:layout_marginLeft="4dip"
-                          android:textSize="24dip"/>
-
-            </LinearLayout>
         </LinearLayout>
         <ImageButton android:id="@+id/imgseekup"
                      android:layout_height="wrap_content" android:layout_width="wrap_content"
@@ -140,6 +133,4 @@
                      android:background="@drawable/seek_up_bgd">
         </ImageButton>
     </LinearLayout>
-
-
 </LinearLayout>

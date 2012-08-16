@@ -50,121 +50,122 @@ import com.ti.fm.IFmConstants;
  */
 
 public class FmRxFreqInput extends Activity implements OnKeyListener,
-		View.OnClickListener, IFmConstants, FmRxAppConstants {
+        View.OnClickListener, IFmConstants, FmRxAppConstants {
 
-	public static final String TAG = "ManualFreqInput";
-	private EditText mUserText;
-	private TextView mBandRange;
-	private Button btnCancel, btnOk;
-	private static final boolean DBG = false;
+    public static final String TAG = "ManualFreqInput";
+    private EditText mUserText;
+    private TextView mBandRange;
+    private Button btnCancel, btnOk;
+    private static final boolean DBG = true;
 
-	/** Called when the activity is first created. */
+    /**
+     * Called when the activity is first created.
+     */
 
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.fmrxfreq);
-		initControls();
-	}
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.fmrxfreq);
+        initControls();
+    }
 
-	private void initControls() {
-		/* listening to key click or a key input into the exit text box */
-		mUserText = (EditText) findViewById(R.id.txtFrequency);
+    private void initControls() {        /* listening to key click or a key input into the exit text box */
+        mUserText = (EditText) findViewById(R.id.txtFrequency);
 		/* wait for key inputs or mouse clicks in the edit box */
-		mUserText.setOnKeyListener(this);
-		btnCancel = (Button) findViewById(R.id.btnCancel);
-		btnOk = (Button) findViewById(R.id.btnOk);
-		btnOk.setOnClickListener(this);
-		btnCancel.setOnClickListener(this);
-		mBandRange = (TextView) findViewById(R.id.freqRange);
-		if (FmRxApp.sBand == FM_BAND_EUROPE_US) {
-			mBandRange.setText(getText(R.string.freqRangeEurope));
-		} else {
-			mBandRange.setText(getText(R.string.freqRangeJapan));
+        mUserText.setOnKeyListener(this);
+        btnCancel = (Button) findViewById(R.id.btnCancel);
+        btnOk = (Button) findViewById(R.id.btnOk);
+        btnOk.setOnClickListener(this);
+        btnCancel.setOnClickListener(this);
+        mBandRange = (TextView) findViewById(R.id.freqRange);
+        if (FmRxApp.sBand == FM_BAND_EUROPE_US) {
+            mBandRange.setText(getText(R.string.freqRangeEurope));
+        } else {
+            mBandRange.setText(getText(R.string.freqRangeJapan));
 
-		}
+        }
 
-	}
+    }
 
-	private void writeFrequency() {
-		// get the text entered in edit box
-		String text = mUserText.getText().toString();
-		try {
-			int iFreq = Integer.parseInt(text);
-			Float validFreq = UpdateFrequency(iFreq);
-			if (validFreq != 0) {
-				// reset the text in edit box for the next entry
-				mUserText.setText(null);
+    private void writeFrequency() {
+        try {
+            Float iFreq = Float.parseFloat(mUserText.getText().toString());
+            Float validFreq = UpdateFrequency(iFreq);
+            if (validFreq != 0) {
+                // reset the text in edit box for the next entry
+                mUserText.setText(null);
 
-				Bundle bundle = new Bundle();
-				bundle.putFloat(FREQ_VALUE, validFreq);
-				Intent result = new Intent();
-				result.putExtras(bundle);
-				setResult(RESULT_OK, result);
-				finish();
+                Bundle bundle = new Bundle();
+                bundle.putFloat(FREQ_VALUE, validFreq);
+                Intent result = new Intent();
+                result.putExtras(bundle);
+                setResult(RESULT_OK, result);
+                finish();
 
-			} else {
-				new AlertDialog.Builder(this).setIcon(
-						android.R.drawable.ic_dialog_alert).setMessage(
-						"Enter valid frequency!!").setNegativeButton(
-						android.R.string.ok, null).show();
-				mUserText.setText(null);
-			}
-		} catch (NumberFormatException nfe) {
-			if (DBG)
-				Log.d(TAG, "NumberFormatException:" + nfe.getMessage());
-			new AlertDialog.Builder(this).setIcon(
-					android.R.drawable.ic_dialog_alert).setMessage(
-					"Enter valid number!!").setNegativeButton(
-					android.R.string.ok, null).show();
-			mUserText.setText(null);
-		}
+            } else {
+                new AlertDialog.Builder(this).setIcon(
+                        android.R.drawable.ic_dialog_alert).setMessage(
+                        R.string.valid_frequency).setNegativeButton(
+                        android.R.string.ok, null).show();
+                mUserText.setText(null);
+            }
+        } catch (NumberFormatException nfe) {
+            if (DBG) {
+                Log.d(TAG, "NumberFormatException:" + nfe.getMessage());
+            }
+            new AlertDialog.Builder(this).setIcon(
+                    android.R.drawable.ic_dialog_alert).setMessage(
+                    R.string.number).setNegativeButton(
+                    android.R.string.ok, null).show();
+            mUserText.setText(null);
+        }
 
-	}
+    }
 
-	/* This is a method implementation of OnKeyListener */
-	public boolean onKey(View v, int keyCode, KeyEvent event) {
-		if (event.getAction() == KeyEvent.ACTION_DOWN) {
-			switch (keyCode) {
-			case KeyEvent.KEYCODE_DPAD_CENTER:
-			case KeyEvent.KEYCODE_ENTER:
-				writeFrequency();
-				return true;
-			}
-		}
-		return false;
-	}
+    /* This is a method implementation of OnKeyListener */
+    public boolean onKey(View v, int keyCode, KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_DPAD_CENTER:
+                case KeyEvent.KEYCODE_ENTER:
+                    writeFrequency();
+                    return true;
+            }
+        }
+        return false;
+    }
 
-	public void onClick(View v) {
-		int id = v.getId();
-		switch (id) {
-		case R.id.btnOk:
-			writeFrequency();
-			break;
-		case R.id.btnCancel:
-			finish();
-			break;
+    public void onClick(View v) {
+        int id = v.getId();
+        switch (id) {
+            case R.id.btnOk:
+                writeFrequency();
+                break;
+            case R.id.btnCancel:
+                finish();
+                break;
 
-		}
-	}
+        }
+    }
 
-	static int BaseFreq() {
-		return FmRxApp.sBand == FM_BAND_JAPAN ? FM_FIRST_FREQ_JAPAN_KHZ
-				: FM_FIRST_FREQ_US_EUROPE_KHZ;
-	}
+    static float BaseFreq() {
+        return FmRxApp.sBand == FM_BAND_JAPAN ? FM_FIRST_FREQ_JAPAN_KHZ_FLOAT
+                : FM_FIRST_FREQ_US_EUROPE_KHZ_FLOAT;
+    }
 
-	static int LastFreq() {
-		return FmRxApp.sBand == FM_BAND_JAPAN ? FM_LAST_FREQ_JAPAN_KHZ
-				: FM_LAST_FREQ_US_EUROPE_KHZ;
-	}
+    static float LastFreq() {
+        return FmRxApp.sBand == FM_BAND_JAPAN ? FM_LAST_FREQ_JAPAN_KHZ_FLOAT
+                : FM_LAST_FREQ_US_EUROPE_KHZ_FLOAT;
+    }
 
-	// Update the Frequency label with the given value
-	float UpdateFrequency(long freq) {
-		if (DBG)
-			Log.d(TAG, "FM App: UpdateFrequency %d." + freq);
-		if (freq < BaseFreq() || freq > LastFreq()) {
-			freq = 0;
-		}
-		return (float) freq;
-	}
+    // Update the Frequency label with the given value
+    float UpdateFrequency(float freq) {
+        if (DBG) {
+            Log.d(TAG, "FM App: UpdateFrequency %d." + freq);
+        }
+        if (freq < BaseFreq() || freq > LastFreq()) {
+            freq = 0;
+        }
+        return freq;
+    }
 
 }

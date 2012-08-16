@@ -100,7 +100,6 @@ public interface FmRxAppConstants {
 
     public static final int ACTIVITY_TUNE = 1;
     public static final int ACTIVITY_CONFIG = 2;
-    public static final int ACTIVITY_PRESET = 3;
 
     public static final String FREQ_VALUE = "FREQUENCY";
 

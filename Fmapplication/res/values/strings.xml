@@ -11,7 +11,7 @@
     <string name="app_rxhelp">About</string>
     <string name="mono">Mono</string>
     <string name="pgmSrv">Program Service</string>
-    <string name="statusMsg">Receiving.....</string>
+    <string name="statusMsg">Receiving…</string>
     <string name="statusMsgStopped">Press seek button to start playing.</string>
     <string name="notiMsg">Notification Message</string>
     <string name="btnOk">OK</string>
@@ -34,8 +34,8 @@
     <string name="stereo">Stereo</string>
     <string name="rdsAf">RDS AF</string>
     <string name="app_rds">FM Configurations</string>
-    <string name="freqRangeEurope">87.50MHz - 108.00MHz</string>
-    <string name="freqRangeJapan">76MHz - 90MHz</string>
+    <string name="freqRangeEurope">87.5 MHz - 108.0 MHz</string>
+    <string name="freqRangeJapan">76 MHz - 90 MHz</string>
     <string name="label">KHz</string>
     <string name="labelhz">MHz</string>
     <string name="rx_freq_val">104.00</string>
@@ -70,8 +70,8 @@
     <string name="rdsaf">Set RDS AF</string>
     <string name="announcement">Announcement</string>
     <string name="TA">TA</string>
-    <string name="connecting ">Connecting ....</string>
-    <string name="seraching">Searching ....</string>
+    <string name="connecting">Connecting…</string>
+    <string name="seraching">Searching…</string>
     <string name="tuning">Tuning</string>
     <string name="notsupported">Not supported!!!!</string>
     <string name="setfreq">Set Frequency</string>
@@ -83,9 +83,9 @@
     <string name="mode">Mode :</string>
     <string name="deemphasis">DEmp Filter:</string>
     <string name="rdssystem">RDS System:</string>
-    <string name="number">Enter valid number</string>
-    <string name="seeking">Seeking ....</string>
-    <string name="playing">Playing ....</string>
+    <string name="number">Enter a valid number</string>
+    <string name="seeking">Seeking…</string>
+    <string name="playing">Playing…</string>
     <string name="index">Index</string>
     <string name="freq">Freq</string>
     <string name="name">""</string>
@@ -120,6 +120,9 @@
     <string name="not_able_to_set_rssi_threshold">Not able to setRssiThreshold!!!!</string>
     <string name="error_in_fm_app">Error in FM Application</string>
     <string name="applying_new_config">Applying new Configuration</string>
+
+    <!-- Tune Screen -->
+    <string name="valid_frequency">Enter valid frequency!!</string>
 
 
 </resources>

@@ -206,9 +206,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     /**
      * Arraylist of stations
      */
-    public static ArrayList<HashMap<String, String>> stations = new ArrayList<HashMap<String, String>>(
-            6);
-    public static TextView txtFmRxTunedFreq;
+    public static ArrayList<HashMap<String, String>> stations = new ArrayList<HashMap<String, String>>(6);
     private OrientationListener mOrientationListener;
 
     Context mContext;
@@ -305,6 +303,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         for (ImageSwitcher switcher : mFreqDigits) {
             switcher.setFactory(FmRxApp.this);
         }
+
+        //set last tunned frequency
+        updateFrequencyDisplay(lastTunedFrequency);
     }
 
 
@@ -460,8 +461,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      */
 
     private Handler mHandler = new Handler() {
-        StringBuilder sb;
-        StringBuilder sbPs;
 
         public void handleMessage(Message msg) {
 
@@ -538,7 +537,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     //Log.i(TAG, "enter handleMessage ----EVENT_SEEK_STOPPED seekFreq" + seekFreq);
                     lastTunedFrequency = (float) seekFreq / 1000;
                     txtStatusMsg.setText(R.string.playing);
-                    txtFmRxTunedFreq.setText(lastTunedFrequency.toString());
                     updateFrequencyDisplay(lastTunedFrequency);
                     break;
 
@@ -561,7 +559,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     //Log.i(TAG, "enter handleMessage ----EVENT_SEEK_STARTED freq" + freq);
                     lastTunedFrequency = (float) freq / 1000;
                     txtStatusMsg.setText(R.string.playing);
-                    txtFmRxTunedFreq.setText(lastTunedFrequency.toString());
                     updateFrequencyDisplay(lastTunedFrequency);
                     // clear the RDS text
                     txtRadioText.setText(null);
@@ -637,7 +634,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                             + tuneFreq);
                     lastTunedFrequency = (float) tuneFreq / 1000;
                     txtStatusMsg.setText(R.string.playing);
-                    txtFmRxTunedFreq.setText(lastTunedFrequency.toString());
                     updateFrequencyDisplay(lastTunedFrequency);
                     // clear the RDS text
                     txtRadioText.setText(null);
@@ -686,11 +682,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                         }
                     } else {
                         String rds = (String) msg.obj;
-                        Log.i(TAG, "enter handleMessage ----EVENT_RDS_TEXT rds" + rds);
-                        sb = new StringBuilder("[RDS] ");
-                        sb.append(rds);
-                        Log.i(TAG, "enter handleMessage ----EVENT_RDS_TEXT sb.toString()" + sb.toString());
-                        txtRadioText.setText(sb.toString());
+                        Log.i(TAG, "enter handleMessage ----EVENT_RDS_TEXT RDS:" + rds);
+                        txtRadioText.setText(" - " + rds);
                     }
                     break;
 
@@ -775,11 +768,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                         }
                     } else {
                         String ps = (String) msg.obj;
-                        Log.i(TAG, "ps  String is " + ps);
-                        sbPs = new StringBuilder("[PS] ");
-                        sbPs.append(ps);
-                        //Log.i(TAG, "enter handleMessage ----EVENT_PS_CHANGED sbPs.toString()"+ sbPs.toString());
-                        txtPsText.setText(sbPs.toString());
+                        Log.i(TAG, "enter handleMessage ----EVENT_PS_CHANGED PS:" + ps);
+                        txtPsText.setText(ps);
                     }
 
                     break;
@@ -1351,9 +1341,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         imageButtonAux = (ImageButton) findViewById(R.id.imgseekdown);
         imageButtonAux.setOnClickListener(this);
 
-        txtFmRxTunedFreq = (TextView) findViewById(R.id.txtRxFreq);
-        txtFmRxTunedFreq.setText(lastTunedFrequency.toString());
-
         txtStatusMsg = (TextView) findViewById(R.id.txtStatusMsg);
         txtRadioText = (TextView) findViewById(R.id.txtRadioText);
         txtPsText = (TextView) findViewById(R.id.txtPsText);
@@ -1395,14 +1382,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         Log.i(TAG, "onActivityResult");
 
         switch (requestCode) {
-            case (ACTIVITY_PRESET): {
-                if (resultCode == Activity.RESULT_OK) {
-                    Log.i(TAG, "Presets saved");
-                    saveObject();
-
-                }
-            }
-            break;
             case (ACTIVITY_TUNE): {
                 if (resultCode == Activity.RESULT_OK && data != null) {
 
@@ -1410,7 +1389,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     if (extras != null) {
 
                         lastTunedFrequency = extras.getFloat(FREQ_VALUE, 0);
-                        txtFmRxTunedFreq.setText(lastTunedFrequency.toString());
+                        updateFrequencyDisplay(lastTunedFrequency);
                         mStatus = sFmReceiver.tune((int) (lastTunedFrequency * 1000));
                         if (!mStatus) {
                             showAlert(this, "FmReceiver", getString(R.string.not_able_to_tune));
@@ -1726,11 +1705,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         try {
             float iFreq = Float.parseFloat(text);
             if (iFreq != 0) {
-                lastTunedFrequency = iFreq;
-                if (DBG) {
-                    Log.d(TAG, "lastTunedFrequency" + lastTunedFrequency);
-                }
-                mStatus = sFmReceiver.tune(lastTunedFrequency.intValue() * 1000);
+                lastTunedFrequency = iFreq * 10;
+                Log.d(TAG, "lastTunedFrequency" + lastTunedFrequency);
+
+                mStatus = sFmReceiver.tune(lastTunedFrequency.intValue() * 100);
                 if (!mStatus) {
                     showAlert(getParent(), "FmReceiver", getString(R.string.not_able_to_tune));
                 }
@@ -1752,7 +1730,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         switch (id) {
             case R.id.imgPower:
-
                 /*
                  * The exit from the FM application happens here. FM will be
                  * disabled
@@ -1760,9 +1737,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 //TODO: should disable Audio Routing!
                 mStatus = sFmReceiver.disable();
                 mPreset = false;
-                break;
-
-            case R.id.imgMode:
                 break;
 
             case R.id.imgMute:
@@ -1845,7 +1819,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     /* Handles item selections */
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
 
             case MENU_CONFIGURE:
@@ -2351,13 +2324,13 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         int digit1, digit2, digit3, digit4, freq = (int) Math.floor(currentFreq * 10);//100.4 > 1004
 
-        digit1 = freq / 10000;
-        freq -= digit1 * 10000;
-        digit2 = freq / 1000;
-        freq -= digit2 * 1000;
-        digit3 = freq / 100;
-        freq -= digit3 * 100;
-        digit4 = freq / 10;
+        digit1 = freq / 1000;
+        freq -= digit1 * 1000;
+        digit2 = freq / 100;
+        freq -= digit2 * 100;
+        digit3 = freq / 10;
+        freq -= digit3 * 10;
+        digit4 = freq;
 
         Log.v(TAG, "FMRadio updateDisplay: currentFreq " + currentFreq + " -> digits " +
                 digit1 + " " + digit2 + " " + digit3 + " " + digit4);

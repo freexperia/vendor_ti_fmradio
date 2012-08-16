@@ -34,8 +34,6 @@ package com.ti.fmapp;
 import android.app.*;
 import android.content.*;
 import android.content.res.Configuration;
-import android.database.Cursor;
-import android.database.SQLException;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -45,11 +43,7 @@ import android.view.*;
 import android.widget.*;
 import com.ti.fm.FmReceiver;
 import com.ti.fm.FmReceiverIntent;
-
 import com.ti.fm.IFmConstants;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 /*
  FM Boot up Sequence:
@@ -107,7 +101,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     private ImageView imgFmMode, imgFmVolume;
     private TextView txtStatusMsg, txtRadioText;
     private TextView txtPsText;
-    static TextView txtStationName;
     private ProgressDialog pd = null, configPd;
 
     /**
@@ -119,8 +112,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public static final int MENU_EXIT = Menu.FIRST + 2;
     public static final int MENU_ABOUT = Menu.FIRST + 3;
     public static final int MENU_SETFREQ = Menu.FIRST + 4;
-
-    public boolean mPreset = false;
 
     /**
      * *****************************************
@@ -203,15 +194,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public static Float lastTunedFrequency = (float) DEFAULT_FREQ_EUROPE;
     public static FmReceiver sFmReceiver;
 
-    /**
-     * Arraylist of stations
-     */
-    public static ArrayList<HashMap<String, String>> stations = new ArrayList<HashMap<String, String>>(6);
     private OrientationListener mOrientationListener;
 
     Context mContext;
-
-    DBAdapter db;
 
     /**
      * Called when the activity is first created.
@@ -283,8 +268,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         registerReceiver(mReceiver, intentFilter);
 
-        db = new DBAdapter(this);
-        createEmptyList();
         /*
          * Need to enable the FM if it was not enabled earlier
          */
@@ -413,46 +396,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         // We use a layout id because it is a unique number. We use it later to
         // cancel.
         mNotificationManager.notify(FM_NOTIFICATION_ID, notification);
-    }
-
-    /*
-      * Set the arraylist with the selected station name and display the name on
-      * main screen
-      */
-    public static void UpdateRenameStation(int index, String name) {
-        txtStationName.setText(name);
-        // Store the name in the selected index in Arraylist
-        SetStation(index, "", name);
-
-    }
-
-
-    /* Set particular station name or frequency in the stations arraylist */
-    public static void SetStation(Integer index, String freq, String name) {
-        Log.i(TAG, "SetStation");
-        Integer pos = index + 1;
-        try {
-            HashMap<String, String> item = stations.get(index.intValue());
-            item.put(ITEM_KEY, pos.toString());
-            // Update the name only
-            if ((freq.equals(""))) {
-                item.put(ITEM_NAME, name);
-
-                // Empty name string is passed. Update the name
-                if ((name.equals(""))) {
-                    item.put(ITEM_NAME, name);
-                }
-            }
-
-            // Update the frequency only
-            else if ((name.equals(""))) {
-                item.put(ITEM_VALUE, freq);
-
-            }
-            stations.set(index, item);
-        } catch (NullPointerException e) {
-            Log.e(TAG, "Tried to add null value");
-        }
     }
 
     /*
@@ -1150,38 +1093,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         SharedPreferences fmConfigPreferences = getSharedPreferences("fmConfigPreferences",
                 MODE_PRIVATE);
 
-        if (mPreset) {
-            saveObject();
-        }
-
-        /* Read the stations stored in DB and update the UI */
-        try {
-            db.open();
-            Cursor c = db.getStation(1);
-            if (c != null && c.moveToFirst()) {
-                mIsDbPresent = true;
-            } else {
-                mIsDbPresent = false;
-            }
-            c.close();
-            db.close();
-        } catch (SQLException e) {
-            mIsDbPresent = false;
-        } catch (Exception ex) {
-            mIsDbPresent = false;
-        }
-
-        if (!mIsDbPresent) {
-
-            Log.d(TAG, " mIsDbPresent writeobject" + mIsDbPresent);
-            writeObject();
-            mIsDbPresent = true;
-        } else {
-            Log.d(TAG, " mIsDbPresent readobject" + mIsDbPresent);
-            readObject();
-        }
-
-        Log.d(TAG, " mIsDbPresent " + mIsDbPresent);
         sBand = fmConfigPreferences.getInt(BAND, DEFAULT_BAND);
         lastTunedFrequency = fmConfigPreferences.getFloat(FREQUENCY,
                 (sBand == FM_BAND_EUROPE_US ? DEFAULT_FREQ_EUROPE
@@ -1193,21 +1104,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         if (DBG) {
             Log.d(TAG, " Load default band " + sBand + "default volume" + mVolume + "last fre"
                     + lastTunedFrequency + "mode" + mMode + "mToggleMute" + mToggleMute + "mRdsState" + mRdsState);
-        }
-
-    }
-
-    private void createEmptyList() {
-
-        Log.d(TAG, " createEmptyList ");
-        stations = new ArrayList<HashMap<String, String>>(6);
-        for (int i = 1; i < 7; i++) {
-            HashMap<String, String> stationsMap = new HashMap<String, String>();
-
-            stationsMap.put(ITEM_KEY, String.valueOf(i));
-            stationsMap.put(ITEM_VALUE, "");
-            stationsMap.put(ITEM_NAME, "");
-            stations.add(i - 1, stationsMap);
         }
 
     }
@@ -1226,83 +1122,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             Log.d(TAG, " save default band " + sBand + "default volume" + mVolume
                     + "last fre" + lastTunedFrequency + "mToggleMute" + mToggleMute);
         }
-        /* Write the stations stored to text file */
-
-        //writeObject();
-        saveObject();
         editor.commit();
-    }
-
-    /* Read the Stations from the text file in file system */
-    void readObject() {
-        Log.i(TAG, "readObject ");
-
-        db.open();
-        Cursor c = db.getAllStations();
-        int count = c.getCount();
-
-        Log.i(TAG, "readObject cursor count " + count);
-        int iCount = 0;
-        if (c.moveToFirst()) {
-            do {
-
-                HashMap<String, String> stations1 = new HashMap<String, String>();
-
-                stations1.put(ITEM_KEY, c.getString(1));
-                stations1.put(ITEM_VALUE, c.getString(2));
-                stations1.put(ITEM_NAME, c.getString(3));
-                stations.set(iCount, stations1);
-                iCount++;
-
-            } while (c.moveToNext());
-
-        } else {
-            Toast.makeText(this, "No station found", Toast.LENGTH_LONG).show();
-        }
-        c.close();
-        db.close();
-
-    }
-
-    /* Write the Stations to the text file in file system */
-    void writeObject() {
-        Log.i(TAG, "writeObject ");
-
-        db.open();
-        long id;
-        id = db.insertStation("1", "", " ");
-        id = db.insertStation("2", "", " ");
-        id = db.insertStation("3", "", " ");
-        id = db.insertStation("4", "", " ");
-        id = db.insertStation("5", "", " ");
-        id = db.insertStation("6", "", " ");
-        db.close();
-
-    }
-
-    void saveObject() {
-
-        Log.i(TAG, "enter saveObject");
-        db.open();
-
-        for (HashMap<String, String> item : stations) {
-            Object v = item.get(ITEM_VALUE);
-            Object n = item.get(ITEM_NAME);
-            Object i = item.get(ITEM_KEY);
-
-            try {
-                mIndex = Integer.parseInt(i.toString());
-                //updateSetStation((mIndex - 1), v.toString(), n.toString());
-                db.updateStation(mIndex, i.toString(), v.toString(), n.toString());
-            } catch (Exception e) {
-                Log.e(TAG, "Exception");
-                e.printStackTrace();
-            }
-
-        }
-
-        db.close();
-
     }
 
     /* Initialise all the widgets */
@@ -1339,9 +1159,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         txtStatusMsg = (TextView) findViewById(R.id.txtStatusMsg);
         txtRadioText = (TextView) findViewById(R.id.txtRadioText);
         txtPsText = (TextView) findViewById(R.id.txtPsText);
-
-        txtStationName = (TextView) findViewById(R.id.txtStationName);
-        txtStationName.setText(null);
 
         // ImageSwitcher for FM frequency
         initImageSwitcher();
@@ -1750,7 +1567,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 // FM seek down
 
                 if (mSeekState == SEEK_REQ_STATE_IDLE) {
-                    txtStationName.setText(null); // set the station name to null
                     mStatus = sFmReceiver.seek(mDirection);
                     if (!mStatus) {
                         showAlert(this, "FmReceiver", getString(R.string.not_able_to_seek_down));
@@ -1766,7 +1582,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 mDirection = FM_SEEK_UP;
                 // FM seek up
                 if (mSeekState == SEEK_REQ_STATE_IDLE) {
-                    txtStationName.setText(null); // set the station name to null
                     mStatus = sFmReceiver.seek(mDirection);
                     if (!mStatus) {
                         showAlert(this, "FmRadio", getString(R.string.not_able_to_seek_up));
@@ -1795,7 +1610,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         item.setIcon(R.drawable.fm_menu_help);
 
         item = menu.add(0, MENU_EXIT, 0, R.string.exit);
-        item.setIcon(R.drawable.icon);
+        item.setIcon(R.drawable.radio);
 
         item = menu.add(0, MENU_SETFREQ, 0, R.string.setfreq);
         item.setIcon(R.drawable.fm_menu_manage);
@@ -1819,7 +1634,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                  * disabled
                  */
                 mStatus = sFmReceiver.disable();
-                mPreset = false;
                 break;
 
             case MENU_ABOUT:

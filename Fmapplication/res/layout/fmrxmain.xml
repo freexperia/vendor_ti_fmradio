@@ -96,15 +96,22 @@
               android:layout_width="wrap_content"
               android:text="@string/statusMsgStopped"
               android:layout_gravity="center_horizontal"
-              android:textSize="18dip"
+              android:textSize="16dip"
+              android:textStyle="bold"
               android:layout_margin="10dip"
               android:textColor="@color/black"
               android:layout_height="wrap_content"/>
 
+    <TextView
+            style="?android:attr/listSeparatorTextViewStyle"
+            android:background="@color/cyan_neon"
+            android:layout_width="fill_parent"
+            android:layout_height="2dip"/>
+
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dip"
+            android:layout_marginTop="10dip"
             android:background="@color/white"
             android:orientation="horizontal">
 
@@ -113,21 +120,37 @@
                      android:layout_width="wrap_content"
                      android:layout_gravity="center"
                      android:background="@drawable/fm_autosearch_reduce_enable"
-                     android:layout_marginLeft="15dip"/>
+                     android:layout_marginLeft="15dip"
+                     android:layout_marginRight="15dip"/>
 
-        <TextureView
+        <Button
                 android:layout_weight="1"
-                android:layout_height="0dip"
+                android:id="@+id/btn_set_frequency"
+                android:layout_height="wrap_content"
                 android:layout_width="0dip"
-                android:background="@color/white"
-                />
+                android:textStyle="bold"
+                android:text="@string/setfreq"/>
 
         <ImageButton android:id="@+id/imgseekup"
                      android:layout_height="wrap_content"
                      android:layout_width="wrap_content"
+                     android:layout_marginLeft="15dip"
                      android:layout_marginRight="15dip"
                      android:layout_gravity="center"
                      android:background="@drawable/fm_autosearch_plus_enable">
         </ImageButton>
     </LinearLayout>
+
+    <TextView
+            style="?android:attr/listSeparatorTextViewStyle"
+            android:layout_marginTop="5dip"
+            android:background="@color/cyan_neon"
+            android:layout_width="fill_parent"
+            android:layout_height="2dip"/>
+
+    <ListView
+            android:id="@+id/lv_presets"
+            android:layout_height="fill_parent"
+            android:layout_width="fill_parent"/>
+
 </LinearLayout>

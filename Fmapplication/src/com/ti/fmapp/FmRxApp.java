@@ -1160,6 +1160,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         txtRadioText = (TextView) findViewById(R.id.txtRadioText);
         txtPsText = (TextView) findViewById(R.id.txtPsText);
 
+        Button btnFrequency = (Button) findViewById(R.id.btn_set_frequency);
+        btnFrequency.setEnabled(true);
+        btnFrequency.setOnClickListener(this);
+
         // ImageSwitcher for FM frequency
         initImageSwitcher();
 
@@ -1542,6 +1546,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         switch (id) {
 
+            case R.id.btn_set_frequency:
+                startActivityForResult(new Intent(INTENT_RXTUNE), ACTIVITY_TUNE);
+                break;
+
             case R.id.imgMute:
                 if (mToggleMute) {
                     mStatus = sFmReceiver.setMuteMode(FM_MUTE);
@@ -1644,8 +1652,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
             case MENU_SETFREQ:
                 /* Start the Manual frequency input window */
-                Intent iRxTune = new Intent(INTENT_RXTUNE);
-                startActivityForResult(iRxTune, ACTIVITY_TUNE);
+                startActivityForResult(new Intent(INTENT_RXTUNE), ACTIVITY_TUNE);
                 break;
 
         }

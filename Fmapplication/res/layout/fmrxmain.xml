@@ -111,7 +111,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dip"
-            android:background="@color/white"
             android:orientation="horizontal">
 
         <ImageButton android:id="@+id/imgseekdown"
@@ -128,6 +127,7 @@
                 android:layout_height="wrap_content"
                 android:layout_width="0dip"
                 android:textStyle="bold"
+                android:enabled="false"
                 android:text="@string/setfreq"/>
 
         <ImageButton android:id="@+id/imgseekup"

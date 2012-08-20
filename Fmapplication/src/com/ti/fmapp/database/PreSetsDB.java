@@ -94,7 +94,9 @@ public class PreSetsDB {
 
     public void updateRadioPreSet(long uid, String name, String frequency) {
         Utils.debugFunc("Will update preset state.", Log.VERBOSE);
-        String updatePreset = "UPDATE preset_stations SET name = '" + name + "' AND frequency = '" + frequency + "' WHERE _uid=" + uid + ";";
+        String updatePreset = "UPDATE preset_stations SET name = '" + name + "' WHERE _uid=" + uid + ";";
+        database.execSQL(updatePreset);
+        updatePreset = "UPDATE preset_stations SET frequency = '" + frequency + "' WHERE _uid=" + uid + ";";
         database.execSQL(updatePreset);
     }
 

@@ -44,6 +44,11 @@ import android.widget.*;
 import com.ti.fm.FmReceiver;
 import com.ti.fm.FmReceiverIntent;
 import com.ti.fm.IFmConstants;
+import com.ti.fmapp.adapters.PreSetsAdapter;
+import com.ti.fmapp.database.PreSetsDB;
+import com.ti.fmapp.logic.PreSetRadio;
+
+import java.util.ArrayList;
 
 /*
  FM Boot up Sequence:
@@ -86,9 +91,10 @@ as intents and the usage of FM APIS will be sequential.
 
 public class FmRxApp extends Activity implements View.OnClickListener,
         IFmConstants, FmRxAppConstants, FmReceiver.ServiceListener,
-        ViewSwitcher.ViewFactory {
+        ViewSwitcher.ViewFactory, AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
     public static final String TAG = "FmRxApp";
     private static final boolean DBG = false;
+    private ArrayList<PreSetRadio> preSetRadios = null;
 
     private static final boolean MAKE_FM_APIS_BLOCKING = true;
 
@@ -1170,6 +1176,26 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         // Get the notification manager service.
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
+        readDatabases();
+    }
+
+    private void readDatabases() {
+        PreSetsDB preSetsDB = new PreSetsDB(FmRxApp.this);
+        preSetsDB.open();
+
+        preSetRadios = preSetsDB.getAllPreSetRadios();
+        if (preSetRadios.size() < 1) {
+            // create empty radios
+            preSetsDB.createPreSetItem(getString(R.string.empty_text), "");
+        }
+
+        preSetsDB.close();
+        // display list
+        ListView lv = (ListView) findViewById(R.id.lv_presets);
+        lv.setDividerHeight(0);
+        lv.setOnItemClickListener(this);
+        lv.setOnItemLongClickListener(this);
+        lv.setAdapter(new PreSetsAdapter(this, preSetRadios));
     }
 
     /**
@@ -2148,5 +2174,30 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         mFreqDigits[2].setImageResource(numbers[digit3]);
         mFreqDigits[3].setImageResource(R.drawable.fm_number_point);
         mFreqDigits[4].setImageResource(numbers[digit4]);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if (preSetRadios != null) {
+            if (preSetRadios.get(position).isStationSet()) {
+                tuneStationFrequency(preSetRadios.get(position).getStationFrequency());
+            } else {
+                //if not yet set, set it
+                PreSetsDB preSetsDB = new PreSetsDB(FmRxApp.this);
+                preSetsDB.open();
+                //TODO: show dialog or put in RDS Radio name
+                preSetsDB.updateRadioPreSet(preSetRadios.get(position).getUid(), "new station", lastTunedFrequency.toString());
+
+                preSetsDB.close();
+                //refresh list
+                readDatabases();
+            }
+        }
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        //TODO : handle other options for preset list elements here
+        return false;
     }
 }

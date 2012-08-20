@@ -2188,9 +2188,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 tuneStationFrequency(preSetRadios.get(position).getStationFrequency());
             } else {
                 //if not yet set, set it
-                final PreSetsDB preSetsDB = new PreSetsDB(FmRxApp.this);
-                preSetsDB.open();
-                //TODO: show dialog or put in RDS Radio name
                 final Dialog simpleDialog = new Dialog(FmRxApp.this);
                 simpleDialog.setContentView(R.layout.dialog_save_station);
                 simpleDialog.setTitle(R.string.choose_station_name);
@@ -2210,8 +2207,15 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                         if (stationName.getText().toString().length() == 0) {
                             simpleDialog.dismiss();
                         } else {
+                            PreSetsDB preSetsDB = new PreSetsDB(FmRxApp.this);
+                            preSetsDB.open();
                             preSetsDB.updateRadioPreSet(preSetRadios.get(position).getUid(),
                                     stationName.getText().toString(), lastTunedFrequency.toString());
+                            preSetsDB.close();
+
+                            //refresh list
+                            readDatabases();
+
                             simpleDialog.dismiss();
                         }
                     }
@@ -2219,9 +2223,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 simpleDialog.show();
 
 
-                preSetsDB.close();
-                //refresh list
-                readDatabases();
             }
         }
     }

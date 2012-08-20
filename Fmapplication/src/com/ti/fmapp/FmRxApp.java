@@ -1184,11 +1184,13 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         preSetsDB.open();
 
         preSetRadios = preSetsDB.getAllPreSetRadios();
+        //if application is starting there should be no stations set, so set some empty ones
         if (preSetRadios.size() < 1) {
             for (int i = 0; i < 7; i++) {
                 // create empty radios
                 preSetsDB.createPreSetItem(getString(R.string.empty_text), "");
             }
+            preSetRadios = preSetsDB.getAllPreSetRadios();
         }
 
         preSetsDB.close();

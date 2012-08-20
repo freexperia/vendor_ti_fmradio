@@ -103,9 +103,9 @@
 
     <TextView
             style="?android:attr/listSeparatorTextViewStyle"
-            android:background="@color/cyan_neon"
+            android:background="@color/cyan_neon_darker"
             android:layout_width="fill_parent"
-            android:layout_height="2dip"/>
+            android:layout_height="3dip"/>
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -136,16 +136,15 @@
                      android:layout_marginLeft="15dip"
                      android:layout_marginRight="15dip"
                      android:layout_gravity="center"
-                     android:background="@drawable/fm_autosearch_plus_enable">
-        </ImageButton>
+                     android:background="@drawable/fm_autosearch_plus_enable"/>
     </LinearLayout>
 
     <TextView
             style="?android:attr/listSeparatorTextViewStyle"
             android:layout_marginTop="5dip"
-            android:background="@color/cyan_neon"
+            android:background="@color/cyan_neon_darker"
             android:layout_width="fill_parent"
-            android:layout_height="2dip"/>
+            android:layout_height="3dip"/>
 
     <ListView
             android:id="@+id/lv_presets"

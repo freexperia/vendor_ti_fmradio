@@ -42,13 +42,24 @@ public class PreSetsAdapter extends BaseAdapter {
             holder = new AlarmViewHolder();
             holder.name = (TextView) convertView.findViewById(R.id.tv_station_name);
             holder.frequency = (TextView) convertView.findViewById(R.id.tv_station_frequency);
+            holder.addNewStation = (TextView) convertView.findViewById(R.id.tv_add_new_station);
             convertView.setTag(holder);
         } else {
             holder = (AlarmViewHolder) convertView.getTag();
         }
 
-        holder.name.setText(preSetRadios.get(position).getStationName());
-        holder.frequency.setText(preSetRadios.get(position).getStationFrequency());
+        if (preSetRadios.get(position).isStationSet()) {
+            holder.name.setText(preSetRadios.get(position).getStationName());
+            holder.name.setVisibility(View.VISIBLE);
+            holder.frequency.setText(preSetRadios.get(position).getStationFrequency());
+            holder.frequency.setVisibility(View.VISIBLE);
+            holder.addNewStation.setVisibility(View.GONE);
+        } else {
+            //if station is not set present 'add station' display instead
+            holder.addNewStation.setVisibility(View.VISIBLE);
+            holder.name.setVisibility(View.INVISIBLE);
+            holder.frequency.setVisibility(View.INVISIBLE);
+        }
 
         return convertView;
     }
@@ -56,6 +67,7 @@ public class PreSetsAdapter extends BaseAdapter {
     class AlarmViewHolder {
         TextView name;
         TextView frequency;
+        TextView addNewStation;
     }
 
 }

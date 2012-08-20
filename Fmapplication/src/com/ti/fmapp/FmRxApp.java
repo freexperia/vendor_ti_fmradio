@@ -1177,20 +1177,21 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         // Get the notification manager service.
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-        readDatabases();
+        readPreSetsDatabase();
     }
 
-    private void readDatabases() {
+    /**
+     * Reads the PreSets database and set's the UI in place according to it
+     */
+    private void readPreSetsDatabase() {
         PreSetsDB preSetsDB = new PreSetsDB(FmRxApp.this);
         preSetsDB.open();
 
         preSetRadios = preSetsDB.getAllPreSetRadios();
         //if application is starting there should be no stations set, so set some empty ones
-        if (preSetRadios.size() < 1) {
-            for (int i = 0; i < 7; i++) {
-                // create empty radios
-                preSetsDB.createPreSetItem(getString(R.string.empty_text), "");
-            }
+        if (preSetRadios.size() == 0) {
+            // create 1 empty radio, which will become an Add Button
+            preSetsDB.createPreSetItem(getString(R.string.empty_text), "");
             preSetRadios = preSetsDB.getAllPreSetRadios();
         }
 
@@ -2211,10 +2212,14 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                             preSetsDB.open();
                             preSetsDB.updateRadioPreSet(preSetRadios.get(position).getUid(),
                                     stationName.getText().toString(), lastTunedFrequency.toString());
+
+                            //if we set a station, increment the counter so we can set another one in the future
+                            preSetsDB.createPreSetItem(getString(R.string.empty_text), "");
+
                             preSetsDB.close();
 
                             //refresh list
-                            readDatabases();
+                            readPreSetsDatabase();
 
                             simpleDialog.dismiss();
                         }

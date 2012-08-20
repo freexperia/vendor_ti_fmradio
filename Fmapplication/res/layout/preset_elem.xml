@@ -1,34 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="fill_parent"
-              android:layout_height="wrap_content">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
 
-    <TextView android:id="@+id/tv_station_name"
-              android:layout_width="wrap_content"
-              android:text="@string/empty_text"
-              android:textSize="16dip"
-              android:textStyle="bold"
-              android:layout_margin="@dimen/default_margin"
-              android:textColor="@color/black"
-              android:layout_height="wrap_content"/>
+    <LinearLayout
+            android:id="@+id/ll_usual_content"
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
 
-    <TextView android:id="@+id/tv_station_frequency"
+        <TextView android:id="@+id/tv_station_name"
+                  android:layout_width="wrap_content"
+                  android:text="@string/empty_text"
+                  android:textSize="16dip"
+                  android:textStyle="bold"
+                  android:layout_margin="@dimen/default_margin"
+                  android:textColor="@color/black"
+                  android:layout_height="wrap_content"/>
+
+        <TextView android:id="@+id/tv_station_frequency"
+                  android:layout_width="wrap_content"
+                  android:text="@string/empty_text"
+                  android:textSize="16dip"
+                  android:textStyle="bold"
+                  android:layout_marginTop="2dip"
+                  android:layout_marginLeft="@dimen/default_margin"
+                  android:layout_marginRight="@dimen/default_margin"
+                  android:layout_marginBottom="11dip"
+                  android:textColor="@color/medium_dark_grey"
+                  android:layout_height="wrap_content"/>
+
+
+    </LinearLayout>
+
+
+    <TextView android:id="@+id/tv_add_new_station"
               android:layout_width="wrap_content"
-              android:text="@string/empty_text"
-              android:textSize="16dip"
+              android:layout_height="wrap_content"
+              android:text="@string/add_station"
+              android:textSize="24dip"
               android:textStyle="bold"
-              android:layout_margin="@dimen/default_margin"
-              android:textColor="@color/medium_dark_grey"
-              android:layout_height="wrap_content"/>
+              android:layout_centerInParent="true"
+              android:visibility="gone"
+              android:textColor="@color/cyan_neon"/>
+
 
     <TextView
             style="?android:attr/listSeparatorTextViewStyle"
-            android:layout_marginTop="5dip"
             android:background="@color/cyan_neon_lighter"
+            android:layout_alignBottom="@id/ll_usual_content"
             android:layout_width="fill_parent"
             android:layout_height="1dip"/>
 
-
-</LinearLayout>
+</RelativeLayout>

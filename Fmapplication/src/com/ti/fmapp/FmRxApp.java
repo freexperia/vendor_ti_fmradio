@@ -133,6 +133,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     private int mVolume = DEF_VOLUME;
     private int mMode = DEFAULT_MODE;
     private boolean mRds = DEFAULT_RDS;
+    private String mPS = "";
     private boolean mRdsAf = DEFAULT_RDS_AF;
     private int mRdsSystem = INITIAL_VAL;
     private int mDeEmpFilter = INITIAL_VAL;
@@ -717,9 +718,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                             Log.i(TAG, "psName" + psName[i]);
                         }
                     } else {
-                        String ps = (String) msg.obj;
-                        Log.i(TAG, "enter handleMessage ----EVENT_PS_CHANGED PS:" + ps);
-                        txtPsText.setText(ps);
+                        mPS = (String) msg.obj;
+                        Log.i(TAG, "enter handleMessage ----EVENT_PS_CHANGED PS:" + mPS);
+                        txtPsText.setText(mPS);
                     }
 
                     break;
@@ -2181,16 +2182,42 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
         if (preSetRadios != null) {
             if (preSetRadios.get(position).isStationSet()) {
                 tuneStationFrequency(preSetRadios.get(position).getStationFrequency());
             } else {
                 //if not yet set, set it
-                PreSetsDB preSetsDB = new PreSetsDB(FmRxApp.this);
+                final PreSetsDB preSetsDB = new PreSetsDB(FmRxApp.this);
                 preSetsDB.open();
                 //TODO: show dialog or put in RDS Radio name
-                preSetsDB.updateRadioPreSet(preSetRadios.get(position).getUid(), "new station", lastTunedFrequency.toString());
+                final Dialog simpleDialog = new Dialog(FmRxApp.this);
+                simpleDialog.setContentView(R.layout.dialog_save_station);
+                simpleDialog.setTitle(R.string.choose_station_name);
+                simpleDialog.setCancelable(true);
+                simpleDialog.setCanceledOnTouchOutside(false);
+                Button btnContinue = (Button) simpleDialog.findViewById(R.id.btn_continue);
+                final EditText stationName = (EditText) simpleDialog.findViewById(R.id.et_station_name);
+
+                if (mRds && mPS.length() > 1) {
+                    stationName.setText(mPS);
+                }
+
+                btnContinue.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // if empty just dismiss
+                        if (stationName.getText().toString().length() == 0) {
+                            simpleDialog.dismiss();
+                        } else {
+                            preSetsDB.updateRadioPreSet(preSetRadios.get(position).getUid(),
+                                    stationName.getText().toString(), lastTunedFrequency.toString());
+                            simpleDialog.dismiss();
+                        }
+                    }
+                });
+                simpleDialog.show();
+
 
                 preSetsDB.close();
                 //refresh list

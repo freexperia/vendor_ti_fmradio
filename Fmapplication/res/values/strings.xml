@@ -121,6 +121,7 @@
     <string name="error_in_fm_app">Error in FM Application</string>
     <string name="applying_new_config">Applying new Configuration</string>
     <string name="empty_text">(Empty)</string>
+    <string name="choose_station_name">What\'s this station called?</string>
 
     <!-- Tune Screen -->
     <string name="valid_frequency">Enter valid frequency!!</string>

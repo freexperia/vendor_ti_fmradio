@@ -16,6 +16,7 @@
     <color name="solid_yellow">#ffffff00</color>
 
     <color name="black">#ff000000</color>
+    <color name="medium_dark_grey">#ff787878</color>
     <color name="light_grey">#ffc9c9c9</color>
     <color name="magic_flame">#00ff2222</color>
     <color name="button_text">#ffffffff</color>

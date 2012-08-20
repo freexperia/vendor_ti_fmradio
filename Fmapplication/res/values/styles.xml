@@ -9,4 +9,8 @@
         <item name="android:shadowRadius">1</item>
     </style>
 
+    <style name="fmapp_style" parent="android:style/Theme.Holo.Light">
+        <!-- nothing yet here -->
+    </style>
+
 </resources>

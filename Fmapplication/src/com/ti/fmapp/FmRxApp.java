@@ -1185,8 +1185,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         preSetRadios = preSetsDB.getAllPreSetRadios();
         if (preSetRadios.size() < 1) {
-            // create empty radios
-            preSetsDB.createPreSetItem(getString(R.string.empty_text), "");
+            for (int i = 0; i < 7; i++) {
+                // create empty radios
+                preSetsDB.createPreSetItem(getString(R.string.empty_text), "");
+            }
         }
 
         preSetsDB.close();

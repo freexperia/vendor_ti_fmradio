@@ -107,19 +107,19 @@ fm_status register_fmsig_handlers(void)
 	sa.sa_handler = fmapp_termination_handler;
 
 	if (-1 == sigaction(SIGTERM, &sa, NULL)) {
-		LOGE("failed to register SIGTERM");
+		ALOGE("failed to register SIGTERM");
 		ret = FMC_STATUS_FAILED;
 		goto out;
 	}
 
 	if (-1 == sigaction(SIGINT, &sa, NULL)) {
-		LOGE("failed to register SIGINT");
+		ALOGE("failed to register SIGINT");
 		ret = FMC_STATUS_FAILED;
 		goto out;
 	}
 
 	if (-1 == sigaction(SIGQUIT, &sa, NULL)) {
-		LOGE("failed to register SIGQUIT");
+		ALOGE("failed to register SIGQUIT");
 		ret = FMC_STATUS_FAILED;
 		goto out;
 	}
@@ -168,7 +168,7 @@ static int nativeJFmRx_Create(JNIEnv *env,jobject obj,jobject jContextValue)
 	register_fmsig_handlers();
 	ret = fm_open_cmd_socket(g_fmapp_hci_dev);
 	if (ret) {
-		LOGE("failed to open cmd socket ret %d",ret);
+		ALOGE("failed to open cmd socket ret %d",ret);
 		goto CLEANUP;
 	}
 
@@ -179,7 +179,7 @@ static int nativeJFmRx_Create(JNIEnv *env,jobject obj,jobject jContextValue)
 
 	fmStatus = FM_RX_Init(fmrx_error_callback);
 	if (fmStatus) {
-	LOGE("failed to init FM rx stack context");
+	ALOGE("failed to init FM rx stack context");
 	goto CLEANUP;
 
 	}
@@ -187,7 +187,7 @@ static int nativeJFmRx_Create(JNIEnv *env,jobject obj,jobject jContextValue)
 	fmStatus = FM_RX_Create(NULL, fmapp_rx_callback, &fmRxContext);
 
 	if (fmStatus) {
-		LOGE("failed to create FM rx stack context");
+		ALOGE("failed to create FM rx stack context");
 		goto CLEANUP;
 	} else {
 
@@ -217,7 +217,7 @@ static int nativeJFmRx_Create(JNIEnv *env,jobject obj,jobject jContextValue)
 	setValueMethodId = env->GetMethodID(contextCls, "setValue", "(I)V");
 	if (setValueMethodId == NULL)
 	{
-	   	LOGE("nativeJFmRx_create: Failed getting setValue method id");
+	   	ALOGE("nativeJFmRx_create: Failed getting setValue method id");
 		goto CLEANUP;
 	}
 	
@@ -227,7 +227,7 @@ static int nativeJFmRx_Create(JNIEnv *env,jobject obj,jobject jContextValue)
 	env->CallVoidMethod(jContextValue, setValueMethodId, (unsigned int)fmRxContext);
 	if (env->ExceptionOccurred())
 	{
-		LOGE("nativeJFmRx_create: Calling CallVoidMethod(setValue) failed");
+		ALOGE("nativeJFmRx_create: Calling CallVoidMethod(setValue) failed");
 		env->ExceptionDescribe();
 		goto CLEANUP;
 	}
@@ -240,7 +240,7 @@ static int nativeJFmRx_Create(JNIEnv *env,jobject obj,jobject jContextValue)
 
 CLEANUP:
 	
-	LOGE("nativeJFmRx_create(): Exiting With a Failure indication");
+	ALOGE("nativeJFmRx_create(): Exiting With a Failure indication");
 	return FMC_STATUS_FAILED;
 }
 
@@ -257,7 +257,7 @@ static jint nativeJFmRx_Destroy(JNIEnv *env, jobject obj,jlong jContextValue)
 	status = FM_RX_Destroy(&fmRxContext);
 
 	if (status) {
-		LOGE("failed to destroy FM rx stack context");
+		ALOGE("failed to destroy FM rx stack context");
 		return status;
 
 	} else{
@@ -277,7 +277,7 @@ static jint nativeJFmRx_Destroy(JNIEnv *env, jobject obj,jlong jContextValue)
 
 
 	if (status) {
-		LOGE("failed to deinit FM rx stack context");
+		ALOGE("failed to deinit FM rx stack context");
 		return status;
 
 	} else {
@@ -292,7 +292,7 @@ static jint nativeJFmRx_Destroy(JNIEnv *env, jobject obj,jlong jContextValue)
 	FM_LOGD("%s: calling bt_chip_disable", __func__);
 
 	if(bt_chip_disable() < 0) {
-		LOGE("bt_chip_disable failed");
+		ALOGE("bt_chip_disable failed");
 	} else {
 
 		FM_LOGD("bt_chip_disable Success");
@@ -1032,7 +1032,7 @@ extern "C"
 void fmrx_error_callback(const fm_rx_status status)
 {
 
-	LOGI("fmrx_error_callback: Entered, ");
+	ALOGI("fmrx_error_callback: Entered, ");
 
 	JNIEnv* env = NULL;
 	bool attachedThread = false;
@@ -1045,12 +1045,12 @@ void fmrx_error_callback(const fm_rx_status status)
 
 	if(jRet < 0)
 	{
-		LOGE("failed to get JNI env,assuming native thread");
+		ALOGE("failed to get JNI env,assuming native thread");
 		jRet = g_jVM->AttachCurrentThread((&env), NULL);
 
 		if(jRet != JNI_OK)
 		{
-			LOGE("failed to atatch to current thread %d",jRet);
+			ALOGE("failed to atatch to current thread %d",jRet);
 			return ;
 		}
 
@@ -1059,7 +1059,7 @@ void fmrx_error_callback(const fm_rx_status status)
 
 	if(env == NULL)
 	{
-		LOGE("fmrx_error_callback: Entered, env is null");
+		ALOGE("fmrx_error_callback: Entered, env is null");
 		return;
 	}
 
@@ -1072,7 +1072,7 @@ void fmrx_error_callback(const fm_rx_status status)
 						);
 
   if (env->ExceptionOccurred())    {
-    LOGE("fmrx_error_callback:  ExceptionOccurred");
+    ALOGE("fmrx_error_callback:  ExceptionOccurred");
     goto CLEANUP;
     }
 
@@ -1085,7 +1085,7 @@ void fmrx_error_callback(const fm_rx_status status)
     return;
     
     CLEANUP:
-	LOGE("fmrx_error_callback: Exiting due to failure");
+	ALOGE("fmrx_error_callback: Exiting due to failure");
 	if (env->ExceptionOccurred())    {
 	env->ExceptionDescribe();
 	env->ExceptionClear();
@@ -1114,7 +1114,7 @@ void fmapp_rx_callback(const fm_rx_event_s *event)
 	g_jVM->AttachCurrentThread((&env), NULL);
 
 	if(env == NULL)	{
-		LOGI("%s: Entered, env is null", __func__);
+		ALOGI("%s: Entered, env is null", __func__);
 	} else {
 
 		FM_LOGD("%s: jEnv %p", __func__, (void *)env);
@@ -1199,7 +1199,7 @@ void fmapp_rx_callback(const fm_rx_event_s *event)
 
 		jAfListData = env->NewByteArray(event->p.afListData.afListSize);
 		if (jAfListData == NULL) {
-			LOGE("%s: Failed converting elements", __func__);
+			ALOGE("%s: Failed converting elements", __func__);
 			goto CLEANUP;
 		}
 
@@ -1209,7 +1209,7 @@ void fmapp_rx_callback(const fm_rx_event_s *event)
 				(jbyte*)event->p.afListData.afList);
 
 		if (env->ExceptionOccurred()) {
-			LOGE("%s: Calling nativeCb_fmRxAfListChanged failed",
+			ALOGE("%s: Calling nativeCb_fmRxAfListChanged failed",
 			     __func__);
 			goto CLEANUP;
 		}
@@ -1238,7 +1238,7 @@ void fmapp_rx_callback(const fm_rx_event_s *event)
 
 		jNameString = env->NewByteArray(len);
 		if (jNameString == NULL) {
-			LOGE("%s: Failed converting elements", __func__);
+			ALOGE("%s: Failed converting elements", __func__);
 			goto CLEANUP;
 		}
 
@@ -1248,7 +1248,7 @@ void fmapp_rx_callback(const fm_rx_event_s *event)
 				(jbyte*)event->p.psData.name);
 
 		if (env->ExceptionOccurred()) {
-			LOGE("%s: nativeCb_fmRxRadioText failed", __func__);
+			ALOGE("%s: nativeCb_fmRxRadioText failed", __func__);
 			goto CLEANUP;
 		}
 
@@ -1266,7 +1266,7 @@ void fmapp_rx_callback(const fm_rx_event_s *event)
 
 		jRadioTxtMsg = env->NewByteArray(event->p.radioTextData.len);
 		if (jRadioTxtMsg == NULL) {
-			LOGE("%s: Failed converting elements", __func__);
+			ALOGE("%s: Failed converting elements", __func__);
 			goto CLEANUP;
 		}
 
@@ -1276,7 +1276,7 @@ void fmapp_rx_callback(const fm_rx_event_s *event)
 				(jbyte*)event->p.radioTextData.msg);
 
 		if (env->ExceptionOccurred()) {
-			LOGE("%s: Calling nativeCb_fmRxRadioText failed",
+			ALOGE("%s: Calling nativeCb_fmRxRadioText failed",
 			     __func__);
 			goto CLEANUP;
 		}
@@ -1300,7 +1300,7 @@ void fmapp_rx_callback(const fm_rx_event_s *event)
 		jGroupData = env->NewByteArray(len);
 
 		if (jGroupData == NULL)	{
-			LOGE("%s: Failed converting elements", __func__);
+			ALOGE("%s: Failed converting elements", __func__);
 			goto CLEANUP;
 		}
 
@@ -1310,7 +1310,7 @@ void fmapp_rx_callback(const fm_rx_event_s *event)
 				(jbyte*)event->p.rawRdsGroupData.groupData);
 
 		if (env->ExceptionOccurred()) {
-			LOGE("%s: Calling jniCb_fmRxRadioText failed",
+			ALOGE("%s: Calling jniCb_fmRxRadioText failed",
 			     __func__);
 			goto CLEANUP;
 		}
@@ -1351,7 +1351,7 @@ void fmapp_rx_callback(const fm_rx_event_s *event)
 
 		jChannelsData = env->NewIntArray(len);
 		if (jChannelsData == NULL) {
-			LOGE("%s: Failed converting elements", __func__);
+			ALOGE("%s: Failed converting elements", __func__);
 			goto CLEANUP;
 		}
 
@@ -1361,7 +1361,7 @@ void fmapp_rx_callback(const fm_rx_event_s *event)
 				(jint*)event->p.completeScanData.channelsData);
 
 		if (env->ExceptionOccurred()) {
-			LOGE("%s: Calling jniCb_fmRxRadioText failed",
+			ALOGE("%s: Calling jniCb_fmRxRadioText failed",
 			     __func__);
 			goto CLEANUP;
 		}
@@ -1381,7 +1381,7 @@ void fmapp_rx_callback(const fm_rx_event_s *event)
 	} //end switch
 
 	if (env->ExceptionOccurred()) {
-		LOGE("fmapp_rx_callback:  ExceptionOccurred");
+		ALOGE("fmapp_rx_callback:  ExceptionOccurred");
 		goto CLEANUP;
 	}
 
@@ -1407,7 +1407,7 @@ void fmapp_rx_callback(const fm_rx_event_s *event)
 	return;
 
 CLEANUP:
-	LOGE("fmapp_rx_callback: Exiting due to failure");
+	ALOGE("fmapp_rx_callback: Exiting due to failure");
 	if(jAfListData!= NULL)
 		env->DeleteLocalRef(jAfListData);
 	if(jRadioTxtMsg!= NULL)
@@ -1432,7 +1432,7 @@ CLEANUP:
 ***********************************************************************/
 #define VERIFY_METHOD_ID(methodId) \
 	if (!_VerifyMethodId(methodId, #methodId)) { \
-		LOGE("Error obtaining method id for %s", #methodId);	\
+		ALOGE("Error obtaining method id for %s", #methodId);	\
 		return; 	\
 	}
 
@@ -1441,7 +1441,7 @@ CLEANUP:
 	bool result = true;
 
 	if (methodId == NULL) {
-		LOGE("_VerifyMethodId: Failed getting method id of %s", name);
+		ALOGE("_VerifyMethodId: Failed getting method id of %s", name);
 		result = false;
 	}
 
@@ -1613,12 +1613,12 @@ static int registerNatives(JNIEnv* env, const char* className,
 
 	clazz = env->FindClass(className);
 	if (clazz == NULL) {
-		LOGE("Can not find class %s\n", className);
+		ALOGE("Can not find class %s\n", className);
 		return JNI_FALSE;
 	}
 
 	if (env->RegisterNatives(clazz, gMethods, numMethods) < 0) {
-		LOGE("Can not RegisterNatives\n");
+		ALOGE("Can not RegisterNatives\n");
 		return JNI_FALSE;
 	}
 
@@ -1630,7 +1630,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 	JNIEnv* env = NULL;
 	jint result = -1;
 
-	LOGE("OnLoad");
+	ALOGE("OnLoad");
 
 	if (vm->GetEnv((void**)&env, JNI_VERSION_1_4) != JNI_OK) {
 		goto bail;

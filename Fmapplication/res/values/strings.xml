@@ -90,6 +90,7 @@
     <string name="freq">Freq</string>
     <string name="name">""</string>
     <string name="channelSpace">Ch Space</string>
+    <string name="confirm_action">Confirm action</string>
 
     <!-- Presets List -->
     <string name="rename">Rename</string>
@@ -123,9 +124,13 @@
     <string name="empty_text">(Empty)</string>
     <string name="choose_station_name">What\'s this station called?</string>
     <string name="add_station">Add New Station</string>
+    <string name="operations">Operations</string>
+    <string name="edit_station">Edit Station</string>
+    <string name="remove_station">Remove Station</string>
+    <string name="confirm_action_remove_station">Are you sure you want to remove this station?</string>
 
     <!-- Tune Screen -->
-    <string name="valid_frequency">Enter valid frequency!!</string>
+    <string name="valid_frequency">Enter a valid frequency!!</string>
 
 
 </resources>

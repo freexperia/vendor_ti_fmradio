@@ -2157,6 +2157,11 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         return i;
     }
 
+    /**
+     * Updates the TOP frequency display
+     *
+     * @param currentFreq current frequency like "94.4"
+     */
     private void updateFrequencyDisplay(Float currentFreq) {
 
         int digit1, digit2, digit3, digit4, freq = (int) Math.floor(currentFreq * 10);//100.4 > 1004
@@ -2169,8 +2174,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         freq -= digit3 * 10;
         digit4 = freq;
 
-        Log.v(TAG, "FMRadio updateDisplay: currentFreq " + currentFreq + " -> digits " +
-                digit1 + " " + digit2 + " " + digit3 + " " + digit4);
+        //Log.v(TAG, "FMRadio updateDisplay: currentFreq " + currentFreq + " -> digits " + digit1 + " " + digit2 + " " + digit3 + " " + digit4);
 
         int[] numbers = NUMBER_IMAGES;
 
@@ -2233,8 +2237,50 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     }
 
     @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        //TODO : handle other options for preset list elements here
-        return false;
+    public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+        //should not be able to remove last station, because it acts as new station action
+        if (position < preSetRadios.size()) {
+            AlertDialog.Builder optionsList = new AlertDialog.Builder(FmRxApp.this);
+            optionsList.setTitle(R.string.operations);
+            CharSequence[] items = new CharSequence[]{getString(R.string.edit_station),
+                    getString(R.string.remove_station)};
+            optionsList.setItems(items, new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    //edit station
+                    if (which == 0) {
+
+                    } else if (which == 1) { //remove station
+                        AlertDialog.Builder ad = new AlertDialog.Builder(FmRxApp.this);
+                        ad.setTitle(R.string.confirm_action);
+                        ad.setCancelable(true);
+                        ad.setMessage(getString(R.string.confirm_action_remove_station) + " " + preSetRadios.get(position).getStationName());
+                        ad.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                PreSetsDB preSetsDB = new PreSetsDB(FmRxApp.this);
+                                preSetsDB.open();
+                                preSetsDB.deletePreSetItem(preSetRadios.get(position));
+                                preSetsDB.close();
+                                readPreSetsDatabase();
+                            }
+                        });
+
+                        ad.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                            }
+                        });
+
+                        ad.show();
+                    }
+                }
+            });
+
+            AlertDialog a1 = optionsList.create();
+            a1.show();
+        }
+        return true;
     }
 }

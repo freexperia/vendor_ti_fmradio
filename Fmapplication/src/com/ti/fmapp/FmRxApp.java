@@ -2204,7 +2204,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      * @param position  position in the list
      * @param isEditing True if updating existing station, False if creating a new one
      */
-    private void updateStation(final int position, boolean isEditing) {
+    private void updateStation(final int position, final boolean isEditing) {
         final Dialog simpleDialog = new Dialog(FmRxApp.this);
         simpleDialog.setContentView(R.layout.dialog_save_station);
         simpleDialog.setTitle(R.string.choose_station_name);
@@ -2233,8 +2233,11 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     preSetsDB.updateRadioPreSet(preSetRadios.get(position).getUid(),
                             stationName.getText().toString(), lastTunedFrequency.toString());
 
-                    //if we set a station, increment the counter so we can set another one in the future
-                    preSetsDB.createPreSetItem(getString(R.string.empty_text), "");
+                    // if we set a station, increment the counter so we can set another one in the future
+                    // but only if creating new one
+                    if (!isEditing) {
+                        preSetsDB.createPreSetItem(getString(R.string.empty_text), "");
+                    }
 
                     preSetsDB.close();
 

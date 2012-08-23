@@ -2239,7 +2239,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
         //should not be able to remove last station, because it acts as new station action
-        if (position < preSetRadios.size()) {
+        if (position < preSetRadios.size() - 1) {
             AlertDialog.Builder optionsList = new AlertDialog.Builder(FmRxApp.this);
             optionsList.setTitle(R.string.operations);
             CharSequence[] items = new CharSequence[]{getString(R.string.edit_station),

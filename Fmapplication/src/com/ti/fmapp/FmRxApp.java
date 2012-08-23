@@ -2193,47 +2193,59 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 tuneStationFrequency(preSetRadios.get(position).getStationFrequency());
             } else {
                 //if not yet set, set it
-                final Dialog simpleDialog = new Dialog(FmRxApp.this);
-                simpleDialog.setContentView(R.layout.dialog_save_station);
-                simpleDialog.setTitle(R.string.choose_station_name);
-                simpleDialog.setCancelable(true);
-                simpleDialog.setCanceledOnTouchOutside(false);
-                Button btnContinue = (Button) simpleDialog.findViewById(R.id.btn_continue);
-                final EditText stationName = (EditText) simpleDialog.findViewById(R.id.et_station_name);
-
-                if (mRds && mPS.length() > 1) {
-                    stationName.setText(mPS);
-                }
-
-                btnContinue.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        // if empty just dismiss
-                        if (stationName.getText().toString().length() == 0) {
-                            simpleDialog.dismiss();
-                        } else {
-                            PreSetsDB preSetsDB = new PreSetsDB(FmRxApp.this);
-                            preSetsDB.open();
-                            preSetsDB.updateRadioPreSet(preSetRadios.get(position).getUid(),
-                                    stationName.getText().toString(), lastTunedFrequency.toString());
-
-                            //if we set a station, increment the counter so we can set another one in the future
-                            preSetsDB.createPreSetItem(getString(R.string.empty_text), "");
-
-                            preSetsDB.close();
-
-                            //refresh list
-                            readPreSetsDatabase();
-
-                            simpleDialog.dismiss();
-                        }
-                    }
-                });
-                simpleDialog.show();
-
-
+                updateStation(position, false);
             }
         }
+    }
+
+    /**
+     * Can either be used to create a new station or edit an existing station
+     *
+     * @param position  position in the list
+     * @param isEditing True if updating existing station, False if creating a new one
+     */
+    private void updateStation(final int position, boolean isEditing) {
+        final Dialog simpleDialog = new Dialog(FmRxApp.this);
+        simpleDialog.setContentView(R.layout.dialog_save_station);
+        simpleDialog.setTitle(R.string.choose_station_name);
+        simpleDialog.setCancelable(true);
+        simpleDialog.setCanceledOnTouchOutside(false);
+        Button btnContinue = (Button) simpleDialog.findViewById(R.id.btn_continue);
+        final EditText stationName = (EditText) simpleDialog.findViewById(R.id.et_station_name);
+
+        if (isEditing) {
+            stationName.setText(preSetRadios.get(position).getStationName());
+        } else {
+            if (mRds && mPS.length() > 1) {
+                stationName.setText(mPS);
+            }
+        }
+
+        btnContinue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // if empty just dismiss
+                if (stationName.getText().toString().length() == 0) {
+                    simpleDialog.dismiss();
+                } else {
+                    PreSetsDB preSetsDB = new PreSetsDB(FmRxApp.this);
+                    preSetsDB.open();
+                    preSetsDB.updateRadioPreSet(preSetRadios.get(position).getUid(),
+                            stationName.getText().toString(), lastTunedFrequency.toString());
+
+                    //if we set a station, increment the counter so we can set another one in the future
+                    preSetsDB.createPreSetItem(getString(R.string.empty_text), "");
+
+                    preSetsDB.close();
+
+                    //refresh list
+                    readPreSetsDatabase();
+
+                    simpleDialog.dismiss();
+                }
+            }
+        });
+        simpleDialog.show();
     }
 
     @Override
@@ -2250,7 +2262,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 public void onClick(DialogInterface dialog, int which) {
                     //edit station
                     if (which == 0) {
-
+                        updateStation(position, true);
                     } else if (which == 1) { //remove station
                         AlertDialog.Builder ad = new AlertDialog.Builder(FmRxApp.this);
                         ad.setTitle(R.string.confirm_action);

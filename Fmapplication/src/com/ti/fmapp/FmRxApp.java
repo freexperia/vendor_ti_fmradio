@@ -98,6 +98,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     private static final boolean MAKE_FM_APIS_BLOCKING = true;
 
+    // Notification stuff
+    private NotificationManager mNotificationManager;
+    private Notification mNotification;
+
     /**
      * *****************************************
      * Widgets
@@ -117,7 +121,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public static final int MENU_CONFIGURE = Menu.FIRST + 1;
     public static final int MENU_EXIT = Menu.FIRST + 2;
     public static final int MENU_ABOUT = Menu.FIRST + 3;
-    public static final int MENU_SETFREQ = Menu.FIRST + 4;
 
     /**
      * *****************************************
@@ -176,11 +179,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      */
 
     private static boolean sdefaultSettingOn = false;
-
-    private static boolean mIsDbPresent = false;
-
-    private NotificationManager mNotificationManager;
-    private int FM_NOTIFICATION_ID;
 
     static final String FM_INTERRUPTED_KEY = "fm_interrupted";
     static final String FM_STATE_KEY = "fm_state";
@@ -283,6 +281,22 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     }
 
 
+    /**
+     * @param command what command to pass
+     * @return the pending intent that contains the provided command to deliver to the appropriate service
+     */
+    private PendingIntent buildServiceIntent(String command) {
+        Intent intent = new Intent(this, FmRxApp.class);
+        intent.putExtra(EXTRA_COMMAND, command);
+
+        //TODO: Now we use this Activity, but in the future we should really use a service for dealing with all FM comms
+        return PendingIntent.getActivity(getApplicationContext(),
+                command.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    /**
+     * Initialize ImageSwitcher for the top frequency numbers
+     */
     private void initImageSwitcher() {
         mFreqDigits = new ImageSwitcher[5];
         mFreqDigits[0] = (ImageSwitcher) findViewById(R.id.is_1);
@@ -310,13 +324,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 setContentView(R.layout.fmrxmain);
                 initControls();
 
-                /* if (sFmReceiver.isFMPaused()) {
-                        Log.i(TAG, "FmReceiver.STATE_PAUSE ");
-                   mStatus = sFmReceiver.resumeFm();
-                 if (mStatus == false) {
-                   showAlert(this, "FmReceiver", "Cannot resume Radio!!!!");
-                     }
-                }*/
                 // Clear the notification which was displayed.
                 // this.mNotificationManager.cancel(FM_NOTIFICATION_ID);
                 break;
@@ -376,33 +383,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         Log.d(TAG, "Lost connection to service");
         mFmServiceConnected = false;
         sFmReceiver = null;
-    }
-
-    /*
-      * When the user exits the FMApplication by selecting back keypress ,FM App
-      * screen will be closed But the FM will be still on. A notification will be
-      * shown to the user with the current playing FM frequency. User can select
-      * the notification and relaunch the FM application
-      */
-
-    private void showNotification(int statusBarIconID, int app_rx,
-                                  CharSequence text, boolean showIconOnly) {
-        Notification notification = new Notification(statusBarIconID, text,
-                System.currentTimeMillis());
-
-        // The PendingIntent to launch our activity if the user selects this
-        // notification
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, FmRxApp.class), 0);
-
-        // Set the info for the views that show in the notification panel.
-        notification.setLatestEventInfo(this, getText(R.string.app_rx), text,
-                contentIntent);
-
-        // Send the notification.
-        // We use a layout id because it is a unique number. We use it later to
-        // cancel.
-        mNotificationManager.notify(FM_NOTIFICATION_ID, notification);
     }
 
     /*
@@ -479,13 +459,13 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     break;
 
                 case EVENT_SEEK_STOPPED:
-
-                    Log.i(TAG, "enter handleMessage ---EVENT_SEEK_STOPPED");
                     Integer seekFreq = (Integer) msg.obj;
-                    //Log.i(TAG, "enter handleMessage ----EVENT_SEEK_STOPPED seekFreq" + seekFreq);
+                    Log.d(TAG, "enter handleMessage ----EVENT_SEEK_STOPPED seekFreq: " + seekFreq);
                     lastTunedFrequency = (float) seekFreq / 1000;
                     txtStatusMsg.setText(R.string.playing);
                     updateFrequencyDisplay(lastTunedFrequency);
+                    //
+
                     break;
 
                 case EVENT_FM_DISABLED:
@@ -588,7 +568,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     // clear the PS text
                     txtPsText.setText(null);
 
-                    Log.d(TAG, "sdefaultSettingOn" + sdefaultSettingOn);
+                    Log.d(TAG, "sdefaultSettingOn: " + sdefaultSettingOn);
 
                     /*
                     * Enable the Audio routing after the tune complete , when FM
@@ -630,7 +610,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                         }
                     } else {
                         String rds = (String) msg.obj;
-                        Log.i(TAG, "enter handleMessage ----EVENT_RDS_TEXT RDS:" + rds);
+                        //Log.i(TAG, "enter handleMessage ----EVENT_RDS_TEXT RDS:" + rds);
                         //only change if new text. avoids RDS text flickering on radio interferences
                         if (rds.length() > 0) {
                             txtRadioText.setText(" - " + rds);
@@ -709,17 +689,17 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
                 /* Display the PS text on UI */
                 case EVENT_PS_CHANGED:
-                    Log.i(TAG, "enter handleMessage ----EVENT_PS_CHANGED");
+                    //Log.i(TAG, "enter handleMessage ----EVENT_PS_CHANGED");
 
                     if (FM_SEND_RDS_IN_BYTEARRAY) {
                         byte[] psName = (byte[]) msg.obj;
 
                         for (int i = 0; i < 4; i++) {
-                            Log.i(TAG, "psName" + psName[i]);
+                            //Log.i(TAG, "psName" + psName[i]);
                         }
                     } else {
                         mPS = (String) msg.obj;
-                        Log.i(TAG, "enter handleMessage ----EVENT_PS_CHANGED PS:" + mPS);
+                        //Log.i(TAG, "enter handleMessage ----EVENT_PS_CHANGED PS:" + mPS);
                         txtPsText.setText(mPS);
                     }
 
@@ -1138,10 +1118,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         imgFmMode = (ImageView) findViewById(R.id.imgMode);
         if (mMode == 0) {
-            Log.i(TAG, " setting stereo icon" + mMode);
+            Log.i(TAG, "> setting stereo icon: " + mMode);
             imgFmMode.setImageResource(R.drawable.fm_stereo);
         } else {
-            Log.i(TAG, " setting mono icon" + mMode);
+            Log.i(TAG, "> setting mono icon: " + mMode);
             imgFmMode.setImageResource(R.drawable.fm_mono);
         }
 
@@ -1150,10 +1130,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         if (mToggleMute) {
             imgFmVolume.setImageResource(R.drawable.fm_volume_mute);
-            Log.i(TAG, " initControls  mute" + mToggleMute);
+            Log.i(TAG, "> initControls  mute: " + mToggleMute);
         } else {
             imgFmVolume.setImageResource(R.drawable.fm_volume);
-            Log.i(TAG, " initControls  mute" + mToggleMute);
+            Log.i(TAG, "> initControls  mute: " + mToggleMute);
         }
 
 
@@ -1174,9 +1154,26 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         // ImageSwitcher for FM frequency
         initImageSwitcher();
 
-        // Get the notification manager service.
-        mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        //set up notifications
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
+        Notification mNotification = new Notification(R.drawable.fm_statusbar_icon, "test", System.currentTimeMillis());
+
+        Intent notificationIntent = new Intent(this, FmRxApp.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        mNotification.contentIntent = contentIntent;
+        mNotification.flags = Notification.FLAG_ONGOING_EVENT;
+
+        RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification);
+        // contentView.setImageViewResource(R.id.image, R.drawable.ic_launcher);
+        contentView.setOnClickPendingIntent(R.id.ib_status_bar_collapse, buildServiceIntent(COMMAND_CLEAR));
+        contentView.setOnClickPendingIntent(R.id.ib_seek_up, buildServiceIntent(COMMAND_SEEK_UP));
+        contentView.setOnClickPendingIntent(R.id.ib_seek_down, buildServiceIntent(COMMAND_SEEK_DOWN));
+        mNotification.contentView = contentView;
+
+        mNotificationManager.notify(NOTIFICATION_ID, mNotification);
+
+        //read and present PreSets
         readPreSetsDatabase();
     }
 
@@ -1652,9 +1649,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         item = menu.add(0, MENU_EXIT, 0, R.string.exit);
         item.setIcon(R.drawable.radio);
 
-        item = menu.add(0, MENU_SETFREQ, 0, R.string.setfreq);
-        item.setIcon(R.drawable.fm_menu_manage);
-
         return true;
     }
 
@@ -1680,11 +1674,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 /* Start the help window */
                 Intent iTxHelp = new Intent(INTENT_RXHELP);
                 startActivity(iTxHelp);
-                break;
-
-            case MENU_SETFREQ:
-                /* Start the Manual frequency input window */
-                startActivityForResult(new Intent(INTENT_RXTUNE), ACTIVITY_TUNE);
                 break;
 
         }

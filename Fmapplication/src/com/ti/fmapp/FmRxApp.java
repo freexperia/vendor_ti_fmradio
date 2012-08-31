@@ -94,8 +94,10 @@ as intents and the usage of FM APIS will be sequential.
 public class FmRxApp extends Activity implements View.OnClickListener,
         IFmConstants, FmRxAppConstants, FmReceiver.ServiceListener,
         ViewSwitcher.ViewFactory, AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
+
     public static final String TAG = "FmRxApp";
     private static final boolean DBG = false;
+
     private ArrayList<PreSetRadio> preSetRadios = null;
 
     private static final boolean MAKE_FM_APIS_BLOCKING = true;
@@ -1205,7 +1207,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         mNotification = new Notification(R.drawable.fm_statusbar_icon, getString(R.string.app_name), System.currentTimeMillis());
         RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification);
         NumberFormat fmt = new DecimalFormat("#0.0");
-        contentView.setTextViewText(R.id.tv_frequency, fmt.format(frequency));
+        contentView.setTextViewText(R.id.tv_frequency, fmt.format(frequency).replaceAll(",", "."));
         contentView.setTextViewText(R.id.tv_station_name, name);
         /*if (!Preferences.getNotificationsUseRDSinsteadPreset(FmRxApp.this)){
             // USE PreSet name
@@ -1633,38 +1635,46 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 break;
 
             case R.id.imgseekdown:
-                mDirection = FM_SEEK_DOWN;
-                // FM seek down
-
-                if (mSeekState == SEEK_REQ_STATE_IDLE) {
-                    mStatus = sFmReceiver.seek(mDirection);
-                    if (!mStatus) {
-                        showAlert(this, "FmReceiver", getString(R.string.not_able_to_seek_down));
-                    } else {
-                        mSeekState = SEEK_REQ_STATE_PENDING;
-                        txtStatusMsg.setText(R.string.seeking);
-                    }
-
-                }
+                seekDown();
 
                 break;
             case R.id.imgseekup:
-                mDirection = FM_SEEK_UP;
-                // FM seek up
-                if (mSeekState == SEEK_REQ_STATE_IDLE) {
-                    mStatus = sFmReceiver.seek(mDirection);
-                    if (!mStatus) {
-                        showAlert(this, "FmRadio", getString(R.string.not_able_to_seek_up));
-
-                    } else {
-                        mSeekState = SEEK_REQ_STATE_PENDING;
-                        txtStatusMsg.setText(R.string.seeking);
-                    }
-                }
-
+                seekUp();
                 break;
         }
 
+    }
+
+
+    private void seekDown() {
+        mDirection = FM_SEEK_DOWN;
+        // FM seek down
+
+        if (mSeekState == SEEK_REQ_STATE_IDLE) {
+            mStatus = sFmReceiver.seek(mDirection);
+            if (!mStatus) {
+                showAlert(this, "FmReceiver", getString(R.string.not_able_to_seek_down));
+            } else {
+                mSeekState = SEEK_REQ_STATE_PENDING;
+                txtStatusMsg.setText(R.string.seeking);
+            }
+
+        }
+    }
+
+    private void seekUp() {
+        mDirection = FM_SEEK_UP;
+        // FM seek up
+        if (mSeekState == SEEK_REQ_STATE_IDLE) {
+            mStatus = sFmReceiver.seek(mDirection);
+            if (!mStatus) {
+                showAlert(this, "FmRadio", getString(R.string.not_able_to_seek_up));
+
+            } else {
+                mSeekState = SEEK_REQ_STATE_PENDING;
+                txtStatusMsg.setText(R.string.seeking);
+            }
+        }
     }
 
     /* Creates the menu items */
@@ -1804,8 +1814,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             }
 
             if (fmAction.equals(FmReceiverIntent.RDS_TEXT_CHANGED_ACTION)) {
-                //  Log.i(TAG, "enter onReceive RDS_TEXT_CHANGED_ACTION "
-                +fmAction);
+                //  Log.i(TAG, "enter onReceive RDS_TEXT_CHANGED_ACTION "+fmAction);
                 if (FM_SEND_RDS_IN_BYTEARRAY) {
                     Bundle extras = intent.getExtras();
 
@@ -2212,7 +2221,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
         if (preSetRadios != null) {
             if (preSetRadios.get(position).isStationSet()) {
-                tuneStationFrequency(preSetRadios.get(position).getStationFrequency());
+                tuneStationFrequency(preSetRadios.get(position).getStationFrequency(), preSetRadios.get(position).getStationName());
             } else {
                 //if not yet set, set it
                 updateStation(position, false);
@@ -2319,5 +2328,22 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             a1.show();
         }
         return true;
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        Log.v(TAG, "called onNewIntent.");
+        if (intent.hasExtra(EXTRA_COMMAND)) {
+            Log.v(TAG, "Command: " + intent.getStringExtra(EXTRA_COMMAND));
+            if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_CLEAR)) {
+                NotificationManager nMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                nMgr.cancel(NOTIFICATION_ID);
+            } else if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_SEEK_UP)) {
+                seekUp();
+            } else if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_SEEK_DOWN)) {
+                seekDown();
+            }
+        }
+        //super.onNewIntent(intent);
     }
 }

@@ -107,6 +107,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     private Notification mNotification;
 
     private boolean isFirstPlay = true;
+    private boolean hidNotification = false;
 
     /**
      * *****************************************
@@ -496,7 +497,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                         initNotifications();
                     }
                     //update notification display
-                    updateNotification(lastTunedFrequency, "");
+                    if (!hidNotification) {
+                        updateNotification(lastTunedFrequency, "");
+                    }
 
                     // clear the RDS text
                     txtRadioText.setText(null);
@@ -659,9 +662,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     if (sdefaultSettingOn) {
                         /* Set the default frequency */
                         if (sBand == FM_BAND_EUROPE_US) {
-                            lastTunedFrequency = (float) DEFAULT_FREQ_EUROPE;
+                            lastTunedFrequency = DEFAULT_FREQ_EUROPE;
                         } else {
-                            lastTunedFrequency = (float) DEFAULT_FREQ_JAPAN;
+                            lastTunedFrequency = DEFAULT_FREQ_JAPAN;
                         }
                     }
 
@@ -990,7 +993,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 //else
                 //    mStatus = sFmReceiver.rxEnableRds_nb();
                 if (!mStatus) {
-                    Log.e(TAG, "setRDS()-- enableRds() ->Erorr");
+                    Log.e(TAG, "setRDS()-- enableRds() ->Error");
                     showAlert(this, "FmReceiver", getString(R.string.not_able_enable_rds));
                 }
 
@@ -1002,7 +1005,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 //     mStatus = sFmReceiver.rxDisableRds_nb();
 
                 if (!mStatus) {
-                    Log.e(TAG, "setRDS()-- disableRds() ->Erorr");
+                    Log.e(TAG, "setRDS()-- disableRds() ->Error");
                     showAlert(this, "FmReceiver", getString(R.string.not_able_disable_rds));
                 } else {
                     Log.e(TAG, "setRDS()-- disableRds() ->success");
@@ -1601,8 +1604,16 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 if (!mStatus) {
                     showAlert(getParent(), "FmReceiver", getString(R.string.not_able_to_tune));
                 }
+                //does notifications need initialization?
+                if (isFirstPlay && !hidNotification) {
+                    isFirstPlay = false;
+                    initNotifications();
+                }
+
                 //update notifications bar
-                updateNotification(iFreq, name);
+                if (!hidNotification) {
+                    updateNotification(iFreq, name);
+                }
             } else {
 
                 new AlertDialog.Builder(this).setIcon(
@@ -2355,6 +2366,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_CLEAR)) {
                 NotificationManager nMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 nMgr.cancel(NOTIFICATION_ID);
+                //set this as a control flag so that the notification does not reappear
+                // if user hid it is because he/she does not want it. if he does just start app again
+                hidNotification = true;
             } else if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_SEEK_UP)) {
                 seekUp();
             } else if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_SEEK_DOWN)) {

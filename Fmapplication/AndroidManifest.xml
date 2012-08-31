@@ -20,7 +20,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".FmRxApp"
-                  android:label="@string/app_rx"
+                  android:label="@string/app_name"
                   android:theme="@style/fmapp_style"
                   android:launchMode="singleInstance"
                   android:screenOrientation="portrait">

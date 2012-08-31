@@ -106,6 +106,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     private NotificationManager mNotificationManager;
     private Notification mNotification;
 
+    private boolean isFirstPlay = true;
+
     /**
      * *****************************************
      * Widgets
@@ -465,9 +467,15 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     Log.d(TAG, "enter handleMessage ----EVENT_SEEK_STOPPED seekFreq: " + seekFreq);
                     lastTunedFrequency = (float) seekFreq / 1000;
                     txtStatusMsg.setText(R.string.playing);
-                    updateFrequencyDisplay(lastTunedFrequency);
-                    //
+                    if (isFirstPlay) {
+                        isFirstPlay = false;
+                        initNotifications();
+                    }
+                    //update notification display
+                    updateNotification(lastTunedFrequency, "");
 
+                    //update panel frequency display
+                    updateFrequencyDisplay(lastTunedFrequency);
                     break;
 
                 case EVENT_FM_DISABLED:
@@ -1156,6 +1164,12 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         // ImageSwitcher for FM frequency
         initImageSwitcher();
 
+
+        //read and present PreSets
+        readPreSetsDatabase();
+    }
+
+    private void initNotifications() {
         //set up notifications
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -1173,9 +1187,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         mNotification.contentView = contentView;
 
         mNotificationManager.notify(NOTIFICATION_ID, mNotification);
-
-        //read and present PreSets
-        readPreSetsDatabase();
     }
 
     /**
@@ -1663,6 +1674,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     }
 
     private void seekUp() {
+
         mDirection = FM_SEEK_UP;
         // FM seek up
         if (mSeekState == SEEK_REQ_STATE_IDLE) {
@@ -2329,6 +2341,11 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         }
         return true;
     }
+
+
+    /**
+     * handling callbacks from Notification bar here
+     */
 
     @Override
     protected void onNewIntent(Intent intent) {

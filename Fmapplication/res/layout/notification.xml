@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content">
+
+    <ImageView
+            android:id="@+id/image"
+            android:layout_width="72dip"
+            android:layout_height="72dip"
+            android:contentDescription="@string/app_name"
+            android:background="@drawable/status_bg"
+            android:scaleType="center"
+            android:src="@drawable/fm_statusbar_icon"/>
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_marginLeft="10dip"
+            android:gravity="center_vertical"
+            android:layout_width="80dip"
+            android:layout_height="fill_parent">
+
+        <TextView
+                android:id="@+id/tv_frequency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="16dip"
+                android:textStyle="bold"/>
+
+        <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textSize="14dip"/>
+
+    </LinearLayout>
+
+    <ImageButton
+            android:id="@+id/ib_seek_down"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:contentDescription="@string/seek_down"
+            style="@style/StatusBarButton"
+            android:src="@drawable/fm_autosearch_reduce_enable_white"/>
+
+    <ImageButton
+            android:id="@+id/ib_seek_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:contentDescription="@string/seek_up"
+            style="@style/StatusBarButton"
+            android:src="@drawable/fm_autosearch_plus_enable_white"/>
+
+    <ImageButton
+            android:id="@+id/ib_status_bar_collapse"
+            style="@style/StatusBarButton"
+            android:contentDescription="@string/close_notification"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/fm_notification_bar_collapse"/>
+
+
+</LinearLayout>

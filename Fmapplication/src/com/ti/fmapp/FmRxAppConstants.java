@@ -103,6 +103,13 @@ public interface FmRxAppConstants {
 
     public static final String FREQ_VALUE = "FREQUENCY";
 
+    /* Notifications */
+    public static final int NOTIFICATION_ID = 1;
+    public static final String COMMAND_CLEAR = "clear";
+    public static final String COMMAND_SEEK_UP = "up";
+    public static final String COMMAND_SEEK_DOWN = "down";
+    public static final String EXTRA_COMMAND = "EXTRA_COMMAND";
+
     /* Rssi range */
 
     public static final int RSSI_MIN = 1;

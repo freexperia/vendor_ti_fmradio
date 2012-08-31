@@ -1,7 +1,7 @@
 # Modified by Sony Ericsson Mobile Communications AB
 
 LOCAL_PATH := $(call my-dir)
-FM_STACK_PATH:= vendor/ti/fmradio/fm_stack/
+FM_STACK_PATH:= hardware/ti/fmradio/fm_stack/
 
 include $(CLEAR_VARS)
 

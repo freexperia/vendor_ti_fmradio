@@ -13,4 +13,11 @@
         <!-- nothing yet here -->
     </style>
 
+    <!-- Notification bar button -->
+    <style name="StatusBarButton">
+        <item name="android:layout_gravity">center|right</item>
+        <item name="android:background">?android:listChoiceBackgroundIndicator</item>
+    </style>
+
+
 </resources>

@@ -132,5 +132,9 @@
     <!-- Tune Screen -->
     <string name="valid_frequency">Enter a valid frequency!!</string>
 
+    <!-- Content Description -->
+    <string name="seek_up">Seek Up</string>
+    <string name="seek_down">Seek Down</string>
+    <string name="close_notification">Close Notification</string>
 
 </resources>

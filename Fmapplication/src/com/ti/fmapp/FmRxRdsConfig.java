@@ -49,24 +49,13 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
         FmRxAppConstants {
 
     public static final String TAG = "FmRxRdsConfig";
+
     private static final boolean DBG = false;
-    /**
-     * *****************************************
-     * Widgets
-     * ******************************************
-     */
-    private Button btnCancel, btnOk;
     private Spinner spnBand, spnDeEmp, spnRdsSystem, spnMode,
             spnChannelSpacing;
     private EditText textRssi;
     private CheckBox chbRdsMode;
     private CheckBox chbSetRdsAf;
-    private ArrayAdapter<String> bandAdapter;
-    private ArrayAdapter<String> channelSpaceAdapter;
-    private ArrayAdapter<String> deEmpAdapter;
-    private ArrayAdapter<String> rdsSystemAdapter;
-    private ArrayAdapter<String> modeAdapter;
-    private ArrayAdapter<String> emptyAdapter;
     private ArrayList<String> channelSpaceString = new ArrayList<String>();
 
     private ArrayList<String> bandString = new ArrayList<String>();
@@ -106,11 +95,16 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
      * Initialise the Widget controls of the Activity
      */
     private void initControl() {
-        btnCancel = (Button) findViewById(R.id.btnCancel);
+        /*
+      *****************************************
+      Widgets
+      ******************************************
+     */
+        Button btnCancel = (Button) findViewById(R.id.btnCancel);
         btnCancel.setOnKeyListener(this);
         btnCancel.setOnClickListener(this);
 
-        btnOk = (Button) findViewById(R.id.btnOk);
+        Button btnOk = (Button) findViewById(R.id.btnOk);
         btnOk.setOnKeyListener(this);
         btnOk.setOnClickListener(this);
 
@@ -136,7 +130,7 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
      */
     private void setSpinners() {
         // BAnd Spinner
-        bandAdapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> bandAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, bandString);
 
         bandAdapter
@@ -147,7 +141,7 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
         spnBand.setOnItemSelectedListener(gItemSelectedHandler);
 
         // ChannelSpace Spinner
-        channelSpaceAdapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> channelSpaceAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, channelSpaceString);
 
         channelSpaceAdapter
@@ -159,7 +153,7 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
         spnChannelSpacing.setOnItemSelectedListener(gItemSelectedHandler);
 
         // De-Emp Spinner
-        deEmpAdapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> deEmpAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, deEmpStrings);
 
         deEmpAdapter
@@ -171,7 +165,7 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
         spnDeEmp.setOnItemSelectedListener(gItemSelectedHandler);
 
         // Mode(Mono/Stereo) Spinner
-        modeAdapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> modeAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, modeStrings);
 
         modeAdapter
@@ -188,7 +182,7 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
      */
     private void setRdsSystemSpinner() {
 
-        rdsSystemAdapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> rdsSystemAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, rdsSystemStrings);
 
         rdsSystemAdapter
@@ -205,7 +199,7 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
      * Spinner with no options
      */
     private void setEmptySpinner() {
-        emptyAdapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> emptyAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, emptyStrings);
 
         emptyAdapter
@@ -227,17 +221,6 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
         }
 
     };
-
-    /**
-     * Pops up the alert Dialog
-     */
-    public void showAlert(Context context, String title, String msg) {
-
-        new AlertDialog.Builder(context).setTitle(title).setIcon(
-                android.R.drawable.ic_dialog_alert).setMessage(msg)
-                .setNegativeButton(android.R.string.ok, null).show();
-
-    }
 
     public void onClick(View view) {
         int id = view.getId();
@@ -334,20 +317,6 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
     public void onResume() {
         super.onResume();
         updateUiFromPreference();
-    }
-
-    public void onPause() {
-        super.onPause();
-
-    }
-
-    public void onStop() {
-        super.onStop();
-    }
-
-    public void onRestart() {
-        super.onRestart();
-
     }
 
     /**

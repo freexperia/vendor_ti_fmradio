@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.ti.fmapp"
-          android:versionCode="5"
-          android:versionName="1.0.4">
+          android:versionCode="6"
+          android:versionName="1.0.5">
     <uses-permission android:name="ti.permission.FMRX"/>
     <uses-permission android:name="ti.permission.FMRX_ADMIN"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>

@@ -32,7 +32,6 @@ package com.ti.fmapp;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -63,13 +62,6 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
     private ArrayList<String> rdsSystemStrings = new ArrayList<String>();
     private ArrayList<String> emptyStrings = new ArrayList<String>();
     private ArrayList<String> modeStrings = new ArrayList<String>();
-
-    /**
-     * *****************************************
-     * private variables
-     * ******************************************
-     */
-    private Context mContext;
 
     /**
      * *****************************************
@@ -136,8 +128,8 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
         bandAdapter
                 .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spnBand.setAdapter(bandAdapter);
-        bandAdapter.add("European");
-        bandAdapter.add("Japanese");
+        bandAdapter.add(getString(R.string.european));
+        bandAdapter.add(getString(R.string.japanese));
         spnBand.setOnItemSelectedListener(gItemSelectedHandler);
 
         // ChannelSpace Spinner
@@ -229,7 +221,7 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
                 finish();
                 break;
             case R.id.btnOk:
-                savePrefernces();
+                savePreferences();
                 break;
 
             default:
@@ -283,7 +275,7 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
 
         if (keyCode == KeyEvent.KEYCODE_SOFT_LEFT) {
             Log.v(TAG, "KEYCODE_SOFT_LEFT ");
-            savePrefernces();
+            savePreferences();
             // finish();
             return true;
         }
@@ -375,7 +367,7 @@ public class FmRxRdsConfig extends Activity implements View.OnKeyListener,
     /**
      * Saves Configuration settings in the Shared Preference
      */
-    private void savePrefernces() {
+    private void savePreferences() {
 
         int mChannelSpacePos = 2;
 

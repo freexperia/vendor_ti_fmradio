@@ -32,6 +32,8 @@
     <string name="stereo">Stereo</string>
     <string name="rdsAf">RDS AF</string>
     <string name="app_rds">FM Configurations</string>
+    <string name="european">European</string>
+    <string name="japanese">Japanese</string>
     <string name="freqRangeEurope">87.5 MHz - 108.0 MHz</string>
     <string name="freqRangeJapan">76 MHz - 90 MHz</string>
     <string name="label">KHz</string>

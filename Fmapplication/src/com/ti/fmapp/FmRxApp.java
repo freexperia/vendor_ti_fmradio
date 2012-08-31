@@ -48,6 +48,8 @@ import com.ti.fmapp.adapters.PreSetsAdapter;
 import com.ti.fmapp.database.PreSetsDB;
 import com.ti.fmapp.logic.PreSetRadio;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 /*
@@ -400,7 +402,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 * After FM is enabled dismiss the progress dialog and display the
                 * FM main screen. Set the default volume.
                 */
-
                 case EVENT_FM_ENABLED:
 
                     Log.i(TAG, "enter handleMessage ----EVENT_FM_ENABLED");
@@ -413,9 +414,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
                     loadDefaultConfiguration();
                     setContentView(R.layout.fmrxmain);
-                    /* At Power up, FM should be always unmuted. */
+                    // At Power up, FM should be always unmuted
                     mToggleMute = false;
-                    //Log.i(TAG, " handleMessage  init mToggleMute" + mToggleMute);
                     initControls();
                     break;
 
@@ -1200,6 +1200,24 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         lv.setAdapter(new PreSetsAdapter(this, preSetRadios));
     }
 
+    private void updateNotification(float frequency, String name) {
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotification = new Notification(R.drawable.fm_statusbar_icon, getString(R.string.app_name), System.currentTimeMillis());
+        RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification);
+        NumberFormat fmt = new DecimalFormat("#0.0");
+        contentView.setTextViewText(R.id.tv_frequency, fmt.format(frequency));
+        contentView.setTextViewText(R.id.tv_station_name, name);
+        /*if (!Preferences.getNotificationsUseRDSinsteadPreset(FmRxApp.this)){
+            // USE PreSet name
+
+        } else {
+            // use RDS value
+            //TODO: notifications RDS value assign and update
+        } */
+        mNotification.contentView = contentView;
+        mNotificationManager.notify(NOTIFICATION_ID, mNotification);
+    }
+
     /**
      * Adds Delay of 3 seconds
      */
@@ -1544,8 +1562,22 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         return false;
     }
 
-    /* Get the stored frequency from the arraylist and tune to that frequency */
+    /**
+     * Get the stored frequency from the arraylist and tune to that frequency
+     *
+     * @param text frequency
+     */
     void tuneStationFrequency(String text) {
+        tuneStationFrequency(text, "");
+    }
+
+    /**
+     * Get the stored frequency from the arraylist and tune to that frequency
+     *
+     * @param text frequency
+     * @param name Name - For updating notifications
+     */
+    void tuneStationFrequency(String text, String name) {
         try {
             float iFreq = Float.parseFloat(text);
             if (iFreq != 0) {
@@ -1556,6 +1588,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 if (!mStatus) {
                     showAlert(getParent(), "FmReceiver", getString(R.string.not_able_to_tune));
                 }
+                //update notifications bar
+                updateNotification(iFreq, name);
             } else {
 
                 new AlertDialog.Builder(this).setIcon(
@@ -1770,8 +1804,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             }
 
             if (fmAction.equals(FmReceiverIntent.RDS_TEXT_CHANGED_ACTION)) {
-                Log.i(TAG, "enter onReceive RDS_TEXT_CHANGED_ACTION "
-                        + fmAction);
+                //  Log.i(TAG, "enter onReceive RDS_TEXT_CHANGED_ACTION "
+                +fmAction);
                 if (FM_SEND_RDS_IN_BYTEARRAY) {
                     Bundle extras = intent.getExtras();
 

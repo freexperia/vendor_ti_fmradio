@@ -15,19 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*******************************************************************************\
- *
- *   FILE NAME:      FmRxAppConstants.java
- *
- *   BRIEF:          This file defines the API of the FM Rx stack.
- *
- *   DESCRIPTION:    General
- *
- *
- *
- *   AUTHOR:
- *
- \*******************************************************************************/
 package com.ti.fmapp;
 
 public interface FmRxAppConstants {

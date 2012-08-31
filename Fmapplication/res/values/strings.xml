@@ -2,8 +2,6 @@
 <resources>
 
     <string name="app_name">FM Radio</string>
-    <string name="app_rx">FM Radio</string>
-    <string name="app_tx">FM TX App</string>
     <string name="fmapp">FM Radio for Android</string>
     <string name="stations">FM Radio Stations</string>
     <string name="lblversion">Version:</string>

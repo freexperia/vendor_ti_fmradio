@@ -22,6 +22,7 @@
         <activity android:name=".FmRxApp"
                   android:label="@string/app_rx"
                   android:theme="@style/fmapp_style"
+                  android:launchMode="singleInstance"
                   android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.START_FMRX"/>

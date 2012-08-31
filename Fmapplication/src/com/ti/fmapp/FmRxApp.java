@@ -1302,279 +1302,96 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 
         switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-
-                return true;
-            case KeyEvent.KEYCODE_DPAD_UP:
-
-                return true;
             case KeyEvent.KEYCODE_BACK:
-                /*
-                 * Show a radio notification when the user presses back button and
-                 * leaves FM app. The FM radio is still on
-                 */
-//                this.showNotification(R.drawable.radio, R.string.app_rx,
-                //                      txtFmRxTunedFreq.getText(), false);
                 saveDefaultConfiguration();
                 finish();
                 return true;
 
-            /* Keys A to L are mapped to different get APIs for Testing */
+            /* Keys are mapped to different get APIs for Testing */
             case KeyEvent.KEYCODE_A:
-
-                /*if (MAKE_FM_APIS_BLOCKING == true) {
-                          // Code for blocking call
-                                      Log.i(TAG, "Testing getVolume()  returned volume = "
-                        + sFmReceiver.rxGetVolume());
-
-                        } else {
-                          // Code for non blocking call
-                                      Log.i(TAG, "Testing getVolume_nb()  returned volume = "
-                        + sFmReceiver.rxGetVolume_nb());
-
-                        }
-
-                */
+                //Log.i(TAG, "Testing getVolume()  returned volume = "+ sFmReceiver.rxGetVolume());
                 return true;
 
             case KeyEvent.KEYCODE_B:
-
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG, "Testing getTunedFrequency()  returned Tuned Freq = "
-                            + sFmReceiver.getTunedFrequency());
-
-                } else {
-                    // Code for non blocking call
-                    //            Log.i(TAG, "Testing getTunedFrequency_nb()  returned Tuned Freq = "
-                    //          + sFmReceiver.rxGetTunedFrequency_nb());
-
-                }
-
+                Log.i(TAG, "Testing getTunedFrequency()  returned Tuned Freq = " + sFmReceiver.getTunedFrequency());
                 return true;
 
             case KeyEvent.KEYCODE_C:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG, "Testing getRssiThreshold()    returned RSSI thrshld = "
-                            + sFmReceiver.getRssiThreshold());
-                } else {
-                    // Code for non blocking call
-                    //  Log.i(TAG, "Testing getRssiThreshold_nb()    returned RSSI thrshld = "
-                    // + sFmReceiver.rxGetRssiThreshold_nb());
-                }
-
+                Log.i(TAG, "Testing getRssiThreshold()    returned RSSI thrshld = " + sFmReceiver.getRssiThreshold());
                 return true;
 
             case KeyEvent.KEYCODE_D:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG, "Testing getBand() returned Band  = "
-                            + sFmReceiver.getBand());
-                } else {
-                    // Code for non blocking call
-                    //       Log.i(TAG, "Testing getBand_nb() returned Band  = "
-                    //       + sFmReceiver.rxGetBand_nb());
-                }
-
+                Log.i(TAG, "Testing getBand() returned Band  = " + sFmReceiver.getBand());
                 return true;
 
             case KeyEvent.KEYCODE_E:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG, "Testing getDeEmphasisFilter()    returned De-emp  = "
-                            + sFmReceiver.getDeEmphasisFilter());
-                } else {
-                    // Code for non blocking call
-                    //       Log.i(TAG, "Testing getDeEmphasisFilter_nb()    returned De-emp  = "
-                    //       + sFmReceiver.rxGetDeEmphasisFilter_nb());
-                }
-
+                Log.i(TAG, "Testing getDeEmphasisFilter()    returned De-emp  = " + sFmReceiver.getDeEmphasisFilter());
                 return true;
 
             case KeyEvent.KEYCODE_F:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG, "Testing getMonoStereoMode() returned MonoStereo = "
-                            + sFmReceiver.getMonoStereoMode());
-
-                } else {
-                    // Code for non blocking call
-                    //            Log.i(TAG, "Testing getMonoStereoMode_nb() returned MonoStereo = "
-                    //         + sFmReceiver.rxGetMonoStereoMode_nb());
-
-                }
-
+                Log.i(TAG, "Testing getMonoStereoMode() returned MonoStereo = " + sFmReceiver.getMonoStereoMode());
                 return true;
 
             case KeyEvent.KEYCODE_G:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG, "Testing getMuteMode()  returned MuteMode = "
-                            + sFmReceiver.getMuteMode());
-                } else {
-                    // Code for non blocking call
-                    //      Log.i(TAG, "Testing getMuteMode_nb()  returned MuteMode = "
-                    //      + sFmReceiver.rxGetMuteMode_nb());
-                }
-
+                Log.i(TAG, "Testing getMuteMode()  returned MuteMode = " + sFmReceiver.getMuteMode());
                 return true;
 
             case KeyEvent.KEYCODE_H:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG,
-                            "Testing getRdsAfSwitchMode()    returned RdsAfSwitchMode = "
-                                    + sFmReceiver.getRdsAfSwitchMode());
-                } else {
-                    // Code for non blocking call
-                    //       Log.i(TAG,
-                    //       "Testing getRdsAfSwitchMode_nb()    returned RdsAfSwitchMode = "
-                    //               + sFmReceiver.rxGetRdsAfSwitchMode_nb());
-                }
-
+                Log.i(TAG, "Testing getRdsAfSwitchMode()    returned RdsAfSwitchMode = " + sFmReceiver.getRdsAfSwitchMode());
                 return true;
 
             case KeyEvent.KEYCODE_I:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG, "Testing getRdsGroupMask() returned RdsGrpMask = "
-                            + sFmReceiver.getRdsGroupMask());
-                } else {
-                    // Code for non blocking call
-                    //    Log.i(TAG, "Testing getRdsGroupMask_nb() returned RdsGrpMask = "
-                    //    + sFmReceiver.rxGetRdsGroupMask_nb());
-                }
-
+                Log.i(TAG, "Testing getRdsGroupMask() returned RdsGrpMask = " + sFmReceiver.getRdsGroupMask());
                 return true;
 
             case KeyEvent.KEYCODE_J:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG, "Testing getRdsSystem() returned Rds System = "
-                            + sFmReceiver.getRdsSystem());
-                } else {
-                    // Code for non blocking call
-                    //    Log.i(TAG, "Testing getRdsSystem_nb() returned Rds System = "
-                    //    + sFmReceiver.rxGetRdsSystem_nb());
-                }
-
+                Log.i(TAG, "Testing getRdsSystem() returned Rds System = "
+                        + sFmReceiver.getRdsSystem());
                 return true;
 
             case KeyEvent.KEYCODE_K:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG,
-                            "Testing getRfDependentMuteMode()    returned RfDepndtMuteMode = "
-                                    + sFmReceiver.getRfDependentMuteMode());
-                } else {
-                    // Code for non blocking call
-                    //      Log.i(TAG,
-                    //      "Testing getRfDependentMuteMode_nb()    returned RfDepndtMuteMode = "
-                    //              + sFmReceiver.rxGetRfDependentMuteMode_nb());
-                }
-
+                Log.i(TAG,
+                        "Testing getRfDependentMuteMode()    returned RfDepndtMuteMode = "
+                                + sFmReceiver.getRfDependentMuteMode());
                 return true;
 
             case KeyEvent.KEYCODE_L:
-
-                if (MAKE_FM_APIS_BLOCKING) {
-
-                    LayoutInflater inflater = getLayoutInflater();
-                    View layout = inflater.inflate(R.layout.toast,
-                            (ViewGroup) findViewById(R.id.toast_layout));
-                    TextView text = (TextView) layout.findViewById(R.id.text);
-                    text.setText("The current Rssi    " + sFmReceiver.getRssi());
-
-                    Toast toast = new Toast(getApplicationContext());
-                    toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_VERTICAL, 0, 0);
-                    toast.setDuration(Toast.LENGTH_LONG);
-                    toast.setView(layout);
-                    toast.show();
-                } else {
-                    // Log.i(TAG,
-                    //     "Testing rxGetRssi_nb()    returned  = "
-                    //             + sFmReceiver.rxGetRssi_nb());
-                }
-
+                Log.i(TAG, "Testing getRssi()    returned value = " + sFmReceiver.getRssi());
                 return true;
 
             case KeyEvent.KEYCODE_M:
                 Log.i(TAG, "Testing isValidChannel()    returned isValidChannel = "
                         + sFmReceiver.isValidChannel());
-
                 return true;
 
             case KeyEvent.KEYCODE_N:
                 Log.i(TAG, "Testing getFwVersion()    returned getFwVersion = "
                         + sFmReceiver.getFwVersion());
-
                 return true;
 
             case KeyEvent.KEYCODE_O:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG,
-                            "Testing getChannelSpacing()    returned getChannelSpacing = "
-                                    + sFmReceiver.getChannelSpacing());
-                } else {
-                    // Code for non blocking call
-                    //  Log.i(TAG,
-                    //  "Testing getChannelSpacing_nb()    returned getChannelSpacing = "
-                    //          + sFmReceiver.rxGetChannelSpacing_nb());
-                }
-
-
+                Log.i(TAG, "Testing getChannelSpacing()    returned getChannelSpacing = " + sFmReceiver.getChannelSpacing());
                 return true;
 
             case KeyEvent.KEYCODE_P:
-                Log.i(TAG, "Testing completescan()");
+                Log.i(TAG, "Testing completeScan()");
                 sFmReceiver.completeScan();
                 return true;
 
             case KeyEvent.KEYCODE_Q:
-
-                if (MAKE_FM_APIS_BLOCKING) {
-                    Log.i(TAG,
-                            "Testing getCompleteScanProgress()    returned scan progress = "
-                                    + sFmReceiver.getCompleteScanProgress());
-                } else {
-                    //               Log.i(TAG,
-                    //       "Testing getCompleteScanProgress()    returned scan progress = "
-                    //               + sFmReceiver.rxGetCompleteScanProgress_nb());
-                }
-
+                Log.i(TAG, "Testing getCompleteScanProgress()    returned scan progress = " + sFmReceiver.getCompleteScanProgress());
                 return true;
 
             case KeyEvent.KEYCODE_R:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    Log.i(TAG, "Testing stopCompleteScan()    returned status = "
-                            + sFmReceiver.stopCompleteScan());
-                } else {
-                    //             Log.i(TAG, "Testing stopCompleteScan()    returned status = "
-                    //     + sFmReceiver.rxStopCompleteScan_nb());
-                }
-
+                Log.i(TAG, "Testing stopCompleteScan()    returned status = " + sFmReceiver.stopCompleteScan());
                 return true;
 
             case KeyEvent.KEYCODE_S:
-
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG,
-                            "Testing setRfDependentMuteMode()    returned RfDepndtMuteMode = "
-                                    + sFmReceiver.setRfDependentMuteMode(1));
-                } else {
-                    // Code for non blocking call
-                    /*Log.i(TAG,
-       "Testing setRfDependentMuteMode()    returned RfDepndtMuteMode = "
-               + sFmReceiver.rxSetRfDependentMuteMode_nb(1));    */
-                }
-
+                Log.i(TAG,
+                        "Testing setRfDependentMuteMode()    returned RfDepndtMuteMode = "
+                                + sFmReceiver.setRfDependentMuteMode((sFmReceiver.getRfDependentMuteMode() == 1) ? 0 : 1));
                 return true;
-
         }
-
         return false;
     }
 

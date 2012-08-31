@@ -467,12 +467,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     Log.d(TAG, "enter handleMessage ----EVENT_SEEK_STOPPED seekFreq: " + seekFreq);
                     lastTunedFrequency = (float) seekFreq / 1000;
                     txtStatusMsg.setText(R.string.playing);
-                    if (isFirstPlay) {
-                        isFirstPlay = false;
-                        initNotifications();
-                    }
-                    //update notification display
-                    updateNotification(lastTunedFrequency, "");
 
                     //update panel frequency display
                     updateFrequencyDisplay(lastTunedFrequency);
@@ -492,12 +486,18 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     break;
 
                 case EVENT_SEEK_STARTED:
-
                     Integer freq = (Integer) msg.obj;
-                    //Log.i(TAG, "enter handleMessage ----EVENT_SEEK_STARTED freq" + freq);
+                    Log.i(TAG, "enter handleMessage ----EVENT_SEEK_STARTED freq" + freq);
                     lastTunedFrequency = (float) freq / 1000;
                     txtStatusMsg.setText(R.string.playing);
                     updateFrequencyDisplay(lastTunedFrequency);
+                    if (isFirstPlay) {
+                        isFirstPlay = false;
+                        initNotifications();
+                    }
+                    //update notification display
+                    updateNotification(lastTunedFrequency, "");
+
                     // clear the RDS text
                     txtRadioText.setText(null);
 

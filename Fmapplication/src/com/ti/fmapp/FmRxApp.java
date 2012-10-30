@@ -285,6 +285,12 @@ public class FmRxApp extends Activity implements View.OnClickListener,
          */
 
         sFmReceiver = new FmReceiver(this, this);
+
+        //receive broadcasts from Notification Bar or Widget
+        BroadcastReceiver receiver;
+        IntentFilter filter = new IntentFilter("com.fm.freexperia.NOTIFICATION");
+        receiver = new NotificationsReceiver();
+        registerReceiver(receiver, filter);
     }
 
 
@@ -293,11 +299,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      * @return the pending intent that contains the provided command to deliver to the appropriate service
      */
     private PendingIntent buildServiceIntent(String command) {
-        Intent intent = new Intent(this, FmRxApp.class);
+        Intent intent = new Intent();
         intent.putExtra(EXTRA_COMMAND, command);
-
-        //TODO: Now we use this Activity, but in the future we should really use a service for dealing with all FM comms
-        return PendingIntent.getActivity(getApplicationContext(),
+        return PendingIntent.getBroadcast(getApplicationContext(),
                 command.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
@@ -1450,6 +1454,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         switch (id) {
 
             case R.id.btn_set_frequency:
+                //TODO : fix. got broken by singleInstance
                 startActivityForResult(new Intent(INTENT_RXTUNE), ACTIVITY_TUNE);
                 break;
 
@@ -2175,23 +2180,31 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      * handling callbacks from Notification bar here
      */
 
+    public class NotificationsReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.v(TAG, "Received Notification!");
+            if (intent.hasExtra(EXTRA_COMMAND)) {
+                Log.v(TAG, "Command: " + intent.getStringExtra(EXTRA_COMMAND));
+                if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_CLEAR)) {
+                    NotificationManager nMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    nMgr.cancel(NOTIFICATION_ID);
+                    //set this as a control flag so that the notification does not reappear
+                    // if user hid it is because he/she does not want it. if he does just start app again
+                    hidNotification = true;
+                } else if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_SEEK_UP)) {
+                    seekUp();
+                } else if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_SEEK_DOWN)) {
+                    seekDown();
+                }
+            }
+        }
+    }
+
     @Override
     protected void onNewIntent(Intent intent) {
         Log.v(TAG, "called onNewIntent.");
-        if (intent.hasExtra(EXTRA_COMMAND)) {
-            Log.v(TAG, "Command: " + intent.getStringExtra(EXTRA_COMMAND));
-            if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_CLEAR)) {
-                NotificationManager nMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                nMgr.cancel(NOTIFICATION_ID);
-                //set this as a control flag so that the notification does not reappear
-                // if user hid it is because he/she does not want it. if he does just start app again
-                hidNotification = true;
-            } else if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_SEEK_UP)) {
-                seekUp();
-            } else if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_SEEK_DOWN)) {
-                seekDown();
-            }
-        }
         //super.onNewIntent(intent);
     }
 }

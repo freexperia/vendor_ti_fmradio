@@ -5,6 +5,11 @@
     <string name="fmapp">FM Radio for Android</string>
     <string name="stations">FM Radio Stations</string>
     <string name="lblversion">Version:</string>
+    <string name="author">Made by:\n\nPedro Veloso (@pedronveloso) for the FreeXperia Project
+        \n\nBased upon the original work from Sony Ericsson Mobile Communications AB and Texas Instruments, Inc.
+        \nBoth their code and this project is sporting the Apache 2.0 License, you can find this project source at
+        https://github.com/CyanogenMod/android_hardware_ti_fmradio
+    </string>
     <string name="app_rxtune">Enter Frequency</string>
     <string name="app_rxhelp">About</string>
     <string name="mono">Mono</string>
@@ -12,8 +17,6 @@
     <string name="statusMsg">Receiving…</string>
     <string name="statusMsgStopped">Press seek button to start playing.</string>
     <string name="notiMsg">Notification Message</string>
-    <string name="btnOk">OK</string>
-    <string name="btnCancel">Cancel</string>
     <string name="btnBack">Back</string>
     <string name="japaneseBand">Japanese Band</string>
     <string name="preEmphasis">Pre Emphasis Filter(Usec):</string>
@@ -43,7 +46,6 @@
     <string name="Configure">Configure</string>
     <string name="Help">Help</string>
     <string name="enterFreq_Dialog">Enter Frequency</string>
-    <string name="Stereo">Stereo</string>
     <string name="empty"></string>
     <string name="pty">Dynamic PTY</string>
     <string name="comp">Compression</string>

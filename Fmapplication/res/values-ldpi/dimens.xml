@@ -1,5 +1,5 @@
 <resources>
 
     <dimen name="default_margin">6dip</dimen>
-    <dimen name="small_font">16sp</dimen>
+    <dimen name="small_font">12sp</dimen>
 </resources>

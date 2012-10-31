@@ -1,27 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent" android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:orientation="vertical"
               android:layout_height="fill_parent">
 
-    <TextView android:layout_width="wrap_content"
-              android:text="@string/fmapp" android:textSize="24sp"
-              android:textStyle="bold" android:layout_height="50dip"
-              android:layout_marginTop="20dip" android:paddingLeft="50dip"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:text="@string/fmapp"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_height="50dip"
+            android:layout_marginTop="20dip"
+            android:paddingLeft="50dip"/>
 
     <LinearLayout
             android:gravity="center_horizontal"
             android:layout_width="fill_parent"
             android:layout_height="50dip">
 
-        <TextView android:layout_width="wrap_content"
-                  android:text="@string/lblversion" android:layout_height="40dip"
-                  android:textSize="24sp"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:text="@string/lblversion"
+                android:layout_height="40dip"
+                android:textSize="24sp"/>
 
-        <TextView android:id="@+id/txtversion" android:layout_width="wrap_content"
-                  android:paddingLeft="30dip"
-                  android:layout_height="40dip" android:textSize="24sp"/>
+        <TextView
+                android:id="@+id/txtversion"
+                android:layout_width="wrap_content"
+                android:paddingLeft="30dip"
+                android:layout_height="40dip"
+                android:textSize="24sp"/>
 
     </LinearLayout>
+
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:text="@string/author"
+            android:gravity="center"
+            android:autoLink="web"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/small_font"/>
 
 </LinearLayout>

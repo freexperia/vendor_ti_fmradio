@@ -1321,7 +1321,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 return true;
 
             case KeyEvent.KEYCODE_C:
-                Log.i(TAG, "Testing getRssiThreshold()    returned RSSI thrshld = " + sFmReceiver.getRssiThreshold());
+                Log.i(TAG, "Testing getRssiThreshold()    returned RSSI threshold = " + sFmReceiver.getRssiThreshold());
                 return true;
 
             case KeyEvent.KEYCODE_D:

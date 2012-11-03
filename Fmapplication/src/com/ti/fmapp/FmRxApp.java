@@ -107,6 +107,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     private Notification mNotification;
 
     private boolean isFirstPlay = true;
+    private boolean hidNotification = false;
 
     /**
      * *****************************************
@@ -284,6 +285,12 @@ public class FmRxApp extends Activity implements View.OnClickListener,
          */
 
         sFmReceiver = new FmReceiver(this, this);
+
+        //receive broadcasts from Notification Bar or Widget
+        BroadcastReceiver receiver;
+        IntentFilter filter = new IntentFilter("com.fm.freexperia.NOTIFICATION");
+        receiver = new NotificationsReceiver();
+        registerReceiver(receiver, filter);
     }
 
 
@@ -292,11 +299,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      * @return the pending intent that contains the provided command to deliver to the appropriate service
      */
     private PendingIntent buildServiceIntent(String command) {
-        Intent intent = new Intent(this, FmRxApp.class);
+        Intent intent = new Intent();
         intent.putExtra(EXTRA_COMMAND, command);
-
-        //TODO: Now we use this Activity, but in the future we should really use a service for dealing with all FM comms
-        return PendingIntent.getActivity(getApplicationContext(),
+        return PendingIntent.getBroadcast(getApplicationContext(),
                 command.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
@@ -496,7 +501,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                         initNotifications();
                     }
                     //update notification display
-                    updateNotification(lastTunedFrequency, "");
+                    if (!hidNotification) {
+                        updateNotification(lastTunedFrequency, "");
+                    }
 
                     // clear the RDS text
                     txtRadioText.setText(null);
@@ -659,9 +666,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     if (sdefaultSettingOn) {
                         /* Set the default frequency */
                         if (sBand == FM_BAND_EUROPE_US) {
-                            lastTunedFrequency = (float) DEFAULT_FREQ_EUROPE;
+                            lastTunedFrequency = DEFAULT_FREQ_EUROPE;
                         } else {
-                            lastTunedFrequency = (float) DEFAULT_FREQ_JAPAN;
+                            lastTunedFrequency = DEFAULT_FREQ_JAPAN;
                         }
                     }
 
@@ -990,7 +997,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 //else
                 //    mStatus = sFmReceiver.rxEnableRds_nb();
                 if (!mStatus) {
-                    Log.e(TAG, "setRDS()-- enableRds() ->Erorr");
+                    Log.e(TAG, "setRDS()-- enableRds() ->Error");
                     showAlert(this, "FmReceiver", getString(R.string.not_able_enable_rds));
                 }
 
@@ -1002,7 +1009,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 //     mStatus = sFmReceiver.rxDisableRds_nb();
 
                 if (!mStatus) {
-                    Log.e(TAG, "setRDS()-- disableRds() ->Erorr");
+                    Log.e(TAG, "setRDS()-- disableRds() ->Error");
                     showAlert(this, "FmReceiver", getString(R.string.not_able_disable_rds));
                 } else {
                     Log.e(TAG, "setRDS()-- disableRds() ->success");
@@ -1299,279 +1306,96 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 
         switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-
-                return true;
-            case KeyEvent.KEYCODE_DPAD_UP:
-
-                return true;
             case KeyEvent.KEYCODE_BACK:
-                /*
-                 * Show a radio notification when the user presses back button and
-                 * leaves FM app. The FM radio is still on
-                 */
-//                this.showNotification(R.drawable.radio, R.string.app_rx,
-                //                      txtFmRxTunedFreq.getText(), false);
                 saveDefaultConfiguration();
                 finish();
                 return true;
 
-            /* Keys A to L are mapped to different get APIs for Testing */
+            /* Keys are mapped to different get APIs for Testing */
             case KeyEvent.KEYCODE_A:
-
-                /*if (MAKE_FM_APIS_BLOCKING == true) {
-                          // Code for blocking call
-                                      Log.i(TAG, "Testing getVolume()  returned volume = "
-                        + sFmReceiver.rxGetVolume());
-
-                        } else {
-                          // Code for non blocking call
-                                      Log.i(TAG, "Testing getVolume_nb()  returned volume = "
-                        + sFmReceiver.rxGetVolume_nb());
-
-                        }
-
-                */
+                //Log.i(TAG, "Testing getVolume()  returned volume = "+ sFmReceiver.rxGetVolume());
                 return true;
 
             case KeyEvent.KEYCODE_B:
-
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG, "Testing getTunedFrequency()  returned Tuned Freq = "
-                            + sFmReceiver.getTunedFrequency());
-
-                } else {
-                    // Code for non blocking call
-                    //            Log.i(TAG, "Testing getTunedFrequency_nb()  returned Tuned Freq = "
-                    //          + sFmReceiver.rxGetTunedFrequency_nb());
-
-                }
-
+                Log.i(TAG, "Testing getTunedFrequency()  returned Tuned Freq = " + sFmReceiver.getTunedFrequency());
                 return true;
 
             case KeyEvent.KEYCODE_C:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG, "Testing getRssiThreshold()    returned RSSI thrshld = "
-                            + sFmReceiver.getRssiThreshold());
-                } else {
-                    // Code for non blocking call
-                    //  Log.i(TAG, "Testing getRssiThreshold_nb()    returned RSSI thrshld = "
-                    // + sFmReceiver.rxGetRssiThreshold_nb());
-                }
-
+                Log.i(TAG, "Testing getRssiThreshold()    returned RSSI threshold = " + sFmReceiver.getRssiThreshold());
                 return true;
 
             case KeyEvent.KEYCODE_D:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG, "Testing getBand() returned Band  = "
-                            + sFmReceiver.getBand());
-                } else {
-                    // Code for non blocking call
-                    //       Log.i(TAG, "Testing getBand_nb() returned Band  = "
-                    //       + sFmReceiver.rxGetBand_nb());
-                }
-
+                Log.i(TAG, "Testing getBand() returned Band  = " + sFmReceiver.getBand());
                 return true;
 
             case KeyEvent.KEYCODE_E:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG, "Testing getDeEmphasisFilter()    returned De-emp  = "
-                            + sFmReceiver.getDeEmphasisFilter());
-                } else {
-                    // Code for non blocking call
-                    //       Log.i(TAG, "Testing getDeEmphasisFilter_nb()    returned De-emp  = "
-                    //       + sFmReceiver.rxGetDeEmphasisFilter_nb());
-                }
-
+                Log.i(TAG, "Testing getDeEmphasisFilter()    returned De-emp  = " + sFmReceiver.getDeEmphasisFilter());
                 return true;
 
             case KeyEvent.KEYCODE_F:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG, "Testing getMonoStereoMode() returned MonoStereo = "
-                            + sFmReceiver.getMonoStereoMode());
-
-                } else {
-                    // Code for non blocking call
-                    //            Log.i(TAG, "Testing getMonoStereoMode_nb() returned MonoStereo = "
-                    //         + sFmReceiver.rxGetMonoStereoMode_nb());
-
-                }
-
+                Log.i(TAG, "Testing getMonoStereoMode() returned MonoStereo = " + sFmReceiver.getMonoStereoMode());
                 return true;
 
             case KeyEvent.KEYCODE_G:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG, "Testing getMuteMode()  returned MuteMode = "
-                            + sFmReceiver.getMuteMode());
-                } else {
-                    // Code for non blocking call
-                    //      Log.i(TAG, "Testing getMuteMode_nb()  returned MuteMode = "
-                    //      + sFmReceiver.rxGetMuteMode_nb());
-                }
-
+                Log.i(TAG, "Testing getMuteMode()  returned MuteMode = " + sFmReceiver.getMuteMode());
                 return true;
 
             case KeyEvent.KEYCODE_H:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG,
-                            "Testing getRdsAfSwitchMode()    returned RdsAfSwitchMode = "
-                                    + sFmReceiver.getRdsAfSwitchMode());
-                } else {
-                    // Code for non blocking call
-                    //       Log.i(TAG,
-                    //       "Testing getRdsAfSwitchMode_nb()    returned RdsAfSwitchMode = "
-                    //               + sFmReceiver.rxGetRdsAfSwitchMode_nb());
-                }
-
+                Log.i(TAG, "Testing getRdsAfSwitchMode()    returned RdsAfSwitchMode = " + sFmReceiver.getRdsAfSwitchMode());
                 return true;
 
             case KeyEvent.KEYCODE_I:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG, "Testing getRdsGroupMask() returned RdsGrpMask = "
-                            + sFmReceiver.getRdsGroupMask());
-                } else {
-                    // Code for non blocking call
-                    //    Log.i(TAG, "Testing getRdsGroupMask_nb() returned RdsGrpMask = "
-                    //    + sFmReceiver.rxGetRdsGroupMask_nb());
-                }
-
+                Log.i(TAG, "Testing getRdsGroupMask() returned RdsGrpMask = " + sFmReceiver.getRdsGroupMask());
                 return true;
 
             case KeyEvent.KEYCODE_J:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG, "Testing getRdsSystem() returned Rds System = "
-                            + sFmReceiver.getRdsSystem());
-                } else {
-                    // Code for non blocking call
-                    //    Log.i(TAG, "Testing getRdsSystem_nb() returned Rds System = "
-                    //    + sFmReceiver.rxGetRdsSystem_nb());
-                }
-
+                Log.i(TAG, "Testing getRdsSystem() returned Rds System = "
+                        + sFmReceiver.getRdsSystem());
                 return true;
 
             case KeyEvent.KEYCODE_K:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG,
-                            "Testing getRfDependentMuteMode()    returned RfDepndtMuteMode = "
-                                    + sFmReceiver.getRfDependentMuteMode());
-                } else {
-                    // Code for non blocking call
-                    //      Log.i(TAG,
-                    //      "Testing getRfDependentMuteMode_nb()    returned RfDepndtMuteMode = "
-                    //              + sFmReceiver.rxGetRfDependentMuteMode_nb());
-                }
-
+                Log.i(TAG,
+                        "Testing getRfDependentMuteMode()    returned RfDepndtMuteMode = "
+                                + sFmReceiver.getRfDependentMuteMode());
                 return true;
 
             case KeyEvent.KEYCODE_L:
-
-                if (MAKE_FM_APIS_BLOCKING) {
-
-                    LayoutInflater inflater = getLayoutInflater();
-                    View layout = inflater.inflate(R.layout.toast,
-                            (ViewGroup) findViewById(R.id.toast_layout));
-                    TextView text = (TextView) layout.findViewById(R.id.text);
-                    text.setText("The current Rssi    " + sFmReceiver.getRssi());
-
-                    Toast toast = new Toast(getApplicationContext());
-                    toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_VERTICAL, 0, 0);
-                    toast.setDuration(Toast.LENGTH_LONG);
-                    toast.setView(layout);
-                    toast.show();
-                } else {
-                    // Log.i(TAG,
-                    //     "Testing rxGetRssi_nb()    returned  = "
-                    //             + sFmReceiver.rxGetRssi_nb());
-                }
-
+                Log.i(TAG, "Testing getRssi()    returned value = " + sFmReceiver.getRssi());
                 return true;
 
             case KeyEvent.KEYCODE_M:
                 Log.i(TAG, "Testing isValidChannel()    returned isValidChannel = "
                         + sFmReceiver.isValidChannel());
-
                 return true;
 
             case KeyEvent.KEYCODE_N:
                 Log.i(TAG, "Testing getFwVersion()    returned getFwVersion = "
                         + sFmReceiver.getFwVersion());
-
                 return true;
 
             case KeyEvent.KEYCODE_O:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG,
-                            "Testing getChannelSpacing()    returned getChannelSpacing = "
-                                    + sFmReceiver.getChannelSpacing());
-                } else {
-                    // Code for non blocking call
-                    //  Log.i(TAG,
-                    //  "Testing getChannelSpacing_nb()    returned getChannelSpacing = "
-                    //          + sFmReceiver.rxGetChannelSpacing_nb());
-                }
-
-
+                Log.i(TAG, "Testing getChannelSpacing()    returned getChannelSpacing = " + sFmReceiver.getChannelSpacing());
                 return true;
 
             case KeyEvent.KEYCODE_P:
-                Log.i(TAG, "Testing completescan()");
+                Log.i(TAG, "Testing completeScan()");
                 sFmReceiver.completeScan();
                 return true;
 
             case KeyEvent.KEYCODE_Q:
-
-                if (MAKE_FM_APIS_BLOCKING) {
-                    Log.i(TAG,
-                            "Testing getCompleteScanProgress()    returned scan progress = "
-                                    + sFmReceiver.getCompleteScanProgress());
-                } else {
-                    //               Log.i(TAG,
-                    //       "Testing getCompleteScanProgress()    returned scan progress = "
-                    //               + sFmReceiver.rxGetCompleteScanProgress_nb());
-                }
-
+                Log.i(TAG, "Testing getCompleteScanProgress()    returned scan progress = " + sFmReceiver.getCompleteScanProgress());
                 return true;
 
             case KeyEvent.KEYCODE_R:
-                if (MAKE_FM_APIS_BLOCKING) {
-                    Log.i(TAG, "Testing stopCompleteScan()    returned status = "
-                            + sFmReceiver.stopCompleteScan());
-                } else {
-                    //             Log.i(TAG, "Testing stopCompleteScan()    returned status = "
-                    //     + sFmReceiver.rxStopCompleteScan_nb());
-                }
-
+                Log.i(TAG, "Testing stopCompleteScan()    returned status = " + sFmReceiver.stopCompleteScan());
                 return true;
 
             case KeyEvent.KEYCODE_S:
-
-                if (MAKE_FM_APIS_BLOCKING) {
-                    // Code for blocking call
-                    Log.i(TAG,
-                            "Testing setRfDependentMuteMode()    returned RfDepndtMuteMode = "
-                                    + sFmReceiver.setRfDependentMuteMode(1));
-                } else {
-                    // Code for non blocking call
-                    /*Log.i(TAG,
-       "Testing setRfDependentMuteMode()    returned RfDepndtMuteMode = "
-               + sFmReceiver.rxSetRfDependentMuteMode_nb(1));    */
-                }
-
+                Log.i(TAG,
+                        "Testing setRfDependentMuteMode()    returned RfDepndtMuteMode = "
+                                + sFmReceiver.setRfDependentMuteMode((sFmReceiver.getRfDependentMuteMode() == 1) ? 0 : 1));
                 return true;
-
         }
-
         return false;
     }
 
@@ -1601,8 +1425,16 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 if (!mStatus) {
                     showAlert(getParent(), "FmReceiver", getString(R.string.not_able_to_tune));
                 }
+                //does notifications need initialization?
+                if (isFirstPlay && !hidNotification) {
+                    isFirstPlay = false;
+                    initNotifications();
+                }
+
                 //update notifications bar
-                updateNotification(iFreq, name);
+                if (!hidNotification) {
+                    updateNotification(iFreq, name);
+                }
             } else {
 
                 new AlertDialog.Builder(this).setIcon(
@@ -1622,6 +1454,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         switch (id) {
 
             case R.id.btn_set_frequency:
+                //TODO : fix. got broken by singleInstance
                 startActivityForResult(new Intent(INTENT_RXTUNE), ACTIVITY_TUNE);
                 break;
 
@@ -2347,20 +2180,31 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      * handling callbacks from Notification bar here
      */
 
+    public class NotificationsReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.v(TAG, "Received Notification!");
+            if (intent.hasExtra(EXTRA_COMMAND)) {
+                Log.v(TAG, "Command: " + intent.getStringExtra(EXTRA_COMMAND));
+                if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_CLEAR)) {
+                    NotificationManager nMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    nMgr.cancel(NOTIFICATION_ID);
+                    //set this as a control flag so that the notification does not reappear
+                    // if user hid it is because he/she does not want it. if he does just start app again
+                    hidNotification = true;
+                } else if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_SEEK_UP)) {
+                    seekUp();
+                } else if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_SEEK_DOWN)) {
+                    seekDown();
+                }
+            }
+        }
+    }
+
     @Override
     protected void onNewIntent(Intent intent) {
         Log.v(TAG, "called onNewIntent.");
-        if (intent.hasExtra(EXTRA_COMMAND)) {
-            Log.v(TAG, "Command: " + intent.getStringExtra(EXTRA_COMMAND));
-            if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_CLEAR)) {
-                NotificationManager nMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                nMgr.cancel(NOTIFICATION_ID);
-            } else if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_SEEK_UP)) {
-                seekUp();
-            } else if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_SEEK_DOWN)) {
-                seekDown();
-            }
-        }
         //super.onNewIntent(intent);
     }
 }

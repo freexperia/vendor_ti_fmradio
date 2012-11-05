@@ -9,18 +9,18 @@ import android.util.Log;
  */
 public class Utils {
 
-    private final static boolean DEBUG_ACTIVE = true;
     private final static String LOG_TAG = "FmRxApp";
 
     /**
      * @param message Message to display
      * @param type    [Log.Error, Log.Warn, ...]
+     * @param shouldPrint value that comes from Preferences which allows the user to decide if debug info should be printed to logcat. Error info will ALWAYS be displayed despite this value
      */
-    public static void debugFunc(String message, int type) {
+    public static void debugFunc(String message, int type, boolean shouldPrint) {
         // errors must always be displayed
         if (type == Log.ERROR) {
             Log.e(LOG_TAG, message);
-        } else if (DEBUG_ACTIVE) {
+        } else if (shouldPrint) {
             switch (type) {
                 case Log.DEBUG:
                     Log.d(LOG_TAG, message);

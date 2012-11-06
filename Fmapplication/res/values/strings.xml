@@ -132,6 +132,9 @@
     <string name="edit_station">Edit Station</string>
     <string name="remove_station">Remove Station</string>
     <string name="confirm_action_remove_station">Are you sure you want to remove this station:</string>
+    <string name="earphones_not_plugged">Earphones not plugged-in. Please plug them in before starting this
+        application.
+    </string>
 
     <!-- Tune Screen -->
     <string name="valid_frequency">Enter a valid frequency!!</string>

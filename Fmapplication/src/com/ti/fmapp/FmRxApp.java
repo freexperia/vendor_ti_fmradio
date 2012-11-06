@@ -228,69 +228,84 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             }
         }
 
+        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        if (audioManager.isWiredHeadsetOn()) {
+            //requestWindowFeature(Window.FEATURE_NO_TITLE);
+            setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+            // Register for FM intent broadcasts.
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(FmReceiverIntent.FM_ENABLED_ACTION);
+            intentFilter.addAction(FmReceiverIntent.FM_DISABLED_ACTION);
+            intentFilter.addAction(FmReceiverIntent.GET_FREQUENCY_ACTION);
+            intentFilter.addAction(FmReceiverIntent.SEEK_ACTION);
+            intentFilter.addAction(FmReceiverIntent.BAND_CHANGE_ACTION);
+            intentFilter.addAction(FmReceiverIntent.GET_CHANNEL_SPACE_ACTION);
+            intentFilter.addAction(FmReceiverIntent.SET_MODE_MONO_STEREO_ACTION);
+            intentFilter.addAction(FmReceiverIntent.VOLUME_CHANGED_ACTION);
+            intentFilter.addAction(FmReceiverIntent.RDS_TEXT_CHANGED_ACTION);
+            intentFilter.addAction(FmReceiverIntent.PS_CHANGED_ACTION);
+            intentFilter.addAction(FmReceiverIntent.AUDIO_PATH_CHANGED_ACTION);
+            intentFilter.addAction(FmReceiverIntent.TUNE_COMPLETE_ACTION);
+            intentFilter.addAction(FmReceiverIntent.SEEK_STOP_ACTION);
+            intentFilter.addAction(FmReceiverIntent.MUTE_CHANGE_ACTION);
+            intentFilter.addAction(FmReceiverIntent.DISPLAY_MODE_MONO_STEREO_ACTION);
+            intentFilter.addAction(FmReceiverIntent.ENABLE_RDS_ACTION);
+            intentFilter.addAction(FmReceiverIntent.DISABLE_RDS_ACTION);
+            intentFilter.addAction(FmReceiverIntent.SET_RDS_AF_ACTION);
+            intentFilter.addAction(FmReceiverIntent.SET_RDS_SYSTEM_ACTION);
+            intentFilter.addAction(FmReceiverIntent.SET_DEEMP_FILTER_ACTION);
+            intentFilter.addAction(FmReceiverIntent.SET_RSSI_THRESHHOLD_ACTION);
+            intentFilter.addAction(FmReceiverIntent.SET_RF_DEPENDENT_MUTE_ACTION);
+            intentFilter.addAction(FmReceiverIntent.PI_CODE_CHANGED_ACTION);
+            intentFilter.addAction(FmReceiverIntent.MASTER_VOLUME_CHANGED_ACTION);
+            intentFilter.addAction(FmReceiverIntent.CHANNEL_SPACING_CHANGED_ACTION);
+            intentFilter.addAction(FmReceiverIntent.COMPLETE_SCAN_DONE_ACTION);
+            intentFilter.addAction(FmReceiverIntent.COMPLETE_SCAN_STOP_ACTION);
+            intentFilter.addAction(FmReceiverIntent.GET_BAND_ACTION);
+            intentFilter.addAction(FmReceiverIntent.GET_MONO_STEREO_MODE_ACTION);
+            intentFilter.addAction(FmReceiverIntent.GET_MUTE_MODE_ACTION);
+            intentFilter.addAction(FmReceiverIntent.GET_RF_MUTE_MODE_ACTION);
+            intentFilter.addAction(FmReceiverIntent.GET_RSSI_THRESHHOLD_ACTION);
+            intentFilter.addAction(FmReceiverIntent.GET_DEEMPHASIS_FILTER_ACTION);
+            intentFilter.addAction(FmReceiverIntent.GET_VOLUME_ACTION);
+            intentFilter.addAction(FmReceiverIntent.GET_RDS_SYSTEM_ACTION);
+            intentFilter.addAction(FmReceiverIntent.GET_RDS_GROUPMASK_ACTION);
+            intentFilter.addAction(FmReceiverIntent.GET_RDS_AF_SWITCH_MODE_ACTION);
+            intentFilter.addAction(FmReceiverIntent.GET_RSSI_ACTION);
+            intentFilter.addAction(FmReceiverIntent.COMPLETE_SCAN_PROGRESS_ACTION);
+            intentFilter.addAction(FmReceiverIntent.SET_RDS_AF_ACTION);
+            intentFilter.addAction(FmReceiverIntent.SET_RF_DEPENDENT_MUTE_ACTION);
+            intentFilter.addAction(FmReceiverIntent.SET_CHANNEL_SPACE_ACTION);
+            // intentFilter.addAction(FmReceiverIntent.FM_ERROR_ACTION);
 
-        // Register for FM intent broadcasts.
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(FmReceiverIntent.FM_ENABLED_ACTION);
-        intentFilter.addAction(FmReceiverIntent.FM_DISABLED_ACTION);
-        intentFilter.addAction(FmReceiverIntent.GET_FREQUENCY_ACTION);
-        intentFilter.addAction(FmReceiverIntent.SEEK_ACTION);
-        intentFilter.addAction(FmReceiverIntent.BAND_CHANGE_ACTION);
-        intentFilter.addAction(FmReceiverIntent.GET_CHANNEL_SPACE_ACTION);
-        intentFilter.addAction(FmReceiverIntent.SET_MODE_MONO_STEREO_ACTION);
-        intentFilter.addAction(FmReceiverIntent.VOLUME_CHANGED_ACTION);
-        intentFilter.addAction(FmReceiverIntent.RDS_TEXT_CHANGED_ACTION);
-        intentFilter.addAction(FmReceiverIntent.PS_CHANGED_ACTION);
-        intentFilter.addAction(FmReceiverIntent.AUDIO_PATH_CHANGED_ACTION);
-        intentFilter.addAction(FmReceiverIntent.TUNE_COMPLETE_ACTION);
-        intentFilter.addAction(FmReceiverIntent.SEEK_STOP_ACTION);
-        intentFilter.addAction(FmReceiverIntent.MUTE_CHANGE_ACTION);
-        intentFilter.addAction(FmReceiverIntent.DISPLAY_MODE_MONO_STEREO_ACTION);
-        intentFilter.addAction(FmReceiverIntent.ENABLE_RDS_ACTION);
-        intentFilter.addAction(FmReceiverIntent.DISABLE_RDS_ACTION);
-        intentFilter.addAction(FmReceiverIntent.SET_RDS_AF_ACTION);
-        intentFilter.addAction(FmReceiverIntent.SET_RDS_SYSTEM_ACTION);
-        intentFilter.addAction(FmReceiverIntent.SET_DEEMP_FILTER_ACTION);
-        intentFilter.addAction(FmReceiverIntent.SET_RSSI_THRESHHOLD_ACTION);
-        intentFilter.addAction(FmReceiverIntent.SET_RF_DEPENDENT_MUTE_ACTION);
-        intentFilter.addAction(FmReceiverIntent.PI_CODE_CHANGED_ACTION);
-        intentFilter.addAction(FmReceiverIntent.MASTER_VOLUME_CHANGED_ACTION);
-        intentFilter.addAction(FmReceiverIntent.CHANNEL_SPACING_CHANGED_ACTION);
-        intentFilter.addAction(FmReceiverIntent.COMPLETE_SCAN_DONE_ACTION);
-        intentFilter.addAction(FmReceiverIntent.COMPLETE_SCAN_STOP_ACTION);
-        intentFilter.addAction(FmReceiverIntent.GET_BAND_ACTION);
-        intentFilter.addAction(FmReceiverIntent.GET_MONO_STEREO_MODE_ACTION);
-        intentFilter.addAction(FmReceiverIntent.GET_MUTE_MODE_ACTION);
-        intentFilter.addAction(FmReceiverIntent.GET_RF_MUTE_MODE_ACTION);
-        intentFilter.addAction(FmReceiverIntent.GET_RSSI_THRESHHOLD_ACTION);
-        intentFilter.addAction(FmReceiverIntent.GET_DEEMPHASIS_FILTER_ACTION);
-        intentFilter.addAction(FmReceiverIntent.GET_VOLUME_ACTION);
-        intentFilter.addAction(FmReceiverIntent.GET_RDS_SYSTEM_ACTION);
-        intentFilter.addAction(FmReceiverIntent.GET_RDS_GROUPMASK_ACTION);
-        intentFilter.addAction(FmReceiverIntent.GET_RDS_AF_SWITCH_MODE_ACTION);
-        intentFilter.addAction(FmReceiverIntent.GET_RSSI_ACTION);
-        intentFilter.addAction(FmReceiverIntent.COMPLETE_SCAN_PROGRESS_ACTION);
-        intentFilter.addAction(FmReceiverIntent.SET_RDS_AF_ACTION);
-        intentFilter.addAction(FmReceiverIntent.SET_RF_DEPENDENT_MUTE_ACTION);
-        intentFilter.addAction(FmReceiverIntent.SET_CHANNEL_SPACE_ACTION);
-        // intentFilter.addAction(FmReceiverIntent.FM_ERROR_ACTION);
+            registerReceiver(mReceiver, intentFilter);
 
-        registerReceiver(mReceiver, intentFilter);
+            /*
+             * Need to enable the FM if it was not enabled earlier
+             */
 
-        /*
-         * Need to enable the FM if it was not enabled earlier
-         */
+            sFmReceiver = new FmReceiver(this, this);
 
-        sFmReceiver = new FmReceiver(this, this);
+            //receive broadcasts from Notification Bar or Widget
+            BroadcastReceiver receiver;
+            IntentFilter filter = new IntentFilter("com.fm.freexperia.NOTIFICATION");
+            receiver = new NotificationsReceiver();
+            registerReceiver(receiver, filter);
+        } else {
+            //earphones not connected
+            new AlertDialog.Builder(FmRxApp.this).setTitle(R.string.app_name).setIcon(
+                    android.R.drawable.ic_dialog_alert).setMessage(getString(R.string.earphones_not_plugged))
+                    .setNegativeButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    }).show()
+                    .setCancelable(false);
+        }
 
-        //receive broadcasts from Notification Bar or Widget
-        BroadcastReceiver receiver;
-        IntentFilter filter = new IntentFilter("com.fm.freexperia.NOTIFICATION");
-        receiver = new NotificationsReceiver();
-        registerReceiver(receiver, filter);
+
     }
 
 

@@ -404,7 +404,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     private Handler mHandler = new Handler() {
 
         public void handleMessage(Message msg) {
-
             switch (msg.what) {
 
                 /*
@@ -1161,23 +1160,25 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     }
 
     private void initNotifications() {
-        //set up notifications
-        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Preferences.getUseNotifications(FmRxApp.this)){
+            //set up notifications
+            mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        Notification mNotification = new Notification(R.drawable.fm_statusbar_icon, getString(R.string.app_name), System.currentTimeMillis());
+            Notification mNotification = new Notification(R.drawable.fm_statusbar_icon, getString(R.string.app_name), System.currentTimeMillis());
 
-        Intent notificationIntent = new Intent(this, FmRxApp.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-        mNotification.contentIntent = contentIntent;
-        mNotification.flags = Notification.FLAG_ONGOING_EVENT;
+            Intent notificationIntent = new Intent(this, FmRxApp.class);
+            PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+            mNotification.contentIntent = contentIntent;
+            mNotification.flags = Notification.FLAG_ONGOING_EVENT;
 
-        RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification);
-        contentView.setOnClickPendingIntent(R.id.ib_status_bar_collapse, buildServiceIntent(COMMAND_CLEAR));
-        contentView.setOnClickPendingIntent(R.id.ib_seek_up, buildServiceIntent(COMMAND_SEEK_UP));
-        contentView.setOnClickPendingIntent(R.id.ib_seek_down, buildServiceIntent(COMMAND_SEEK_DOWN));
-        mNotification.contentView = contentView;
+            RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification);
+            contentView.setOnClickPendingIntent(R.id.ib_status_bar_collapse, buildServiceIntent(COMMAND_CLEAR));
+            contentView.setOnClickPendingIntent(R.id.ib_seek_up, buildServiceIntent(COMMAND_SEEK_UP));
+            contentView.setOnClickPendingIntent(R.id.ib_seek_down, buildServiceIntent(COMMAND_SEEK_DOWN));
+            mNotification.contentView = contentView;
 
-        mNotificationManager.notify(NOTIFICATION_ID, mNotification);
+            mNotificationManager.notify(NOTIFICATION_ID, mNotification);
+        }
     }
 
     /**
@@ -1204,22 +1205,33 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         lv.setAdapter(new PreSetsAdapter(this, preSetRadios));
     }
 
+    /**
+     * Mehtod responsible for updating the notification
+     * @param frequency frequency to display in notification
+     * @param name preset name or RDS value
+     */
     private void updateNotification(float frequency, String name) {
-        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotification = new Notification(R.drawable.fm_statusbar_icon, getString(R.string.app_name), System.currentTimeMillis());
-        RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification);
-        NumberFormat fmt = new DecimalFormat("#0.0");
-        contentView.setTextViewText(R.id.tv_frequency, fmt.format(frequency).replaceAll(",", "."));
-        contentView.setTextViewText(R.id.tv_station_name, name);
-        /*if (!Preferences.getNotificationsUseRDSinsteadPreset(FmRxApp.this)){
-            // USE PreSet name
+        if (Preferences.getUseNotifications(FmRxApp.this)){
+            mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotification = new Notification(R.drawable.fm_statusbar_icon, getString(R.string.app_name), System.currentTimeMillis());
+            mNotification.flags = Notification.FLAG_ONGOING_EVENT;
+            RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification);
+            NumberFormat fmt = new DecimalFormat("#0.0");
+            contentView.setTextViewText(R.id.tv_frequency, fmt.format(frequency).replaceAll(",", "."));
+            contentView.setTextViewText(R.id.tv_station_name, name);
+            contentView.setOnClickPendingIntent(R.id.ib_status_bar_collapse, buildServiceIntent(COMMAND_CLEAR));
+           contentView.setOnClickPendingIntent(R.id.ib_seek_up, buildServiceIntent(COMMAND_SEEK_UP));
+           contentView.setOnClickPendingIntent(R.id.ib_seek_down, buildServiceIntent(COMMAND_SEEK_DOWN));
+            /*if (!Preferences.getNotificationsUseRDSinsteadPreset(FmRxApp.this)){
+                // USE PreSet name
 
-        } else {
-            // use RDS value
-            //TODO: notifications RDS value assign and update
-        } */
-        mNotification.contentView = contentView;
-        mNotificationManager.notify(NOTIFICATION_ID, mNotification);
+            } else {
+                // use RDS value
+                //TODO: notifications RDS value assign and update
+            } */
+            mNotification.contentView = contentView;
+            mNotificationManager.notify(NOTIFICATION_ID, mNotification);
+        }
     }
 
     /**

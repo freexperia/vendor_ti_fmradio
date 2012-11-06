@@ -1156,14 +1156,14 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             imgFmVolume.setImageResource(R.drawable.fm_volume);
         }
 
-        imgFmLoudspeaker = (ImageView) findViewById(R.id.imgLoudspeaker);
+        /*imgFmLoudspeaker = (ImageView) findViewById(R.id.imgLoudspeaker);
         imgFmLoudspeaker.setOnClickListener(this);
         AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         if (audioManager.isSpeakerphoneOn()) {
             imgFmLoudspeaker.setImageResource(R.drawable.fm_loudspeaker);
         } else {
             imgFmLoudspeaker.setImageResource(R.drawable.fm_loudspeaker_off);
-        }
+        } */
 
 
         ImageButton imageButtonAux = (ImageButton) findViewById(R.id.imgseekup);

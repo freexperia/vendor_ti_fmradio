@@ -51,7 +51,7 @@ public class PreSetsDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Utils.debugFunc("[AlarmsDB] Upgrading database from version " + oldVersion + " to " + newVersion + ", which will destroy all old data", Log.VERBOSE);
+        Utils.debugFunc("[AlarmsDB] Upgrading database from version " + oldVersion + " to " + newVersion + ", which will destroy all old data", Log.VERBOSE, true);
         db.execSQL("DROP TABLE IF EXISTS" + TABLE_PRESETS);
         onCreate(db);
     }

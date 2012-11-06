@@ -5,7 +5,8 @@
     <string name="fmapp">FM Radio for Android</string>
     <string name="stations">FM Radio Stations</string>
     <string name="lblversion">Version:</string>
-    <string name="author">Made by:\n\nPedro Veloso (@pedronveloso) for the FreeXperia Project\nLayout concepts and art by Hairo The Blue Mage, dab512 and royale1223.
+    <string name="author">Made by:\n\nPedro Veloso (@pedronveloso) for the FreeXperia Project\nLayout concepts and art
+        by Hairo The Blue Mage, dab512 and royale1223.
         \n\nBased upon the original work from Sony Ericsson Mobile Communications AB and Texas Instruments, Inc.
         \nBoth their code and this project is sporting the Apache 2.0 License, you can find this project source at
         https://github.com/CyanogenMod/android_hardware_ti_fmradio

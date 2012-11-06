@@ -12,8 +12,8 @@ public class Utils {
     private final static String LOG_TAG = "FmRxApp";
 
     /**
-     * @param message Message to display
-     * @param type    [Log.Error, Log.Warn, ...]
+     * @param message     Message to display
+     * @param type        [Log.Error, Log.Warn, ...]
      * @param shouldPrint value that comes from Preferences which allows the user to decide if debug info should be printed to logcat. Error info will ALWAYS be displayed despite this value
      */
     public static void debugFunc(String message, int type, boolean shouldPrint) {

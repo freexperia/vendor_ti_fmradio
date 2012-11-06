@@ -108,7 +108,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     private boolean isFirstPlay = true;
     private boolean hidNotification = false;
-    private boolean printDebugInfo = true;
+    private boolean mPrintDebugInfo = true;
 
     /**
      * *****************************************
@@ -326,7 +326,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     private void startup() {
 
-        printDebugInfo = Preferences.getPrintDebugInfo(FmRxApp.this);
+        mPrintDebugInfo = Preferences.getPrintDebugInfo(FmRxApp.this);
 
         switch (sFmReceiver.getFMState()) {
 
@@ -342,7 +342,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 break;
 
             case FmReceiver.STATE_DISABLED:
-                Utils.debugFunc("FmReceiver.STATE_DISABLED",Log.INFO,printDebugInfo);
+                Utils.debugFunc("FmReceiver.STATE_DISABLED", Log.INFO, mPrintDebugInfo);
                 //TODO: should this be set to false?
                 sdefaultSettingOn = false;
 
@@ -379,20 +379,20 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                                 getString(R.string.powering_radio), true, false);
                     }
                 } else {
-                    Utils.debugFunc("mFmInterrupted is true dont call enable",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("mFmInterrupted is true dont call enable", Log.INFO, mPrintDebugInfo);
                 }
                 break;
         }
     }
 
     public void onServiceConnected() {
-        Utils.debugFunc("onServiceConnected",Log.INFO,printDebugInfo);
+        Utils.debugFunc("onServiceConnected", Log.INFO, mPrintDebugInfo);
         mFmServiceConnected = true;
         startup();
     }
 
     public void onServiceDisconnected() {
-        Utils.debugFunc("Lost connection to service",Log.INFO,printDebugInfo);
+        Utils.debugFunc("Lost connection to service", Log.INFO, mPrintDebugInfo);
         mFmServiceConnected = false;
         sFmReceiver = null;
     }
@@ -413,7 +413,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 * FM main screen. Set the default volume.
                 */
                 case EVENT_FM_ENABLED:
-                    Utils.debugFunc("enter handleMessage ----EVENT_FM_ENABLED",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_FM_ENABLED", Log.INFO, mPrintDebugInfo);
                     if (pd != null) {
                         pd.dismiss();
                     }
@@ -433,7 +433,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 * icon
                 */
                 case EVENT_MONO_STEREO_CHANGE:
-                    Utils.debugFunc( "enter handleMessage ---EVENT_MONO_STEREO_CHANGE",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ---EVENT_MONO_STEREO_CHANGE", Log.INFO, mPrintDebugInfo);
                     if (mMode == 0) {
                         imgFmMode.setImageResource(R.drawable.fm_stereo);
                     } else {
@@ -446,7 +446,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 * icon
                 */
                 case EVENT_MONO_STEREO_DISPLAY:
-                    Utils.debugFunc( "enter handleMessage ---EVENT_MONO_STEREO_DISPLAY",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ---EVENT_MONO_STEREO_DISPLAY", Log.INFO, mPrintDebugInfo);
 
                     Integer mode = (Integer) msg.obj;
                     //Log.i(TAG, "enter handleMessage ---mode" + mode.intValue());
@@ -461,12 +461,12 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 * Update the icon on main screen with appropriate mute/unmute icon
                 */
                 case EVENT_MUTE_CHANGE:
-                    Utils.debugFunc("enter handleMessage ---EVENT_MUTE_CHANGE",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ---EVENT_MUTE_CHANGE", Log.INFO, mPrintDebugInfo);
                     break;
 
                 case EVENT_SEEK_STOPPED:
                     Integer seekFreq = (Integer) msg.obj;
-                    Utils.debugFunc("enter handleMessage ----EVENT_SEEK_STOPPED seekFreq: " + seekFreq,Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_SEEK_STOPPED seekFreq: " + seekFreq, Log.INFO, mPrintDebugInfo);
                     lastTunedFrequency = (float) seekFreq / 1000;
                     txtStatusMsg.setText(R.string.playing);
 
@@ -475,7 +475,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     break;
 
                 case EVENT_FM_DISABLED:
-                    Utils.debugFunc("enter handleMessage ----EVENT_FM_DISABLED",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_FM_DISABLED", Log.INFO, mPrintDebugInfo);
                     /*
                     * we have exited the FM App. Set the sdefaultSettingOn flag to
                     * false Save the default configuration in the preference
@@ -487,7 +487,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
                 case EVENT_SEEK_STARTED:
                     Integer freq = (Integer) msg.obj;
-                    Utils.debugFunc("enter handleMessage ----EVENT_SEEK_STARTED freq" + freq,Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_SEEK_STARTED freq" + freq, Log.INFO, mPrintDebugInfo);
                     lastTunedFrequency = (float) freq / 1000;
                     txtStatusMsg.setText(R.string.playing);
                     updateFrequencyDisplay(lastTunedFrequency);
@@ -520,7 +520,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 * time
                 */
                 case EVENT_VOLUME_CHANGE:
-                    Utils.debugFunc("enter handleMessage ----EVENT_VOLUME_CHANGE",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_VOLUME_CHANGE", Log.INFO, mPrintDebugInfo);
                     /*
                     * volume change will be completed here. So set the state to
                     * idle, so that user can set other volume.
@@ -557,10 +557,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     break;
 
                 case EVENT_COMPLETE_SCAN_PROGRESS:
-                    Utils.debugFunc("enter handleMessage ----EVENT_COMPLETE_SCAN_PROGRESS",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_COMPLETE_SCAN_PROGRESS", Log.INFO, mPrintDebugInfo);
 
                     Integer progress = (Integer) msg.obj;
-                    Utils.debugFunc("enter handleMessage ----EVENT_COMPLETE_SCAN_PROGRESS progress" + progress,Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_COMPLETE_SCAN_PROGRESS progress" + progress, Log.INFO, mPrintDebugInfo);
                     break;
 
                 /*
@@ -569,7 +569,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 */
                 case EVENT_TUNE_COMPLETE:
                     Integer tuneFreq = (Integer) msg.obj;
-                    Utils.debugFunc("enter handleMessage ----EVENT_TUNE_COMPLETE tuneFreq"+ tuneFreq,Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_TUNE_COMPLETE tuneFreq" + tuneFreq, Log.INFO, mPrintDebugInfo);
                     lastTunedFrequency = (float) tuneFreq / 1000;
                     txtStatusMsg.setText(R.string.playing);
                     updateFrequencyDisplay(lastTunedFrequency);
@@ -577,7 +577,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     txtRadioText.setText(null);
                     // clear the PS text
                     txtPsText.setText(null);
-                    Utils.debugFunc("sdefaultSettingOn: " + sdefaultSettingOn,Log.INFO,printDebugInfo);
+                    Utils.debugFunc("sdefaultSettingOn: " + sdefaultSettingOn, Log.INFO, mPrintDebugInfo);
 
                     /*
                     * Enable the Audio routing after the tune complete , when FM
@@ -615,7 +615,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                         byte[] rdsText = (byte[]) msg.obj;
 
                         for (int i = 0; i < 4; i++) {
-                            Utils.debugFunc("rdsText" + rdsText[i],Log.INFO,printDebugInfo);
+                            Utils.debugFunc("rdsText" + rdsText[i], Log.INFO, mPrintDebugInfo);
                         }
                     } else {
                         String rds = (String) msg.obj;
@@ -630,24 +630,24 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 /* Display the RDS text on UI */
                 case EVENT_PI_CODE:
                     String pi = (String) msg.obj;
-                    Utils.debugFunc("enter handleMessage ----EVENT_PI_CODE rds" + pi,Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_PI_CODE rds" + pi, Log.INFO, mPrintDebugInfo);
                     break;
 
                 case EVENT_SET_CHANNELSPACE:
-                    Utils.debugFunc("enter handleMessage ----EVENT_SET_CHANNELSPACE",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_SET_CHANNELSPACE", Log.INFO, mPrintDebugInfo);
                     break;
 
 
                 case EVENT_GET_CHANNEL_SPACE_CHANGE:
-                    Utils.debugFunc("enter handleMessage ----EVENT_GET_CHANNEL_SPACE_CHANGE",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_GET_CHANNEL_SPACE_CHANGE", Log.INFO, mPrintDebugInfo);
                     Long gChSpace = (Long) msg.obj;
-                    Utils.debugFunc("enter handleMessage ----gChSpace" + gChSpace,Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----gChSpace" + gChSpace, Log.INFO, mPrintDebugInfo);
                     break;
 
                 /* tune to default frequency after the band change callback . */
 
                 case EVENT_BAND_CHANGE:
-                    Utils.debugFunc("enter handleMessage ----EVENT_BAND_CHANGE",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_BAND_CHANGE", Log.INFO, mPrintDebugInfo);
                     /*
                     * Tune to the last stored frequency at the
                     * enable/re-enable,else tune to the default frequency when band
@@ -673,26 +673,26 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 /* Enable RDS system after enable RDS callback . */
 
                 case EVENT_ENABLE_RDS:
-                    Utils.debugFunc( "enter handleMessage ----EVENT_ENABLE_RDS",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_ENABLE_RDS", Log.INFO, mPrintDebugInfo);
                     break;
 
                 /* Set RSSI after SET_RDS_AF callback */
                 case EVENT_SET_RDS_AF:
-                    Utils.debugFunc("enter handleMessage ----EVENT_SET_RDS_AF",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_SET_RDS_AF", Log.INFO, mPrintDebugInfo);
                     break;
                 /* Set RDS AF after SET_RDS_SYSTEM callback */
                 case EVENT_SET_RDS_SYSTEM:
-                    Utils.debugFunc("enter handleMessage ----EVENT_SET_RDS_SYSTEM",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_SET_RDS_SYSTEM", Log.INFO, mPrintDebugInfo);
                     break;
                 /* Set RSSI after disable RDS callback */
                 case EVENT_DISABLE_RDS:
-                    Utils.debugFunc( "enter handleMessage ----EVENT_DISABLE_RDS",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_DISABLE_RDS", Log.INFO, mPrintDebugInfo);
                     txtPsText.setText(null);
                     txtRadioText.setText(null);
                     break;
 
                 case EVENT_SET_DEEMP_FILTER:
-                    Utils.debugFunc("enter handleMessage ----EVENT_SET_DEEMP_FILTER",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_SET_DEEMP_FILTER", Log.INFO, mPrintDebugInfo);
                     break;
 
                 /* Display the PS text on UI */
@@ -714,7 +714,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     break;
 
                 case EVENT_SET_RSSI_THRESHHOLD:
-                    Utils.debugFunc("enter handleMessage ----EVENT_SET_RSSI_THRESHHOLD",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_SET_RSSI_THRESHHOLD", Log.INFO, mPrintDebugInfo);
                     /*
                     * All the configurations will be completed here. So set the
                     * state to idle, so that user can configure again
@@ -722,22 +722,22 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     configurationState = CONFIGURATION_STATE_IDLE;
                     break;
                 case EVENT_SET_RF_DEPENDENT_MUTE:
-                    Utils.debugFunc("enter handleMessage ----EVENT_SET_RF_DEPENDENT_MUTE",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_SET_RF_DEPENDENT_MUTE", Log.INFO, mPrintDebugInfo);
                     break;
 
                 case EVENT_COMPLETE_SCAN_STOP:
-                    Utils.debugFunc("enter handleMessage ----EVENT_COMPLETE_SCAN_STOP",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_COMPLETE_SCAN_STOP", Log.INFO, mPrintDebugInfo);
                     break;
 
                 case EVENT_COMPLETE_SCAN_DONE:
-                    Utils.debugFunc("enter handleMessage ----EVENT_COMPLETE_SCAN_DONE",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_COMPLETE_SCAN_DONE", Log.INFO, mPrintDebugInfo);
 
                     int[] channelList = (int[]) msg.obj;
                     int noOfChannels = msg.arg2;
-                    Utils.debugFunc("noOfChannels" + noOfChannels,Log.DEBUG,printDebugInfo);
+                    Utils.debugFunc("noOfChannels" + noOfChannels, Log.DEBUG, mPrintDebugInfo);
 
                     for (int i = 0; i < noOfChannels; i++) {
-                        Utils.debugFunc("channelList" + channelList[i],Log.DEBUG,printDebugInfo);
+                        Utils.debugFunc("channelList" + channelList[i], Log.DEBUG, mPrintDebugInfo);
                     }
 
                     break;
@@ -745,21 +745,21 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 case EVENT_GET_BAND:
 
                     Long gBand = (Long) msg.obj;
-                    Utils.debugFunc("enter handleMessage ----gBand" + gBand,Log.DEBUG,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----gBand" + gBand, Log.DEBUG, mPrintDebugInfo);
                     break;
 
                 case EVENT_GET_FREQUENCY:
 
                     Integer gFreq = (Integer) msg.obj;
-                    Utils.debugFunc("enter handleMessage ----gFreq" + gFreq,Log.DEBUG,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----gFreq" + gFreq, Log.DEBUG, mPrintDebugInfo);
                     break;
                 case EVENT_GET_VOLUME:
                     Long gVol = (Long) msg.obj;
-                    Utils.debugFunc("enter handleMessage ----gVol" + gVol,Log.DEBUG,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----gVol" + gVol, Log.DEBUG, mPrintDebugInfo);
                     break;
                 case EVENT_GET_MODE:
                     Long gMode = (Long) msg.obj;
-                    Utils.debugFunc("enter handleMessage ----gMode" + gMode,Log.DEBUG,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----gMode" + gMode, Log.DEBUG, mPrintDebugInfo);
                     break;
                 case EVENT_GET_MUTE_MODE:
 
@@ -770,45 +770,45 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     } else if (gMuteMode == (long) FM_MUTE) {
                         imgFmVolume.setImageResource(R.drawable.fm_volume_mute);
                     }
-                    Utils.debugFunc("enter handleMessage ----gMuteMode" + gMuteMode,Log.DEBUG,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----gMuteMode" + gMuteMode, Log.DEBUG, mPrintDebugInfo);
                     break;
                 case EVENT_GET_RF_MUTE_MODE:
 
                     Long gRfMuteMode = (Long) msg.obj;
-                    Utils.debugFunc("enter handleMessage ----gRfMuteMode" + gRfMuteMode,Log.DEBUG,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----gRfMuteMode" + gRfMuteMode, Log.DEBUG, mPrintDebugInfo);
                     break;
                 case EVENT_GET_RSSI_THRESHHOLD:
                     Long gRssi = (Long) msg.obj;
-                    Utils.debugFunc("enter handleMessage ----gRssi" + gRssi,Log.DEBUG,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----gRssi" + gRssi, Log.DEBUG, mPrintDebugInfo);
                     break;
 
                 case EVENT_GET_RSSI:
                     Integer rssi = (Integer) msg.obj;
-                    Utils.debugFunc("enter handleMessage ----rssi" + rssi,Log.DEBUG,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----rssi" + rssi, Log.DEBUG, mPrintDebugInfo);
                     break;
                 case EVENT_GET_DEEMPHASIS_FILTER:
                     Long gFilter = (Long) msg.obj;
-                    Utils.debugFunc("enter handleMessage ----gFilter" + gFilter,Log.DEBUG,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----gFilter" + gFilter, Log.DEBUG, mPrintDebugInfo);
                     break;
 
                 case EVENT_GET_RDS_SYSTEM:
                     Long gRdsSys = (Long) msg.obj;
-                    Utils.debugFunc("enter handleMessage ----gRdsSys" + gRdsSys,Log.DEBUG,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----gRdsSys" + gRdsSys, Log.DEBUG, mPrintDebugInfo);
                     break;
                 case EVENT_GET_RDS_GROUPMASK:
                     Long gRdsMask = (Long) msg.obj;
-                    Utils.debugFunc("enter handleMessage ----gRdsMask" + gRdsMask,Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----gRdsMask" + gRdsMask, Log.INFO, mPrintDebugInfo);
                     break;
 
                 case EVENT_MASTER_VOLUME_CHANGED:
                     Integer vol = (Integer) msg.obj;
                     mVolume = vol;
-                    Utils.debugFunc("enter handleMessage ----mVolume" + vol,Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----mVolume" + vol, Log.INFO, mPrintDebugInfo);
 
                     break;
 
                 case EVENT_FM_ERROR:
-                    Utils.debugFunc( "enter handleMessage ----EVENT_FM_ERROR",Log.INFO,printDebugInfo);
+                    Utils.debugFunc("enter handleMessage ----EVENT_FM_ERROR", Log.INFO, mPrintDebugInfo);
                     // showAlert(getParent(), "FmRadio", "Error!!!!");
 
                     LayoutInflater inflater = getLayoutInflater();
@@ -841,14 +841,14 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
     private void setRdsConfig() {
-        Utils.debugFunc("setRdsConfig()-entered",Log.INFO,printDebugInfo);
+        Utils.debugFunc("setRdsConfig()-entered", Log.INFO, mPrintDebugInfo);
         configurationState = CONFIGURATION_STATE_PENDING;
         SharedPreferences fmConfigPreferences = getSharedPreferences(
                 "fmConfigPreferences", MODE_PRIVATE);
 
         // Set Band
         int band = fmConfigPreferences.getInt(BAND, DEFAULT_BAND);
-        Utils.debugFunc("setRdsConfig()--- band= " + band,Log.INFO,printDebugInfo);
+        Utils.debugFunc("setRdsConfig()--- band= " + band, Log.INFO, mPrintDebugInfo);
         if (band != sBand) // If Band is same as the one set already do not set
         // it again
         {
@@ -857,7 +857,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 // Code for blocking call
                 mStatus = sFmReceiver.setBand(band);
                 if (!mStatus) {
-                    Utils.debugFunc("setRdsConfig()-- setBand ->Error",Log.ERROR,printDebugInfo);
+                    Utils.debugFunc("setRdsConfig()-- setBand ->Error", Log.ERROR, mPrintDebugInfo);
                     showAlert(this, "FmReceiver",
                             getString(R.string.not_able_to_setband_to_value));
                 } else {
@@ -882,7 +882,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
                 mStatus = sFmReceiver.setBand(band);
                 if (!mStatus) {
-                    Utils.debugFunc("setRdsConfig()-- setBand ->Error",Log.ERROR,printDebugInfo);
+                    Utils.debugFunc("setRdsConfig()-- setBand ->Error", Log.ERROR, mPrintDebugInfo);
                     showAlert(this, "FmReceiver",
                             getString(R.string.not_able_to_setband_to_value));
                 } else {
@@ -911,10 +911,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             }
             //else
             // mStatus = sFmReceiver.rxSetDeEmphasisFilter_nb(deEmp);
-            Utils.debugFunc( "setRdsConfig()--- DeEmp= " + deEmp,Log.INFO,printDebugInfo);
+            Utils.debugFunc("setRdsConfig()--- DeEmp= " + deEmp, Log.INFO, mPrintDebugInfo);
 
             if (!mStatus) {
-                Utils.debugFunc("setRdsConfig()-- setDeEmphasisFilter ->Error",Log.ERROR,printDebugInfo);
+                Utils.debugFunc("setRdsConfig()-- setDeEmphasisFilter ->Error", Log.ERROR, mPrintDebugInfo);
                 showAlert(this, "FmReceiver",
                         getString(R.string.not_able_to_set_deemp_filter_to_value));
 
@@ -952,7 +952,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         /** Set channel spacing to the one selected by the user */
         int channelSpace = fmConfigPreferences.getInt(CHANNELSPACE,
                 DEFAULT_CHANNELSPACE);
-        Utils.debugFunc("setChannelSpacing()--- channelSpace= " + channelSpace,Log.INFO,printDebugInfo);
+        Utils.debugFunc("setChannelSpacing()--- channelSpace= " + channelSpace, Log.INFO, mPrintDebugInfo);
         if (channelSpace != sChannelSpace) // If channelSpace is same as the one
         // set already do not set
         // it again
@@ -964,7 +964,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             //     mStatus = sFmReceiver.rxSetChannelSpacing_nb(channelSpace);
 
             if (!mStatus) {
-                Utils.debugFunc("setChannelSpacing()-- setChannelSpacing ->Error",Log.ERROR,printDebugInfo);
+                Utils.debugFunc("setChannelSpacing()-- setChannelSpacing ->Error", Log.ERROR, mPrintDebugInfo);
                 showAlert(this, "FmReceiver",
                         getString(R.string.not_able_to_set_channel_spacing_to_value));
             }
@@ -974,7 +974,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         // set RDS related configuration
         boolean rdsEnable = fmConfigPreferences.getBoolean(RDS, DEFAULT_RDS);
-        Utils.debugFunc("setRDS()--- rdsEnable= " + rdsEnable,Log.INFO,printDebugInfo);
+        Utils.debugFunc("setRDS()--- rdsEnable= " + rdsEnable, Log.INFO, mPrintDebugInfo);
         if (mRds != rdsEnable) {
 
             if (rdsEnable) {
@@ -984,7 +984,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 //else
                 //    mStatus = sFmReceiver.rxEnableRds_nb();
                 if (!mStatus) {
-                    Utils.debugFunc("setRDS()-- enableRds() ->Error",Log.ERROR,printDebugInfo);
+                    Utils.debugFunc("setRDS()-- enableRds() ->Error", Log.ERROR, mPrintDebugInfo);
                     showAlert(this, "FmReceiver", getString(R.string.not_able_enable_rds));
                 }
 
@@ -996,10 +996,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 //     mStatus = sFmReceiver.rxDisableRds_nb();
 
                 if (!mStatus) {
-                    Utils.debugFunc("setRDS()-- disableRds() ->Error",Log.ERROR,printDebugInfo);
+                    Utils.debugFunc("setRDS()-- disableRds() ->Error", Log.ERROR, mPrintDebugInfo);
                     showAlert(this, "FmReceiver", getString(R.string.not_able_disable_rds));
                 } else {
-                    Utils.debugFunc( "setRDS()-- disableRds() ->success",Log.ERROR,printDebugInfo);
+                    Utils.debugFunc("setRDS()-- disableRds() ->success", Log.ERROR, mPrintDebugInfo);
                     /* clear the PS and RDS text */
                     txtPsText.setText(null);
                     txtRadioText.setText(null);
@@ -1012,7 +1012,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         int rdsSystem = fmConfigPreferences.getInt(RDSSYSTEM,
                 DEFAULT_RDS_SYSTEM);
         if (DBG) {
-            Utils.debugFunc( "setRdsSystem()--- rdsSystem= " + rdsSystem,Log.DEBUG,printDebugInfo);
+            Utils.debugFunc("setRdsSystem()--- rdsSystem= " + rdsSystem, Log.DEBUG, mPrintDebugInfo);
         }
         if (mRdsSystem != rdsSystem) {
             // Set RDS-SYSTEM if a new choice is made by the user
@@ -1026,7 +1026,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             //        RDSSYSTEM, DEFAULT_RDS_SYSTEM));
 
             if (!mStatus) {
-                Utils.debugFunc("setRdsSystem()-- setRdsSystem ->Error",Log.ERROR,printDebugInfo);
+                Utils.debugFunc("setRdsSystem()-- setRdsSystem ->Error", Log.ERROR, mPrintDebugInfo);
                 showAlert(this, "FmReceiver",
                         getString(R.string.not_able_to_set_rds_to_value));
             }
@@ -1038,7 +1038,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         int rdsAf = 0;
         rdsAf = rdsAfSwitch ? 1 : 0;
         if (DBG) {
-            Utils.debugFunc("setRdsAf()--- rdsAfSwitch= " + rdsAf,Log.DEBUG,printDebugInfo);
+            Utils.debugFunc("setRdsAf()--- rdsAfSwitch= " + rdsAf, Log.DEBUG, mPrintDebugInfo);
         }
         if (mRdsAf != rdsAfSwitch) {
             // Set RDS-AF if a new choice is made by the user
@@ -1049,14 +1049,14 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             //else
             //mStatus = sFmReceiver.rxSetRdsAfSwitchMode_nb(rdsAf);
             if (!mStatus) {
-                Utils.debugFunc("setRdsAf()-- setRdsAfSwitchMode(1) ->Error",Log.ERROR,printDebugInfo);
+                Utils.debugFunc("setRdsAf()-- setRdsAfSwitchMode(1) ->Error", Log.ERROR, mPrintDebugInfo);
                 showAlert(this, "FmReceiver", getString(R.string.not_able_to_set_rds_af_on));
             }
             mRdsAf = rdsAfSwitch;
         }
         // Set Rssi
         int rssiThreshHold = fmConfigPreferences.getInt(RSSI, DEFAULT_RSSI);
-        Utils.debugFunc("setRssi()-ENTER --- rssiThreshHold= " + rssiThreshHold,Log.INFO,printDebugInfo);
+        Utils.debugFunc("setRssi()-ENTER --- rssiThreshHold= " + rssiThreshHold, Log.INFO, mPrintDebugInfo);
 
         // Set RSSI if a new value is entered by the user
 
@@ -1072,13 +1072,13 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         mRssi = rssiThreshHold;
 
-        Utils.debugFunc("setRdsConfig()-exit",Log.INFO,printDebugInfo);
+        Utils.debugFunc("setRdsConfig()-exit", Log.INFO, mPrintDebugInfo);
 
     }
 
     /* Load the Default values from the preference when the application starts */
     private void loadDefaultConfiguration() {
-        Utils.debugFunc("loadDefaultConfiguration()-entered",Log.INFO,printDebugInfo);
+        Utils.debugFunc("loadDefaultConfiguration()-entered", Log.INFO, mPrintDebugInfo);
         SharedPreferences fmConfigPreferences = getSharedPreferences("fmConfigPreferences",
                 MODE_PRIVATE);
 
@@ -1092,14 +1092,14 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         if (DBG) {
             Utils.debugFunc(" Load default band " + sBand + "default volume" + mVolume + "last fre"
-                                + lastTunedFrequency + "mode" + mMode + "mToggleMute" + mToggleMute + "mRdsState" + mRdsState,Log.DEBUG,printDebugInfo);
+                    + lastTunedFrequency + "mode" + mMode + "mToggleMute" + mToggleMute + "mRdsState" + mRdsState, Log.DEBUG, mPrintDebugInfo);
         }
 
     }
 
     /* Save the Default values to the preference when the application exits */
     private void saveDefaultConfiguration() {
-        Utils.debugFunc("saveDefaultConfiguration()-Entered",Log.INFO,printDebugInfo);
+        Utils.debugFunc("saveDefaultConfiguration()-Entered", Log.INFO, mPrintDebugInfo);
 
         SharedPreferences fmConfigPreferences = getSharedPreferences(
                 "fmConfigPreferences", MODE_PRIVATE);
@@ -1109,21 +1109,21 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         editor.putFloat(FREQUENCY, lastTunedFrequency);
         if (DBG) {
             Utils.debugFunc(" save default band " + sBand + "default volume" + mVolume
-                                + "last fre" + lastTunedFrequency + "mToggleMute",Log.DEBUG,printDebugInfo);
+                    + "last fre" + lastTunedFrequency + "mToggleMute", Log.DEBUG, mPrintDebugInfo);
         }
         editor.commit();
     }
 
     /* Initialise all the widgets */
     private void initControls() {
-        Utils.debugFunc("enter initControls",Log.INFO,printDebugInfo);
+        Utils.debugFunc("enter initControls", Log.INFO, mPrintDebugInfo);
 
         imgFmMode = (ImageView) findViewById(R.id.imgMode);
         if (mMode == 0) {
-            Utils.debugFunc("> setting stereo icon: " + mMode,Log.INFO,printDebugInfo);
+            Utils.debugFunc("> setting stereo icon: " + mMode, Log.INFO, mPrintDebugInfo);
             imgFmMode.setImageResource(R.drawable.fm_stereo);
         } else {
-            Utils.debugFunc("> setting mono icon: " + mMode,Log.INFO,printDebugInfo);
+            Utils.debugFunc("> setting mono icon: " + mMode, Log.INFO, mPrintDebugInfo);
             imgFmMode.setImageResource(R.drawable.fm_mono);
         }
 
@@ -1132,10 +1132,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         if (mToggleMute) {
             imgFmVolume.setImageResource(R.drawable.fm_volume_mute);
-            Utils.debugFunc("> initControls  mute: " + mToggleMute,Log.INFO,printDebugInfo);
+            Utils.debugFunc("> initControls  mute: " + mToggleMute, Log.INFO, mPrintDebugInfo);
         } else {
             imgFmVolume.setImageResource(R.drawable.fm_volume);
-            Utils.debugFunc("> initControls  mute: " + mToggleMute,Log.INFO,printDebugInfo);
+            Utils.debugFunc("> initControls  mute: " + mToggleMute, Log.INFO, mPrintDebugInfo);
         }
 
 
@@ -1235,7 +1235,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     // completed.
                     sleep(3000);
                 } catch (Exception e) {
-                    Utils.debugFunc("InsertDelayThread()-- Exception!",Log.ERROR,printDebugInfo);
+                    Utils.debugFunc("InsertDelayThread()-- Exception!", Log.ERROR, mPrintDebugInfo);
                 }
                 // Dismiss the Dialog
                 configPd.dismiss();
@@ -1246,7 +1246,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Utils.debugFunc("onActivityResult called",Log.INFO,printDebugInfo);
+        Utils.debugFunc("onActivityResult called", Log.INFO, mPrintDebugInfo);
 
         switch (requestCode) {
             case (ACTIVITY_TUNE): {
@@ -1268,7 +1268,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
             case (ACTIVITY_CONFIG): {
                 if (resultCode == Activity.RESULT_OK) {
-                    Utils.debugFunc("ActivityFmRdsConfig configurationState "+ configurationState,Log.INFO,printDebugInfo);
+                    Utils.debugFunc("ActivityFmRdsConfig configurationState " + configurationState, Log.INFO, mPrintDebugInfo);
                     if (configurationState == CONFIGURATION_STATE_IDLE) {
 
 
@@ -1301,77 +1301,77 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 return true;
 
             case KeyEvent.KEYCODE_B:
-                Utils.debugFunc("Testing getTunedFrequency()  returned Tuned Freq = " + sFmReceiver.getTunedFrequency(),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing getTunedFrequency()  returned Tuned Freq = " + sFmReceiver.getTunedFrequency(), Log.INFO, mPrintDebugInfo);
                 return true;
 
             case KeyEvent.KEYCODE_C:
-                Utils.debugFunc("Testing getRssiThreshold()    returned RSSI threshold = " + sFmReceiver.getRssiThreshold(),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing getRssiThreshold()    returned RSSI threshold = " + sFmReceiver.getRssiThreshold(), Log.INFO, mPrintDebugInfo);
                 return true;
 
             case KeyEvent.KEYCODE_D:
-                Utils.debugFunc("Testing getBand() returned Band  = " + sFmReceiver.getBand(),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing getBand() returned Band  = " + sFmReceiver.getBand(), Log.INFO, mPrintDebugInfo);
                 return true;
 
             case KeyEvent.KEYCODE_E:
-                Utils.debugFunc("Testing getDeEmphasisFilter()    returned De-emp  = " + sFmReceiver.getDeEmphasisFilter(),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing getDeEmphasisFilter()    returned De-emp  = " + sFmReceiver.getDeEmphasisFilter(), Log.INFO, mPrintDebugInfo);
                 return true;
 
             case KeyEvent.KEYCODE_F:
-                Utils.debugFunc("Testing getMonoStereoMode() returned MonoStereo = " + sFmReceiver.getMonoStereoMode(),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing getMonoStereoMode() returned MonoStereo = " + sFmReceiver.getMonoStereoMode(), Log.INFO, mPrintDebugInfo);
                 return true;
 
             case KeyEvent.KEYCODE_G:
-                Utils.debugFunc("Testing getMuteMode()  returned MuteMode = " + sFmReceiver.getMuteMode(),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing getMuteMode()  returned MuteMode = " + sFmReceiver.getMuteMode(), Log.INFO, mPrintDebugInfo);
                 return true;
 
             case KeyEvent.KEYCODE_H:
-                Utils.debugFunc("Testing getRdsAfSwitchMode()    returned RdsAfSwitchMode = " + sFmReceiver.getRdsAfSwitchMode(),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing getRdsAfSwitchMode()    returned RdsAfSwitchMode = " + sFmReceiver.getRdsAfSwitchMode(), Log.INFO, mPrintDebugInfo);
                 return true;
 
             case KeyEvent.KEYCODE_I:
-                Utils.debugFunc("Testing getRdsGroupMask() returned RdsGrpMask = " + sFmReceiver.getRdsGroupMask(),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing getRdsGroupMask() returned RdsGrpMask = " + sFmReceiver.getRdsGroupMask(), Log.INFO, mPrintDebugInfo);
                 return true;
 
             case KeyEvent.KEYCODE_J:
-                Utils.debugFunc("Testing getRdsSystem() returned Rds System = "+ sFmReceiver.getRdsSystem(),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing getRdsSystem() returned Rds System = " + sFmReceiver.getRdsSystem(), Log.INFO, mPrintDebugInfo);
                 return true;
 
             case KeyEvent.KEYCODE_K:
-                Utils.debugFunc("Testing getRfDependentMuteMode()    returned RfDepndtMuteMode = "+ sFmReceiver.getRfDependentMuteMode(),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing getRfDependentMuteMode()    returned RfDepndtMuteMode = " + sFmReceiver.getRfDependentMuteMode(), Log.INFO, mPrintDebugInfo);
                 return true;
 
             case KeyEvent.KEYCODE_L:
-                Utils.debugFunc("Testing getRssi()    returned value = " + sFmReceiver.getRssi(),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing getRssi()    returned value = " + sFmReceiver.getRssi(), Log.INFO, mPrintDebugInfo);
                 return true;
 
             case KeyEvent.KEYCODE_M:
-                Utils.debugFunc("Testing isValidChannel()    returned isValidChannel = "+ sFmReceiver.isValidChannel(),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing isValidChannel()    returned isValidChannel = " + sFmReceiver.isValidChannel(), Log.INFO, mPrintDebugInfo);
                 return true;
 
             case KeyEvent.KEYCODE_N:
-                Utils.debugFunc("Testing getFwVersion()    returned getFwVersion = "+ sFmReceiver.getFwVersion(),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing getFwVersion()    returned getFwVersion = " + sFmReceiver.getFwVersion(), Log.INFO, mPrintDebugInfo);
                 return true;
 
             case KeyEvent.KEYCODE_O:
-                Utils.debugFunc("Testing getChannelSpacing()    returned getChannelSpacing = " + sFmReceiver.getChannelSpacing(),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing getChannelSpacing()    returned getChannelSpacing = " + sFmReceiver.getChannelSpacing(), Log.INFO, mPrintDebugInfo);
                 return true;
 
             case KeyEvent.KEYCODE_P:
-                Utils.debugFunc("Testing completeScan()",Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing completeScan()", Log.INFO, mPrintDebugInfo);
                 sFmReceiver.completeScan();
                 return true;
 
             case KeyEvent.KEYCODE_Q:
-                Utils.debugFunc("Testing getCompleteScanProgress()    returned scan progress = " + sFmReceiver.getCompleteScanProgress(),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing getCompleteScanProgress()    returned scan progress = " + sFmReceiver.getCompleteScanProgress(), Log.INFO, mPrintDebugInfo);
                 return true;
 
             case KeyEvent.KEYCODE_R:
-                Utils.debugFunc("Testing stopCompleteScan()    returned status = " + sFmReceiver.stopCompleteScan(),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing stopCompleteScan()    returned status = " + sFmReceiver.stopCompleteScan(), Log.INFO, mPrintDebugInfo);
                 return true;
 
             case KeyEvent.KEYCODE_S:
-                Utils.debugFunc( "Testing setRfDependentMuteMode()    returned RfDepndtMuteMode = "+
-                        sFmReceiver.setRfDependentMuteMode((sFmReceiver.getRfDependentMuteMode() == 1) ? 0 : 1),Log.INFO,printDebugInfo);
+                Utils.debugFunc("Testing setRfDependentMuteMode()    returned RfDepndtMuteMode = " +
+                        sFmReceiver.setRfDependentMuteMode((sFmReceiver.getRfDependentMuteMode() == 1) ? 0 : 1), Log.INFO, mPrintDebugInfo);
                 return true;
         }
         return false;
@@ -1397,7 +1397,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             float iFreq = Float.parseFloat(text);
             if (iFreq != 0) {
                 lastTunedFrequency = iFreq * 10;
-                Utils.debugFunc("lastTunedFrequency" + lastTunedFrequency,Log.INFO,printDebugInfo);
+                Utils.debugFunc("lastTunedFrequency" + lastTunedFrequency, Log.INFO, mPrintDebugInfo);
 
                 mStatus = sFmReceiver.tune(lastTunedFrequency.intValue() * 100);
                 if (!mStatus) {
@@ -1422,7 +1422,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
             }
         } catch (NumberFormatException nfe) {
-            Utils.debugFunc("nfe",Log.INFO,printDebugInfo);
+            Utils.debugFunc("nfe", Log.INFO, mPrintDebugInfo);
         }
     }
 
@@ -1557,7 +1557,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     protected void onSaveInstanceState(Bundle icicle) {
         super.onSaveInstanceState(icicle);
-        Utils.debugFunc("onSaveInstanceState",Log.INFO,printDebugInfo);
+        Utils.debugFunc("onSaveInstanceState", Log.INFO, mPrintDebugInfo);
         /* save the fm state into bundle for the activity restart */
         mFmInterrupted = true;
         Bundle fmState = new Bundle();
@@ -1567,13 +1567,13 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     }
 
     public void onStart() {
-        Utils.debugFunc("onStart",Log.INFO,printDebugInfo);
+        Utils.debugFunc("onStart", Log.INFO, mPrintDebugInfo);
         super.onStart();
     }
 
     public void onPause() {
         super.onPause();
-        Utils.debugFunc("onPause",Log.INFO,printDebugInfo);
+        Utils.debugFunc("onPause", Log.INFO, mPrintDebugInfo);
 
         if (pd != null) {
             pd.dismiss();
@@ -1584,20 +1584,20 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
-        Utils.debugFunc("onConfigurationChanged",Log.INFO,printDebugInfo);
+        Utils.debugFunc("onConfigurationChanged", Log.INFO, mPrintDebugInfo);
         super.onConfigurationChanged(newConfig);
 
     }
 
     public void onResume() {
-        Utils.debugFunc("onResume",Log.INFO,printDebugInfo);
+        Utils.debugFunc("onResume", Log.INFO, mPrintDebugInfo);
         super.onResume();
         //if(mFmServiceConnected == true)
         startup();
     }
 
     public void onDestroy() {
-        Utils.debugFunc("onDestroy",Log.INFO,printDebugInfo);
+        Utils.debugFunc("onDestroy", Log.INFO, mPrintDebugInfo);
         super.onDestroy();
         /*
          * Unregistering the receiver , so that we dont handle any FM events
@@ -1615,29 +1615,29 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         public void onReceive(Context context, Intent intent) {
 
             String fmAction = intent.getAction();
-            Utils.debugFunc("enter onReceive" + fmAction,Log.INFO,printDebugInfo);
+            Utils.debugFunc("enter onReceive" + fmAction, Log.INFO, mPrintDebugInfo);
             if (fmAction.equals(FmReceiverIntent.FM_ENABLED_ACTION)) {
-                Utils.debugFunc("enter onReceive FM_ENABLED_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive FM_ENABLED_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 mHandler.sendMessage(mHandler
                         .obtainMessage(EVENT_FM_ENABLED, 0));
             }
             if (fmAction.equals(FmReceiverIntent.FM_DISABLED_ACTION)) {
-                Utils.debugFunc("enter onReceive FM_DISABLED_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive FM_DISABLED_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 mHandler.sendMessage(mHandler.obtainMessage(EVENT_FM_DISABLED,
                         0));
             }
 
             if (fmAction.equals(FmReceiverIntent.SET_MODE_MONO_STEREO_ACTION)) {
-                Utils.debugFunc("enter onReceive SET_MODE_MONO_STEREO_ACTION "+ fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive SET_MODE_MONO_STEREO_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 mHandler.sendMessage(mHandler.obtainMessage(
                         EVENT_MONO_STEREO_CHANGE, 0));
             }
             if (fmAction
                     .equals(FmReceiverIntent.DISPLAY_MODE_MONO_STEREO_ACTION)) {
-                Utils.debugFunc( "enter onReceive DISPLAY_MODE_MONO_STEREO_ACTION "+ fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive DISPLAY_MODE_MONO_STEREO_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 Integer modeDisplay = intent.getIntExtra(
                         FmReceiverIntent.MODE_MONO_STEREO, 0);
@@ -1663,7 +1663,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 }
             }
             if (fmAction.equals(FmReceiverIntent.PI_CODE_CHANGED_ACTION)) {
-                Utils.debugFunc("enter onReceive PI_CODE_CHANGED_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive PI_CODE_CHANGED_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 Integer pi = intent.getIntExtra(FmReceiverIntent.PI, 0);
 
@@ -1672,7 +1672,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             }
 
             if (fmAction.equals(FmReceiverIntent.TUNE_COMPLETE_ACTION)) {
-                Utils.debugFunc("enter onReceive TUNE_COMPLETE_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive TUNE_COMPLETE_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 int tuneFreq = intent.getIntExtra(
                         FmReceiverIntent.TUNED_FREQUENCY, 0);
@@ -1683,7 +1683,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             }
 
             if (fmAction.equals(FmReceiverIntent.COMPLETE_SCAN_PROGRESS_ACTION)) {
-                Utils.debugFunc("enter onReceive COMPLETE_SCAN_PROGRESS_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive COMPLETE_SCAN_PROGRESS_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 int progress = intent.getIntExtra(
                         FmReceiverIntent.SCAN_PROGRESS, 0);
@@ -1695,19 +1695,19 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
             if (fmAction.equals(FmReceiverIntent.VOLUME_CHANGED_ACTION)) {
-                Utils.debugFunc("enter onReceive VOLUME_CHANGED_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive VOLUME_CHANGED_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
                 mHandler.sendMessage(mHandler.obtainMessage(
                         EVENT_VOLUME_CHANGE, 0));
             }
 
             if (fmAction.equals(FmReceiverIntent.MUTE_CHANGE_ACTION)) {
-                Utils.debugFunc("enter onReceive MUTE_CHANGE_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive MUTE_CHANGE_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
                 mHandler.sendMessage(mHandler.obtainMessage(EVENT_MUTE_CHANGE,
                         0));
             }
 
             if (fmAction.equals(FmReceiverIntent.SEEK_STOP_ACTION)) {
-                Utils.debugFunc( "enter onReceive SEEK_STOP_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive SEEK_STOP_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 int freq = intent.getIntExtra(FmReceiverIntent.SEEK_FREQUENCY,
                         0);
@@ -1717,7 +1717,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             }
 
             if (fmAction.equals(FmReceiverIntent.SEEK_ACTION)) {
-                Utils.debugFunc("enter onReceive SEEK_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive SEEK_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 int freq = intent.getIntExtra(FmReceiverIntent.SEEK_FREQUENCY,
                         0);
@@ -1727,7 +1727,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             }
 
             if (fmAction.equals(FmReceiverIntent.BAND_CHANGE_ACTION)) {
-                Utils.debugFunc("enter onReceive BAND_CHANGE_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive BAND_CHANGE_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 mHandler.sendMessage(mHandler.obtainMessage(EVENT_BAND_CHANGE,
                         0));
@@ -1735,7 +1735,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
             if (fmAction.equals(FmReceiverIntent.GET_CHANNEL_SPACE_ACTION)) {
-                Utils.debugFunc("enter onReceive GET_CHANNEL_SPACE_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive GET_CHANNEL_SPACE_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 Long chSpace = intent.getLongExtra(
                         FmReceiverIntent.GET_CHANNEL_SPACE, 0);
@@ -1745,7 +1745,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
             if (fmAction.equals(FmReceiverIntent.SET_CHANNEL_SPACE_ACTION)) {
-                Utils.debugFunc("enter onReceive SET_CHANNEL_SPACE_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive SET_CHANNEL_SPACE_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 mHandler.sendMessage(mHandler.obtainMessage(
                         EVENT_SET_CHANNELSPACE, 0));
@@ -1753,7 +1753,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
             if (fmAction.equals(FmReceiverIntent.GET_RDS_AF_SWITCH_MODE_ACTION)) {
-                Utils.debugFunc( "enter onReceive GET_RDS_AF_SWITCH_MODE_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive GET_RDS_AF_SWITCH_MODE_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 Long switchMode = intent.getLongExtra(
                         FmReceiverIntent.GET_RDS_AF_SWITCHMODE, 0);
@@ -1763,7 +1763,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
             if (fmAction.equals(FmReceiverIntent.GET_VOLUME_ACTION)) {
-                Utils.debugFunc("enter onReceive GET_VOLUME_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive GET_VOLUME_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 Long gVolume = intent.getLongExtra(
                         FmReceiverIntent.GET_VOLUME, 0);
@@ -1773,7 +1773,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
             if (fmAction.equals(FmReceiverIntent.GET_MONO_STEREO_MODE_ACTION)) {
-                Utils.debugFunc("enter onReceive GET_MONO_STEREO_MODE_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive GET_MONO_STEREO_MODE_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 Long gMode = intent.getLongExtra(
                         FmReceiverIntent.GET_MODE, 0);
@@ -1783,7 +1783,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
             if (fmAction.equals(FmReceiverIntent.GET_MUTE_MODE_ACTION)) {
-                Utils.debugFunc("enter onReceive GET_MUTE_MODE_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive GET_MUTE_MODE_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 Long gMuteMode = intent.getLongExtra(
                         FmReceiverIntent.GET_MUTE_MODE, 0);
@@ -1793,7 +1793,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
             if (fmAction.equals(FmReceiverIntent.GET_BAND_ACTION)) {
-                Utils.debugFunc("enter onReceive GET_BAND_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive GET_BAND_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 Long gBand = intent.getLongExtra(
                         FmReceiverIntent.GET_BAND, 0);
@@ -1803,7 +1803,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
             if (fmAction.equals(FmReceiverIntent.GET_FREQUENCY_ACTION)) {
-                Utils.debugFunc("enter onReceive GET_FREQUENCY_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive GET_FREQUENCY_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 int gFreq = intent.getIntExtra(
                         FmReceiverIntent.TUNED_FREQUENCY, 0);
@@ -1813,7 +1813,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
             if (fmAction.equals(FmReceiverIntent.GET_RF_MUTE_MODE_ACTION)) {
-                Utils.debugFunc("enter onReceive GET_RF_MUTE_MODE_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive GET_RF_MUTE_MODE_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 Long gRfMuteMode = intent.getLongExtra(
                         FmReceiverIntent.GET_RF_MUTE_MODE, 0);
@@ -1823,7 +1823,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
             if (fmAction.equals(FmReceiverIntent.GET_RSSI_THRESHHOLD_ACTION)) {
-                Utils.debugFunc("enter onReceive GET_RSSI_THRESHHOLD_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive GET_RSSI_THRESHHOLD_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 Long gRssiThreshhold = intent.getLongExtra(
                         FmReceiverIntent.GET_RSSI_THRESHHOLD, 0);
@@ -1833,7 +1833,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
             if (fmAction.equals(FmReceiverIntent.GET_DEEMPHASIS_FILTER_ACTION)) {
-                Utils.debugFunc("enter onReceive GET_DEEMPHASIS_FILTER_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive GET_DEEMPHASIS_FILTER_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 Long gFilter = intent.getLongExtra(
                         FmReceiverIntent.GET_DEEMPHASIS_FILTER, 0);
@@ -1843,7 +1843,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
             if (fmAction.equals(FmReceiverIntent.GET_RSSI_ACTION)) {
-                Utils.debugFunc("enter onReceive GET_RSSI_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive GET_RSSI_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 int gRssi = intent.getIntExtra(
                         FmReceiverIntent.GET_RSSI, 0);
@@ -1853,7 +1853,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
             if (fmAction.equals(FmReceiverIntent.GET_RDS_SYSTEM_ACTION)) {
-                Utils.debugFunc("enter onReceive GET_RDS_SYSTEM_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive GET_RDS_SYSTEM_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 Long gRdsSystem = intent.getLongExtra(
                         FmReceiverIntent.GET_RDS_SYSTEM, 0);
@@ -1863,7 +1863,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
             if (fmAction.equals(FmReceiverIntent.GET_RDS_GROUPMASK_ACTION)) {
-                Utils.debugFunc("enter onReceive GET_RDS_GROUPMASK_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive GET_RDS_GROUPMASK_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 Long gRdsMask = intent.getLongExtra(
                         FmReceiverIntent.GET_RDS_GROUPMASK, 0);
@@ -1873,42 +1873,42 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
             if (fmAction.equals(FmReceiverIntent.ENABLE_RDS_ACTION)) {
-                Utils.debugFunc("enter onReceive ENABLE_RDS_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive ENABLE_RDS_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 mHandler.sendMessage(mHandler
                         .obtainMessage(EVENT_ENABLE_RDS, 0));
             }
 
             if (fmAction.equals(FmReceiverIntent.DISABLE_RDS_ACTION)) {
-                Utils.debugFunc( "enter onReceive DISABLE_RDS_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive DISABLE_RDS_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 mHandler.sendMessage(mHandler.obtainMessage(EVENT_DISABLE_RDS,
                         0));
             }
 
             if (fmAction.equals(FmReceiverIntent.SET_RDS_AF_ACTION)) {
-                Utils.debugFunc( "enter onReceive SET_RDS_AF_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive SET_RDS_AF_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 mHandler.sendMessage(mHandler
                         .obtainMessage(EVENT_SET_RDS_AF, 0));
             }
 
             if (fmAction.equals(FmReceiverIntent.SET_RDS_SYSTEM_ACTION)) {
-                Utils.debugFunc( "enter onReceive SET_RDS_SYSTEM_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive SET_RDS_SYSTEM_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 mHandler.sendMessage(mHandler.obtainMessage(
                         EVENT_SET_RDS_SYSTEM, 0));
             }
 
             if (fmAction.equals(FmReceiverIntent.SET_DEEMP_FILTER_ACTION)) {
-                Utils.debugFunc( "enter onReceive SET_DEEMP_FILTER_ACTION "+ fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive SET_DEEMP_FILTER_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 mHandler.sendMessage(mHandler.obtainMessage(
                         EVENT_SET_DEEMP_FILTER, 0));
             }
 
             if (fmAction.equals(FmReceiverIntent.PS_CHANGED_ACTION)) {
-                Utils.debugFunc("enter onReceive PS_CHANGED_ACTION " + fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive PS_CHANGED_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 if (FM_SEND_RDS_IN_BYTEARRAY) {
                     Bundle extras = intent.getExtras();
@@ -1928,7 +1928,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             }
 
             if (fmAction.equals(FmReceiverIntent.SET_RSSI_THRESHHOLD_ACTION)) {
-                Utils.debugFunc("enter onReceive SET_RSSI_THRESHHOLD_ACTION "+ fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive SET_RSSI_THRESHHOLD_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 mHandler.sendMessage(mHandler.obtainMessage(
                         EVENT_SET_RSSI_THRESHHOLD, 0));
@@ -1936,14 +1936,14 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
             if (fmAction.equals(FmReceiverIntent.SET_RF_DEPENDENT_MUTE_ACTION)) {
                 Utils.debugFunc("enter onReceive SET_RF_DEPENDENT_MUTE_ACTION "
-                                        + fmAction,Log.INFO,printDebugInfo);
+                        + fmAction, Log.INFO, mPrintDebugInfo);
 
                 mHandler.sendMessage(mHandler.obtainMessage(
                         EVENT_SET_RF_DEPENDENT_MUTE, 0));
             }
 
             if (fmAction.equals(FmReceiverIntent.COMPLETE_SCAN_DONE_ACTION)) {
-                Utils.debugFunc("enter onReceive COMPLETE_SCAN_DONE_ACTION "+ fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive COMPLETE_SCAN_DONE_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
 
                 Bundle extras = intent.getExtras();
 
@@ -1954,12 +1954,12 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                         FmReceiverIntent.SCAN_LIST_COUNT, 0);
 
                 int status = extras.getInt(FmReceiverIntent.STATUS, 0);
-                Utils.debugFunc("noOfChannels" + noOfChannels,Log.INFO,printDebugInfo);
+                Utils.debugFunc("noOfChannels" + noOfChannels, Log.INFO, mPrintDebugInfo);
 
                 for (int i = 0; i < noOfChannels; i++)
 
                 {
-                    Utils.debugFunc("channelList" + channelList[i],Log.INFO,printDebugInfo);
+                    Utils.debugFunc("channelList" + channelList[i], Log.INFO, mPrintDebugInfo);
                 }
 
                 mHandler.sendMessage(mHandler.obtainMessage(
@@ -1968,18 +1968,18 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             }
 
             if (fmAction.equals(FmReceiverIntent.COMPLETE_SCAN_STOP_ACTION)) {
-                Utils.debugFunc( "enter onReceive COMPLETE_SCAN_STOP_ACTION "+ fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive COMPLETE_SCAN_STOP_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
                 Bundle extras = intent.getExtras();
                 int status = extras.getInt(FmReceiverIntent.STATUS, 0);
                 int channelValue = extras.getInt(
                         FmReceiverIntent.LAST_SCAN_CHANNEL, 0);
-                Utils.debugFunc( "Last Scanned Channel Frequency before calling Stop Scan" + channelValue,Log.INFO,printDebugInfo);
+                Utils.debugFunc("Last Scanned Channel Frequency before calling Stop Scan" + channelValue, Log.INFO, mPrintDebugInfo);
                 mHandler.sendMessage(mHandler.obtainMessage(
                         EVENT_COMPLETE_SCAN_STOP, status, channelValue));
             }
 
             if (fmAction.equals(FmReceiverIntent.MASTER_VOLUME_CHANGED_ACTION)) {
-                Utils.debugFunc( "enter onReceive MASTER_VOLUME_CHANGED_ACTION "+ fmAction,Log.INFO,printDebugInfo);
+                Utils.debugFunc("enter onReceive MASTER_VOLUME_CHANGED_ACTION " + fmAction, Log.INFO, mPrintDebugInfo);
                 mVolume = intent.getIntExtra(FmReceiverIntent.MASTER_VOLUME, 0);
                 mHandler.sendMessage(mHandler.obtainMessage(
                         EVENT_MASTER_VOLUME_CHANGED, mVolume));
@@ -1995,7 +1995,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     /* Get the volume */
     void getNewGain(int volume) {
-        Utils.debugFunc( "getNewGain" + volume,Log.INFO,printDebugInfo);
+        Utils.debugFunc("getNewGain" + volume, Log.INFO, mPrintDebugInfo);
         if (volume <= GAIN_STEP) {
             mVolume = MIN_VOLUME;
         } else if (volume >= MAX_VOLUME) {
@@ -2088,7 +2088,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     PreSetsDB preSetsDB = new PreSetsDB(FmRxApp.this);
                     preSetsDB.open();
                     preSetsDB.updateRadioPreSet(preSetRadios.get(position).getUid(),
-                            stationName.getText().toString(), lastTunedFrequency.toString());
+                            stationName.getText().toString(), lastTunedFrequency.toString(), mPrintDebugInfo);
 
                     // if we set a station, increment the counter so we can set another one in the future
                     // but only if creating new one
@@ -2165,9 +2165,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Utils.debugFunc("Received Notification!",Log.VERBOSE,printDebugInfo);
+            Utils.debugFunc("Received Notification!", Log.VERBOSE, mPrintDebugInfo);
             if (intent.hasExtra(EXTRA_COMMAND)) {
-                Utils.debugFunc("Command: " + intent.getStringExtra(EXTRA_COMMAND),Log.VERBOSE,printDebugInfo);
+                Utils.debugFunc("Command: " + intent.getStringExtra(EXTRA_COMMAND), Log.VERBOSE, mPrintDebugInfo);
                 if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_CLEAR)) {
                     NotificationManager nMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                     nMgr.cancel(NOTIFICATION_ID);
@@ -2185,7 +2185,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
     @Override
     protected void onNewIntent(Intent intent) {
-        Utils.debugFunc("called onNewIntent",Log.VERBOSE,printDebugInfo);
+        Utils.debugFunc("called onNewIntent", Log.VERBOSE, mPrintDebugInfo);
         //super.onNewIntent(intent);
     }
 }

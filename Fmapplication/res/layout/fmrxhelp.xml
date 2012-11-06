@@ -43,6 +43,6 @@
             android:gravity="center"
             android:autoLink="web"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/small_font" />
+            android:textSize="@dimen/small_font"/>
 
 </LinearLayout>

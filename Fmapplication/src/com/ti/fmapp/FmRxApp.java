@@ -235,7 +235,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         if (audioManager.isWiredHeadsetOn()) {
-            //requestWindowFeature(Window.FEATURE_NO_TITLE);
             setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
             // Register for FM intent broadcasts.
@@ -1608,14 +1607,23 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      */
     private void exitApp() {
         //clear notification
-        if (mNotificationManager != null)
-            mNotificationManager.cancel(NOTIFICATION_ID);
+        try {
+            if (mNotificationManager != null)
+                mNotificationManager.cancel(NOTIFICATION_ID);
+        } catch (Exception e) {
+            Utils.debugFunc("Could not cancel notification! E.: " + e.getMessage(), Log.ERROR, mPrintDebugInfo);
+        }
         /*
          * The exit from the FM application happens here. FM will be
          * disabled
          */
-        if (hasInitializedFMReceiver && sFmReceiver != null)
-            mStatus = sFmReceiver.disable();
+        try {
+            if (hasInitializedFMReceiver && sFmReceiver != null)
+                mStatus = sFmReceiver.disable();
+        } catch (Exception e) {
+            Utils.debugFunc("Could not disable FM Service! E.: " + e.getMessage(), Log.ERROR, mPrintDebugInfo);
+        }
+
     }
 
 

@@ -50,7 +50,7 @@ public class PreSetsDB {
         try {
             dbHelper.close();
         } catch (Exception e) {
-            Utils.debugFunc("Could not close Radio PreSets DB", Log.ERROR);
+            Utils.debugFunc("Could not close Radio PreSets DB", Log.ERROR, true);
             e.printStackTrace();
         }
     }
@@ -92,8 +92,8 @@ public class PreSetsDB {
         return alarmItem;
     }
 
-    public void updateRadioPreSet(long uid, String name, String frequency) {
-        Utils.debugFunc("Will update preset state.", Log.VERBOSE);
+    public void updateRadioPreSet(long uid, String name, String frequency, boolean shouldPrint) {
+        Utils.debugFunc("Will update preset state.", Log.VERBOSE, shouldPrint);
         String updatePreset = "UPDATE preset_stations SET name = '" + name + "' WHERE _uid=" + uid + ";";
         database.execSQL(updatePreset);
         updatePreset = "UPDATE preset_stations SET frequency = '" + frequency + "' WHERE _uid=" + uid + ";";

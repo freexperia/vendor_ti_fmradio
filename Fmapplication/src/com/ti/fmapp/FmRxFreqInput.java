@@ -43,6 +43,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import com.ti.fm.IFmConstants;
+import com.ti.fmapp.utils.Utils;
 
 /**
  * FmRxFreqInput asks the user to enter a valid frequency for tuning the radio.
@@ -52,10 +53,8 @@ import com.ti.fm.IFmConstants;
 public class FmRxFreqInput extends Activity implements OnKeyListener,
         View.OnClickListener, IFmConstants, FmRxAppConstants {
 
-    public static final String TAG = "ManualFreqInput";
     private EditText mUserText;
-    private TextView mBandRange;
-    private Button btnCancel, btnOk;
+    private boolean mPrintDebugInfo = true;
     private static final boolean DBG = true;
 
     /**
@@ -65,18 +64,18 @@ public class FmRxFreqInput extends Activity implements OnKeyListener,
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fmrxfreq);
+        mPrintDebugInfo = Preferences.getPrintDebugInfo(this);
         initControls();
     }
 
     private void initControls() {        /* listening to key click or a key input into the exit text box */
-        mUserText = (EditText) findViewById(R.id.txtFrequency);
-		/* wait for key inputs or mouse clicks in the edit box */
+        mUserText = (EditText) findViewById(R.id.txtFrequency);        /* wait for key inputs or mouse clicks in the edit box */
         mUserText.setOnKeyListener(this);
-        btnCancel = (Button) findViewById(R.id.btnCancel);
-        btnOk = (Button) findViewById(R.id.btnOk);
+        Button btnCancel = (Button) findViewById(R.id.btnCancel);
+        Button btnOk = (Button) findViewById(R.id.btnOk);
         btnOk.setOnClickListener(this);
         btnCancel.setOnClickListener(this);
-        mBandRange = (TextView) findViewById(R.id.freqRange);
+        TextView mBandRange = (TextView) findViewById(R.id.freqRange);
         if (FmRxApp.sBand == FM_BAND_EUROPE_US) {
             mBandRange.setText(getText(R.string.freqRangeEurope));
         } else {
@@ -110,7 +109,7 @@ public class FmRxFreqInput extends Activity implements OnKeyListener,
             }
         } catch (NumberFormatException nfe) {
             if (DBG) {
-                Log.d(TAG, "NumberFormatException:" + nfe.getMessage());
+                Utils.debugFunc("NumberFormatException:" + nfe.getMessage(), Log.DEBUG, mPrintDebugInfo);
             }
             new AlertDialog.Builder(this).setIcon(
                     android.R.drawable.ic_dialog_alert).setMessage(
@@ -160,7 +159,7 @@ public class FmRxFreqInput extends Activity implements OnKeyListener,
     // Update the Frequency label with the given value
     float UpdateFrequency(float freq) {
         if (DBG) {
-            Log.d(TAG, "FM App: UpdateFrequency %d." + freq);
+            Utils.debugFunc("FM App: UpdateFrequency %d." + freq, Log.DEBUG, mPrintDebugInfo);
         }
         if (freq < BaseFreq() || freq > LastFreq()) {
             freq = 0;

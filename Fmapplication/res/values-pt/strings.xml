@@ -59,7 +59,8 @@
     <string name="station5">5</string>
     <string name="station6">6</string>
     <string name="station">Estação</string>
-    <string name="configure">Configurar</string>
+    <string name="configure_rds">Configurar RDS</string>
+    <string name="preferences">Preferências</string>
     <string name="exit">Sair</string>
     <string name="about">Sobre</string>
     <string name="preset">Preset</string>

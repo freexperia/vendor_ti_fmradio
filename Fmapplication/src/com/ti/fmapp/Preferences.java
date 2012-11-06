@@ -17,10 +17,24 @@ package com.ti.fmapp;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.preference.PreferenceActivity;
 
-public class Preferences {
+public class Preferences extends PreferenceActivity {
 
     public static final String PREFS_NAME = "FMPREFS";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        addPreferencesFromResource(R.xml.preferences);
+    }
+
+
+    /**
+     * Static Methods for easy accessing Preferences
+     */
+
 
     /**
      * @param ctx App Context
@@ -35,6 +49,40 @@ public class Preferences {
         SharedPreferences settings = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("rds_instead_preset", newValue);
+        editor.commit();
+    }
+
+
+    /**
+     * @param ctx App Context
+     * @return Use notification bar controls
+     */
+    public static boolean getUseNotifications(Context ctx) {
+        SharedPreferences settings = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return settings.getBoolean("use_notification_bar", true);
+    }
+
+    public static void setUseNotifications(Context ctx, boolean newValue) {
+        SharedPreferences settings = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean("use_notification_bar", newValue);
+        editor.commit();
+    }
+
+
+    /**
+     * @param ctx App Context
+     * @return Print Debug Information to Logcat
+     */
+    public static boolean getPrintDebugInfo(Context ctx) {
+        SharedPreferences settings = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return settings.getBoolean("print_debug_info", false);
+    }
+
+    public static void setPrintDebugInfo(Context ctx, boolean newValue) {
+        SharedPreferences settings = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean("print_debug_info", newValue);
         editor.commit();
     }
 

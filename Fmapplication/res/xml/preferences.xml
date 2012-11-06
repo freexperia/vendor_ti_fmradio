@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/general_preferences">
+
+        <CheckBoxPreference
+                android:key="use_notification_bar"
+                android:title="@string/pref_notification_bar"
+                android:defaultValue="true"/>
+
+        <CheckBoxPreference
+                android:key="rds_instead_preset"
+                android:title="@string/pref_use_rds_instead"
+                android:defaultValue="false"/>
+
+        <CheckBoxPreference
+                android:key="print_debug_info"
+                android:title="@string/pref_print_debug_info"
+                android:defaultValue="false"/>
+
+
+        <PreferenceScreen
+                android:title="@string/about">
+            <intent android:action="com.ti.fmapp.FmRxHelp.VIEW"/>
+        </PreferenceScreen>
+
+    </PreferenceCategory>
+</PreferenceScreen>

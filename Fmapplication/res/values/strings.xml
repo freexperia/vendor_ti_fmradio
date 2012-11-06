@@ -5,7 +5,8 @@
     <string name="fmapp">FM Radio for Android</string>
     <string name="stations">FM Radio Stations</string>
     <string name="lblversion">Version:</string>
-    <string name="author">Made by:\n\nPedro Veloso (@pedronveloso) for the FreeXperia Project
+    <string name="author">Made by:\n\nPedro Veloso (@pedronveloso) for the FreeXperia Project\nLayout concepts and art
+        by Hairo The Blue Mage, dab512 and royale1223.
         \n\nBased upon the original work from Sony Ericsson Mobile Communications AB and Texas Instruments, Inc.
         \nBoth their code and this project is sporting the Apache 2.0 License, you can find this project source at
         https://github.com/CyanogenMod/android_hardware_ti_fmradio
@@ -65,7 +66,8 @@
     <string name="station5">5</string>
     <string name="station6">6</string>
     <string name="station">Station</string>
-    <string name="configure">Configure</string>
+    <string name="configure_rds">Configure RDS</string>
+    <string name="preferences">Preferences</string>
     <string name="exit">Exit</string>
     <string name="about">About</string>
     <string name="preset">Preset</string>
@@ -138,5 +140,11 @@
     <string name="seek_up">Seek Up</string>
     <string name="seek_down">Seek Down</string>
     <string name="close_notification">Close Notification</string>
+
+    <!-- Preferences -->
+    <string name="general_preferences">General</string>
+    <string name="pref_use_rds_instead">Use PRESET name in Notification instead of RDS value</string>
+    <string name="pref_notification_bar">Use notification bar controls</string>
+    <string name="pref_print_debug_info">Print debug information to logcat (requires restart of app)</string>
 
 </resources>

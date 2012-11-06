@@ -209,6 +209,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public static FmReceiver sFmReceiver;
 
     private OrientationListener mOrientationListener;
+    private boolean hasInitializedFMReceiver = false;
 
     Context mContext;
 
@@ -282,6 +283,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             // intentFilter.addAction(FmReceiverIntent.FM_ERROR_ACTION);
 
             registerReceiver(mReceiver, intentFilter);
+            hasInitializedFMReceiver = true;
 
             /*
              * Need to enable the FM if it was not enabled earlier
@@ -1652,10 +1654,11 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         Utils.debugFunc("onDestroy", Log.INFO, mPrintDebugInfo);
         super.onDestroy();
         /*
-         * Unregistering the receiver , so that we dont handle any FM events
-         * when out of the FM application screen
+         * Unregistering the receiver , so that we don't handle any FM events
+         * when out of the FM application screen. Will only unregister if it has been registered to begin with
          */
-        unregisterReceiver(mReceiver);
+        if (hasInitializedFMReceiver)
+            unregisterReceiver(mReceiver);
         // TODO : uncomment line bellow?
         //sFmReceiver.close();
     }

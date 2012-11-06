@@ -103,7 +103,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     private static final boolean MAKE_FM_APIS_BLOCKING = true;
 
     // Notification stuff
-    private NotificationManager mNotificationManager;
+    private NotificationManager mNotificationManager = null;
     private Notification mNotification;
 
     private boolean isFirstPlay = true;
@@ -154,6 +154,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     private int mDirection = FM_SEEK_UP;
 
     private String mRDS = "";
+
+    private BroadcastReceiver mNotificationsReceiver;
 
     /* State values */
 
@@ -206,7 +208,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public static int sChannelSpace = DEFAULT_CHANNELSPACE;
 
     public static Float lastTunedFrequency = (float) DEFAULT_FREQ_EUROPE;
-    public static FmReceiver sFmReceiver;
+    public static FmReceiver sFmReceiver = null;
 
     private OrientationListener mOrientationListener;
     private boolean hasInitializedFMReceiver = false;
@@ -292,11 +294,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             sFmReceiver = new FmReceiver(this, this);
 
             //receive broadcasts from Notification Bar or Widget, and also HeadSet plug in/out events
-            BroadcastReceiver receiver;
             IntentFilter filter = new IntentFilter("com.fm.freexperia.NOTIFICATION");
             filter.addAction(Intent.ACTION_HEADSET_PLUG);
-            receiver = new NotificationsReceiver();
-            registerReceiver(receiver, filter);
+            mNotificationsReceiver = new NotificationsReceiver();
+            registerReceiver(mNotificationsReceiver, filter);
         } else {
             //earphones not connected
             new AlertDialog.Builder(FmRxApp.this).setTitle(R.string.app_name).setIcon(
@@ -1057,8 +1058,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         boolean rdsAfSwitch = fmConfigPreferences.getBoolean(RDSAF,
                 DEFAULT_RDS_AF);
-        int rdsAf = 0;
-        rdsAf = rdsAfSwitch ? 1 : 0;
+        int rdsAf = rdsAfSwitch ? 1 : 0;
         if (DBG) {
             Utils.debugFunc("setRdsAf()--- rdsAfSwitch= " + rdsAf, Log.DEBUG, mPrintDebugInfo);
         }
@@ -1198,8 +1198,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             Notification mNotification = new Notification(R.drawable.fm_statusbar_icon, getString(R.string.app_name), System.currentTimeMillis());
 
             Intent notificationIntent = new Intent(this, FmRxApp.class);
-            PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-            mNotification.contentIntent = contentIntent;
+            mNotification.contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
             mNotification.flags = Notification.FLAG_ONGOING_EVENT;
 
             RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.notification);
@@ -1609,12 +1608,14 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      */
     private void exitApp() {
         //clear notification
-        mNotificationManager.cancel(NOTIFICATION_ID);
+        if (mNotificationManager != null)
+            mNotificationManager.cancel(NOTIFICATION_ID);
         /*
          * The exit from the FM application happens here. FM will be
          * disabled
          */
-        mStatus = sFmReceiver.disable();
+        if (hasInitializedFMReceiver && sFmReceiver != null)
+            mStatus = sFmReceiver.disable();
     }
 
 
@@ -1667,8 +1668,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
          * Unregistering the receiver , so that we don't handle any FM events
          * when out of the FM application screen. Will only unregister if it has been registered to begin with
          */
-        if (hasInitializedFMReceiver)
+        if (hasInitializedFMReceiver) {
             unregisterReceiver(mReceiver);
+            unregisterReceiver(mNotificationsReceiver);
+        }
         // TODO : uncomment line bellow?
         //sFmReceiver.close();
     }

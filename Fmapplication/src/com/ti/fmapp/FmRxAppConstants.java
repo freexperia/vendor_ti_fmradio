@@ -76,7 +76,7 @@ public interface FmRxAppConstants {
     public static final float DEFAULT_FREQ_JAPAN = (float) 76000 / 1000;
     public static final int DEFAULT_BAND = 0; // EuropeUS
     public static final int DEFAULT_MODE = 0; // Stereo
-    public static final boolean DEFAULT_RDS = true;
+    public static final boolean DEFAULT_RDS = false;
     public static final int DEFAULT_DEEMP = 0;
     public static final int DEFAULT_RDS_SYSTEM = 0;
     public static final boolean DEFAULT_RDS_AF = false;
@@ -112,7 +112,7 @@ public interface FmRxAppConstants {
     public static final boolean SEEK_REQ_STATE_IDLE = true;
     public static final boolean SEEK_REQ_STATE_PENDING = false;
 
-    /* Preference save keys */
+    /* Preference RDS save keys */
 
     public static final String BAND = "BAND";
     public static final String VOLUME = "VOLUME";
@@ -150,7 +150,6 @@ public interface FmRxAppConstants {
 
     /* Activity Intents */
     public static final String INTENT_RDS_CONFIG = "android.intent.action.RDS_CONFIG";
-    public static final String INTENT_PRESET = "android.intent.action.PRESET";
     public static final String INTENT_RXHELP = "android.intent.action.START_RXHELP";
     public static final String INTENT_RXTUNE = "android.intent.action.START_RXFREQ";
 

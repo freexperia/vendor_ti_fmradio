@@ -145,7 +145,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     private int mVolume = DEF_VOLUME;
     private int mMode = DEFAULT_MODE;
     private boolean mRds = DEFAULT_RDS;
-    private String mPS = "";
+    private String mPS = "", mPreviousPS = "";
     private boolean mRdsAf = DEFAULT_RDS_AF;
     private int mRdsSystem = INITIAL_VAL;
     private int mDeEmpFilter = INITIAL_VAL;
@@ -153,7 +153,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     // Seek up/down direction
     private int mDirection = FM_SEEK_UP;
 
-    private String mRDS = "";
 
     private BroadcastReceiver mNotificationsReceiver;
 
@@ -628,7 +627,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
                 /* Display the RDS text on UI */
                 case EVENT_RDS_TEXT:
-                    //Log.i(TAG, "enter handleMessage ----EVENT_RDS_TEXT");
+                    //Utils.debugFunc("EVENT_RDS_TEXT", Log.INFO, mPrintDebugInfo);
                     if (FM_SEND_RDS_IN_BYTEARRAY) {
                         byte[] rdsText = (byte[]) msg.obj;
 
@@ -636,15 +635,11 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                             Utils.debugFunc("rdsText" + rdsText[i], Log.INFO, mPrintDebugInfo);
                         }
                     } else {
-                        mRDS = (String) msg.obj;
-                        //Log.i(TAG, "enter handleMessage ----EVENT_RDS_TEXT RDS:" + rds);
+                        String rds = (String) msg.obj;
+                        Utils.debugFunc("RDS: '" + rds + "'", Log.INFO, mPrintDebugInfo);
                         //only change if new text. avoids RDS text flickering on radio interferences
-                        if (mRDS.length() > 0) {
-                            txtRadioText.setText(" - " + mRDS);
-                            // update notification?
-                            if (Preferences.getUseNotifications(FmRxApp.this) && Preferences.getNotificationsUseRDSinsteadPreset(FmRxApp.this)) {
-                                updateNotification(lastTunedFrequency, mRDS);
-                            }
+                        if (rds.length() > 0) {
+                            txtRadioText.setText(" - " + rds);
                         }
                     }
                     break;
@@ -731,6 +726,24 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                         mPS = (String) msg.obj;
                         //Log.i(TAG, "enter handleMessage ----EVENT_PS_CHANGED PS:" + mPS);
                         txtPsText.setText(mPS);
+                        if (mPS.length() > 0) {
+                            // update notification?
+                            if (Preferences.getUseNotifications(FmRxApp.this) && Preferences.getNotificationsUseRDSinsteadPreset(FmRxApp.this)) {
+                                //only update if first part of RDS changed
+                                int lastPos = 6;
+                                if (mPS.length() > 0) {
+                                    if (mPS.length() < 7)
+                                        lastPos = mPS.length();
+                                    if (!mPS.substring(0, lastPos).equals(mPreviousPS)) {
+                                        updateNotification(lastTunedFrequency, mPS);
+                                        mPreviousPS = mPS.substring(0, lastPos);
+                                    }
+                                }
+
+
+                            }
+                        }
+
                     }
 
                     break;
@@ -955,8 +968,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             if (MAKE_FM_APIS_BLOCKING) {
                 mStatus = sFmReceiver.setMonoStereoMode(mode);
             }
-            //else
-            //mStatus = sFmReceiver.rxSetMonoStereoMode_nb(mode);
             if (!mStatus) {
                 showAlert(this, "FmReceiver", getString(R.string.not_able_to_set_mode));
             } else {
@@ -982,8 +993,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             if (MAKE_FM_APIS_BLOCKING) {
                 mStatus = sFmReceiver.setChannelSpacing(channelSpace);
             }
-            // else
-            //     mStatus = sFmReceiver.rxSetChannelSpacing_nb(channelSpace);
 
             if (!mStatus) {
                 Utils.debugFunc("setChannelSpacing()-- setChannelSpacing ->Error", Log.ERROR, mPrintDebugInfo);
@@ -1003,8 +1012,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 if (MAKE_FM_APIS_BLOCKING) {
                     mStatus = sFmReceiver.enableRds();
                 }
-                //else
-                //    mStatus = sFmReceiver.rxEnableRds_nb();
                 if (!mStatus) {
                     Utils.debugFunc("setRDS()-- enableRds() ->Error", Log.ERROR, mPrintDebugInfo);
                     showAlert(this, "FmReceiver", getString(R.string.not_able_enable_rds));
@@ -1014,8 +1021,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 if (MAKE_FM_APIS_BLOCKING) {
                     mStatus = sFmReceiver.disableRds();
                 }
-                // else
-                //     mStatus = sFmReceiver.rxDisableRds_nb();
 
                 if (!mStatus) {
                     Utils.debugFunc("setRDS()-- disableRds() ->Error", Log.ERROR, mPrintDebugInfo);
@@ -1043,9 +1048,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 mStatus = sFmReceiver.setRdsSystem(fmConfigPreferences.getInt(
                         RDSSYSTEM, DEFAULT_RDS_SYSTEM));
             }
-            //else
-            //mStatus = sFmReceiver.rxSetRdsSystem_nb(fmConfigPreferences.getInt(
-            //        RDSSYSTEM, DEFAULT_RDS_SYSTEM));
 
             if (!mStatus) {
                 Utils.debugFunc("setRdsSystem()-- setRdsSystem ->Error", Log.ERROR, mPrintDebugInfo);
@@ -1067,8 +1069,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             if (MAKE_FM_APIS_BLOCKING) {
                 mStatus = sFmReceiver.setRdsAfSwitchMode(rdsAf);
             }
-            //else
-            //mStatus = sFmReceiver.rxSetRdsAfSwitchMode_nb(rdsAf);
             if (!mStatus) {
                 Utils.debugFunc("setRdsAf()-- setRdsAfSwitchMode(1) ->Error", Log.ERROR, mPrintDebugInfo);
                 showAlert(this, "FmReceiver", getString(R.string.not_able_to_set_rds_af_on));
@@ -1084,9 +1084,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         if (MAKE_FM_APIS_BLOCKING) {
             mStatus = sFmReceiver.setRssiThreshold(rssiThreshHold);
         }
-        //else
-        //    mStatus = sFmReceiver.rxSetRssiThreshold_nb(rssiThreshHold);
-
         if (!mStatus) {
             showAlert(this, "FmReceiver", getString(R.string.not_able_to_set_rssi_threshold));
         }
@@ -1337,9 +1334,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 return true;
 
             /* Keys are mapped to different get APIs for Testing */
-            case KeyEvent.KEYCODE_A:
-                //Log.i(TAG, "Testing getVolume()  returned volume = "+ sFmReceiver.rxGetVolume());
-                return true;
 
             case KeyEvent.KEYCODE_B:
                 Utils.debugFunc("Testing getTunedFrequency()  returned Tuned Freq = " + sFmReceiver.getTunedFrequency(), Log.INFO, mPrintDebugInfo);
@@ -1680,8 +1674,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             unregisterReceiver(mReceiver);
             unregisterReceiver(mNotificationsReceiver);
         }
-        // TODO : uncomment line bellow?
-        //sFmReceiver.close();
+        sFmReceiver.close();
     }
 
     // Receives all of the FM intents and dispatches to the proper handler

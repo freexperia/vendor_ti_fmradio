@@ -116,7 +116,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      * ******************************************
      */
 
-    private ImageView imgFmMode, imgFmVolume, imgFmLoudspeaker;
+    private ImageView imgFmMode, imgFmVolume;//, imgFmLoudspeaker;
     private TextView txtStatusMsg, txtRadioText;
     private TextView txtPsText;
     private ProgressDialog pd = null, configPd;
@@ -291,9 +291,10 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
             sFmReceiver = new FmReceiver(this, this);
 
-            //receive broadcasts from Notification Bar or Widget
+            //receive broadcasts from Notification Bar or Widget, and also HeadSet plug in/out events
             BroadcastReceiver receiver;
             IntentFilter filter = new IntentFilter("com.fm.freexperia.NOTIFICATION");
+            filter.addAction(Intent.ACTION_HEADSET_PLUG);
             receiver = new NotificationsReceiver();
             registerReceiver(receiver, filter);
         } else {
@@ -1589,13 +1590,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 break;
 
             case MENU_EXIT:
-                //clear notification
-                mNotificationManager.cancel(NOTIFICATION_ID);
-                /*
-                 * The exit from the FM application happens here. FM will be
-                 * disabled
-                 */
-                mStatus = sFmReceiver.disable();
+                exitApp();
                 break;
 
             case MENU_ABOUT:
@@ -1607,6 +1602,21 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         }
         return super.onOptionsItemSelected(item);
     }
+
+
+    /**
+     * Method that takes care of properly exiting the application
+     */
+    private void exitApp() {
+        //clear notification
+        mNotificationManager.cancel(NOTIFICATION_ID);
+        /*
+         * The exit from the FM application happens here. FM will be
+         * disabled
+         */
+        mStatus = sFmReceiver.disable();
+    }
+
 
     protected void onSaveInstanceState(Bundle icicle) {
         super.onSaveInstanceState(icicle);
@@ -2236,6 +2246,14 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     seekUp();
                 } else if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_SEEK_DOWN)) {
                     seekDown();
+                }
+            } else {
+                if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
+                    AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+                    //if headset is not plugged, terminate application
+                    if (!audioManager.isWiredHeadsetOn()) {
+                        exitApp();
+                    }
                 }
             }
         }

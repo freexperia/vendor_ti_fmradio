@@ -193,7 +193,7 @@
                 android:text="@android:string/ok"
                 style="@style/preferencesTextStyle"
                 android:id="@+id/btnOk"
-                android:layout_weight="1" />
+                android:layout_weight="1"/>
 
         <Button
                 android:id="@+id/btnCancel"
@@ -201,6 +201,6 @@
                 style="@style/preferencesTextStyle"
                 android:layout_height="fill_parent"
                 android:text="@android:string/cancel"
-                android:layout_weight="1" />
+                android:layout_weight="1"/>
     </LinearLayout>
 </LinearLayout>

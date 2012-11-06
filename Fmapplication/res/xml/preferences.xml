@@ -20,7 +20,7 @@
 
         <PreferenceScreen
                 android:title="@string/about">
-            <intent android:action="com.ti.fmapp.FmRxHelp.VIEW"/>
+            <intent android:action="android.intent.action.START_RXHELP"/>
         </PreferenceScreen>
 
     </PreferenceCategory>

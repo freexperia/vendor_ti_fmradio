@@ -117,13 +117,13 @@
     <LinearLayout android:layout_height="50dip"
                   android:layout_width="fill_parent">
         <Button android:layout_width="wrap_content"
-                android:layout_height="fill_parent" android:text="@string/btnOk"
+                android:layout_height="fill_parent" android:text="@android:string/ok"
                 style="@style/preferencesTextStyle"
                 android:id="@+id/btnOk" android:layout_weight="1">
         </Button>
         <Button android:id="@+id/btnCancel" android:layout_width="wrap_content"
                 style="@style/preferencesTextStyle"
-                android:layout_height="fill_parent" android:text="@string/btnCancel"
+                android:layout_height="fill_parent" android:text="@android:string/cancel"
                 android:layout_weight="1">
         </Button>
     </LinearLayout>

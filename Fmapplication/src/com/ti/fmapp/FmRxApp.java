@@ -153,6 +153,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     // Seek up/down direction
     private int mDirection = FM_SEEK_UP;
 
+    private String mRDS="";
+
     /* State values */
 
     // variable to make sure that the next configuration change happens after
@@ -631,11 +633,15 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                             Utils.debugFunc("rdsText" + rdsText[i], Log.INFO, mPrintDebugInfo);
                         }
                     } else {
-                        String rds = (String) msg.obj;
+                        mRDS = (String) msg.obj;
                         //Log.i(TAG, "enter handleMessage ----EVENT_RDS_TEXT RDS:" + rds);
                         //only change if new text. avoids RDS text flickering on radio interferences
-                        if (rds.length() > 0) {
-                            txtRadioText.setText(" - " + rds);
+                        if (mRDS.length() > 0) {
+                            txtRadioText.setText(" - " + mRDS);
+                            // update notification?
+                            if (Preferences.getUseNotifications(FmRxApp.this) && Preferences.getNotificationsUseRDSinsteadPreset(FmRxApp.this)){
+                                updateNotification(lastTunedFrequency,mRDS);
+                            }
                         }
                     }
                     break;
@@ -1101,7 +1107,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                         : DEFAULT_FREQ_JAPAN));
         mMode = fmConfigPreferences.getInt(MODE, DEFAULT_MODE);
         mToggleMute = fmConfigPreferences.getBoolean(MUTE, false);
-        mRdsState = fmConfigPreferences.getBoolean(RDS, false);
+        mRdsState = fmConfigPreferences.getBoolean(RDS, true);
 
         if (DBG) {
             Utils.debugFunc(" Load default band " + sBand + "default volume" + mVolume + "last fre"
@@ -1221,7 +1227,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     }
 
     /**
-     * Mehtod responsible for updating the notification
+     * Method responsible for updating the notification
      *
      * @param frequency frequency to display in notification
      * @param name      preset name or RDS value
@@ -1438,7 +1444,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
                 //update notifications bar
                 if (!hidNotification) {
-                    updateNotification(iFreq, name);
+                        updateNotification(iFreq, name);
                 }
             } else {
 

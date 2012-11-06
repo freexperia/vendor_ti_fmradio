@@ -116,7 +116,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      * ******************************************
      */
 
-    private ImageView imgFmMode, imgFmVolume;
+    private ImageView imgFmMode, imgFmVolume, imgFmLoudspeaker;
     private TextView txtStatusMsg, txtRadioText;
     private TextView txtPsText;
     private ProgressDialog pd = null, configPd;
@@ -152,6 +152,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     private int mRssi = INITIAL_RSSI;
     // Seek up/down direction
     private int mDirection = FM_SEEK_UP;
+
+    private String mRDS = "";
 
     /* State values */
 
@@ -631,11 +633,15 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                             Utils.debugFunc("rdsText" + rdsText[i], Log.INFO, mPrintDebugInfo);
                         }
                     } else {
-                        String rds = (String) msg.obj;
+                        mRDS = (String) msg.obj;
                         //Log.i(TAG, "enter handleMessage ----EVENT_RDS_TEXT RDS:" + rds);
                         //only change if new text. avoids RDS text flickering on radio interferences
-                        if (rds.length() > 0) {
-                            txtRadioText.setText(" - " + rds);
+                        if (mRDS.length() > 0) {
+                            txtRadioText.setText(" - " + mRDS);
+                            // update notification?
+                            if (Preferences.getUseNotifications(FmRxApp.this) && Preferences.getNotificationsUseRDSinsteadPreset(FmRxApp.this)) {
+                                updateNotification(lastTunedFrequency, mRDS);
+                            }
                         }
                     }
                     break;
@@ -1101,7 +1107,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                         : DEFAULT_FREQ_JAPAN));
         mMode = fmConfigPreferences.getInt(MODE, DEFAULT_MODE);
         mToggleMute = fmConfigPreferences.getBoolean(MUTE, false);
-        mRdsState = fmConfigPreferences.getBoolean(RDS, false);
+        mRdsState = fmConfigPreferences.getBoolean(RDS, true);
 
         if (DBG) {
             Utils.debugFunc(" Load default band " + sBand + "default volume" + mVolume + "last fre"
@@ -1143,12 +1149,20 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         imgFmVolume = (ImageView) findViewById(R.id.imgMute);
         imgFmVolume.setOnClickListener(this);
 
+        Utils.debugFunc("> initControls  mute: " + mToggleMute, Log.INFO, mPrintDebugInfo);
         if (mToggleMute) {
             imgFmVolume.setImageResource(R.drawable.fm_volume_mute);
-            Utils.debugFunc("> initControls  mute: " + mToggleMute, Log.INFO, mPrintDebugInfo);
         } else {
             imgFmVolume.setImageResource(R.drawable.fm_volume);
-            Utils.debugFunc("> initControls  mute: " + mToggleMute, Log.INFO, mPrintDebugInfo);
+        }
+
+        imgFmLoudspeaker = (ImageView) findViewById(R.id.imgLoudspeaker);
+        imgFmLoudspeaker.setOnClickListener(this);
+        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        if (audioManager.isSpeakerphoneOn()) {
+            imgFmLoudspeaker.setImageResource(R.drawable.fm_loudspeaker);
+        } else {
+            imgFmLoudspeaker.setImageResource(R.drawable.fm_loudspeaker_off);
         }
 
 
@@ -1168,7 +1182,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         // ImageSwitcher for FM frequency
         initImageSwitcher();
-
 
         //read and present PreSets
         readPreSetsDatabase();
@@ -1221,7 +1234,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     }
 
     /**
-     * Mehtod responsible for updating the notification
+     * Method responsible for updating the notification
      *
      * @param frequency frequency to display in notification
      * @param name      preset name or RDS value
@@ -1480,13 +1493,23 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                         mToggleMute = true;
                     }
                 }
-
                 break;
 
             case R.id.imgseekdown:
                 seekDown();
-
                 break;
+
+            case R.id.imgLoudspeaker:
+                AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+                if (audioManager.isSpeakerphoneOn()) {
+                    audioManager.setSpeakerphoneOn(false);
+                    imgFmLoudspeaker.setImageResource(R.drawable.fm_loudspeaker_off);
+                } else {
+                    audioManager.setSpeakerphoneOn(true);
+                    imgFmLoudspeaker.setImageResource(R.drawable.fm_loudspeaker);
+                }
+                break;
+
             case R.id.imgseekup:
                 seekUp();
                 break;
@@ -1619,8 +1642,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public void onResume() {
         Utils.debugFunc("onResume", Log.INFO, mPrintDebugInfo);
         super.onResume();
-        //if(mFmServiceConnected == true)
-        startup();
+        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        if (audioManager.isWiredHeadsetOn())
+            startup();
     }
 
     public void onDestroy() {

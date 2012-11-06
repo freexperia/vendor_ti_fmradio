@@ -19,10 +19,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
 
 public class Preferences extends PreferenceActivity {
-
-    public static final String PREFS_NAME = "FMPREFS";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,12 +40,12 @@ public class Preferences extends PreferenceActivity {
      * @return If True use RDS value instead of preset name for notification display
      */
     public static boolean getNotificationsUseRDSinsteadPreset(Context ctx) {
-        SharedPreferences settings = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(ctx);
         return settings.getBoolean("rds_instead_preset", false);
     }
 
     public static void setNotificationsUseRDSinsteadPreset(Context ctx, boolean newValue) {
-        SharedPreferences settings = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(ctx);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("rds_instead_preset", newValue);
         editor.commit();
@@ -58,12 +57,12 @@ public class Preferences extends PreferenceActivity {
      * @return Use notification bar controls
      */
     public static boolean getUseNotifications(Context ctx) {
-        SharedPreferences settings = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(ctx);
         return settings.getBoolean("use_notification_bar", true);
     }
 
     public static void setUseNotifications(Context ctx, boolean newValue) {
-        SharedPreferences settings = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(ctx);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("use_notification_bar", newValue);
         editor.commit();
@@ -75,12 +74,12 @@ public class Preferences extends PreferenceActivity {
      * @return Print Debug Information to Logcat
      */
     public static boolean getPrintDebugInfo(Context ctx) {
-        SharedPreferences settings = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(ctx);
         return settings.getBoolean("print_debug_info", false);
     }
 
     public static void setPrintDebugInfo(Context ctx, boolean newValue) {
-        SharedPreferences settings = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(ctx);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("print_debug_info", newValue);
         editor.commit();

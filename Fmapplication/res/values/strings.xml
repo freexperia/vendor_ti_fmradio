@@ -143,8 +143,11 @@
 
     <!-- Preferences -->
     <string name="general_preferences">General</string>
+    <string name="pref_use_rds_instead_title">Notification PRESET</string>
     <string name="pref_use_rds_instead">Use PRESET name in Notification instead of RDS value</string>
+    <string name="pref_notification_bar_title">Notifications</string>
     <string name="pref_notification_bar">Use notification bar controls</string>
+    <string name="pref_print_debug_info_title">Debug Info</string>
     <string name="pref_print_debug_info">Print debug information to logcat (requires restart of app)</string>
 
 </resources>

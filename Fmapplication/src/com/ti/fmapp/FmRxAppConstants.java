@@ -76,14 +76,14 @@ public interface FmRxAppConstants {
     public static final float DEFAULT_FREQ_JAPAN = (float) 76000 / 1000;
     public static final int DEFAULT_BAND = 0; // EuropeUS
     public static final int DEFAULT_MODE = 0; // Stereo
-    public static final boolean DEFAULT_RDS = false;
+    public static final boolean DEFAULT_RDS = true;
     public static final int DEFAULT_DEEMP = 0;
     public static final int DEFAULT_RDS_SYSTEM = 0;
     public static final boolean DEFAULT_RDS_AF = false;
     public static final int DEFAULT_RSSI = 7;
     public static final int DEFAULT_CHANNELSPACE = 2;
 
-    /* Actvity result index */
+    /* Activity result index */
 
     public static final int ACTIVITY_TUNE = 1;
     public static final int ACTIVITY_CONFIG = 2;

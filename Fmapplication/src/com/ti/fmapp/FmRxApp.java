@@ -1619,8 +1619,9 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public void onResume() {
         Utils.debugFunc("onResume", Log.INFO, mPrintDebugInfo);
         super.onResume();
-        //if(mFmServiceConnected == true)
-        startup();
+        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        if (audioManager.isWiredHeadsetOn())
+            startup();
     }
 
     public void onDestroy() {

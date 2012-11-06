@@ -217,6 +217,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+        mPrintDebugInfo = Preferences.getPrintDebugInfo(FmRxApp.this);
         mContext = this;
         /* Retrieve the fm_state and find out whether FM App was interrupted */
 
@@ -224,7 +225,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             Bundle fmState = savedInstanceState.getBundle(FM_STATE_KEY);
             if (fmState != null) {
                 mFmInterrupted = fmState.getBoolean(FM_INTERRUPTED_KEY, false);
-
             }
         }
 
@@ -300,6 +300,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      */
     private PendingIntent buildServiceIntent(String command) {
         Intent intent = new Intent();
+        intent.setAction("com.fm.freexperia.NOTIFICATION");
         intent.putExtra(EXTRA_COMMAND, command);
         return PendingIntent.getBroadcast(getApplicationContext(),
                 command.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -325,8 +326,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
 
     private void startup() {
-
-        mPrintDebugInfo = Preferences.getPrintDebugInfo(FmRxApp.this);
 
         switch (sFmReceiver.getFMState()) {
 

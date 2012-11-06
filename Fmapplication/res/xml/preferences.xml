@@ -4,17 +4,20 @@
 
         <CheckBoxPreference
                 android:key="use_notification_bar"
-                android:title="@string/pref_notification_bar"
+                android:title="@string/pref_notification_bar_title"
+                android:summary="@string/pref_notification_bar"
                 android:defaultValue="true"/>
 
         <CheckBoxPreference
                 android:key="rds_instead_preset"
-                android:title="@string/pref_use_rds_instead"
+                android:title="@string/pref_use_rds_instead_title"
+                android:summary="@string/pref_use_rds_instead"
                 android:defaultValue="false"/>
 
         <CheckBoxPreference
                 android:key="print_debug_info"
-                android:title="@string/pref_print_debug_info"
+                android:title="@string/pref_print_debug_info_title"
+                android:summary="@string/pref_print_debug_info"
                 android:defaultValue="false"/>
 
 

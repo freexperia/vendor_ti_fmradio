@@ -116,7 +116,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
      * ******************************************
      */
 
-    private ImageView imgFmMode, imgFmVolume;
+    private ImageView imgFmMode, imgFmVolume, imgFmLoudspeaker;
     private TextView txtStatusMsg, txtRadioText;
     private TextView txtPsText;
     private ProgressDialog pd = null, configPd;
@@ -153,7 +153,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
     // Seek up/down direction
     private int mDirection = FM_SEEK_UP;
 
-    private String mRDS="";
+    private String mRDS = "";
 
     /* State values */
 
@@ -639,8 +639,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                         if (mRDS.length() > 0) {
                             txtRadioText.setText(" - " + mRDS);
                             // update notification?
-                            if (Preferences.getUseNotifications(FmRxApp.this) && Preferences.getNotificationsUseRDSinsteadPreset(FmRxApp.this)){
-                                updateNotification(lastTunedFrequency,mRDS);
+                            if (Preferences.getUseNotifications(FmRxApp.this) && Preferences.getNotificationsUseRDSinsteadPreset(FmRxApp.this)) {
+                                updateNotification(lastTunedFrequency, mRDS);
                             }
                         }
                     }
@@ -1149,12 +1149,20 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         imgFmVolume = (ImageView) findViewById(R.id.imgMute);
         imgFmVolume.setOnClickListener(this);
 
+        Utils.debugFunc("> initControls  mute: " + mToggleMute, Log.INFO, mPrintDebugInfo);
         if (mToggleMute) {
             imgFmVolume.setImageResource(R.drawable.fm_volume_mute);
-            Utils.debugFunc("> initControls  mute: " + mToggleMute, Log.INFO, mPrintDebugInfo);
         } else {
             imgFmVolume.setImageResource(R.drawable.fm_volume);
-            Utils.debugFunc("> initControls  mute: " + mToggleMute, Log.INFO, mPrintDebugInfo);
+        }
+
+        imgFmLoudspeaker = (ImageView) findViewById(R.id.imgLoudspeaker);
+        imgFmLoudspeaker.setOnClickListener(this);
+        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        if (audioManager.isSpeakerphoneOn()) {
+            imgFmLoudspeaker.setImageResource(R.drawable.fm_loudspeaker);
+        } else {
+            imgFmLoudspeaker.setImageResource(R.drawable.fm_loudspeaker_off);
         }
 
 
@@ -1174,7 +1182,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
         // ImageSwitcher for FM frequency
         initImageSwitcher();
-
 
         //read and present PreSets
         readPreSetsDatabase();
@@ -1444,7 +1451,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
 
                 //update notifications bar
                 if (!hidNotification) {
-                        updateNotification(iFreq, name);
+                    updateNotification(iFreq, name);
                 }
             } else {
 
@@ -1486,13 +1493,23 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                         mToggleMute = true;
                     }
                 }
-
                 break;
 
             case R.id.imgseekdown:
                 seekDown();
-
                 break;
+
+            case R.id.imgLoudspeaker:
+                AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+                if (audioManager.isSpeakerphoneOn()) {
+                    audioManager.setSpeakerphoneOn(false);
+                    imgFmLoudspeaker.setImageResource(R.drawable.fm_loudspeaker_off);
+                } else {
+                    audioManager.setSpeakerphoneOn(true);
+                    imgFmLoudspeaker.setImageResource(R.drawable.fm_loudspeaker);
+                }
+                break;
+
             case R.id.imgseekup:
                 seekUp();
                 break;

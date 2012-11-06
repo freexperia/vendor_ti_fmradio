@@ -1472,7 +1472,6 @@ public class FmRxApp extends Activity implements View.OnClickListener,
         switch (id) {
 
             case R.id.btn_set_frequency:
-                //TODO : fix. got broken by singleInstance
                 startActivityForResult(new Intent(INTENT_RXTUNE), ACTIVITY_TUNE);
                 break;
 
@@ -1499,7 +1498,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 seekDown();
                 break;
 
-            case R.id.imgLoudspeaker:
+            /*case R.id.imgLoudspeaker:
                 AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
                 if (audioManager.isSpeakerphoneOn()) {
                     audioManager.setSpeakerphoneOn(false);
@@ -1508,7 +1507,7 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                     audioManager.setSpeakerphoneOn(true);
                     imgFmLoudspeaker.setImageResource(R.drawable.fm_loudspeaker);
                 }
-                break;
+                break; */
 
             case R.id.imgseekup:
                 seekUp();
@@ -1588,6 +1587,8 @@ public class FmRxApp extends Activity implements View.OnClickListener,
                 break;
 
             case MENU_EXIT:
+                //clear notification
+                mNotificationManager.cancel(NOTIFICATION_ID);
                 /*
                  * The exit from the FM application happens here. FM will be
                  * disabled
@@ -2220,8 +2221,11 @@ public class FmRxApp extends Activity implements View.OnClickListener,
             if (intent.hasExtra(EXTRA_COMMAND)) {
                 Utils.debugFunc("Command: " + intent.getStringExtra(EXTRA_COMMAND), Log.VERBOSE, mPrintDebugInfo);
                 if (intent.getStringExtra(EXTRA_COMMAND).equals(COMMAND_CLEAR)) {
-                    NotificationManager nMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                    nMgr.cancel(NOTIFICATION_ID);
+                    if (mNotificationManager == null) {
+                        NotificationManager nMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                        nMgr.cancel(NOTIFICATION_ID);
+                    } else
+                        mNotificationManager.cancel(NOTIFICATION_ID);
                     //set this as a control flag so that the notification does not reappear
                     // if user hid it is because he/she does not want it. if he does just start app again
                     hidNotification = true;
